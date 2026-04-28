@@ -145,3 +145,5 @@ For each sub-problem or interaction that the proposal reveals within an existing
 | 14 | Multi-Workstream Legibility for the Agent and the User | §14 |
 | 15 | Imposed Working Context Without Surveyed Precedent | §15 |
 | 16 | Recovery and Resume Surfaces Are Not Neutral | §16 |
+| 17 | Graph and Memory Configuration Overhead | §17 |
+| 18 | Provider, Account, and Entitlement Friction | §18 |

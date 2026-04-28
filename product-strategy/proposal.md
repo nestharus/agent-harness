@@ -6,7 +6,7 @@ This proposal defines the `agent-harness` system: a single-user Tauri v2 desktop
 
 Reference notation:
 
-- `D1` through `D16` refer to the numbered difficulties in [problem.md](problem.md).
+- `D1` through `D18` refer to the numbered difficulties in [problem.md](problem.md).
 - `P1` through `P16` refer to the numbered principles in [philosophy.md](philosophy.md).
 
 This document is not a roadmap. It does not define build order, MVP scope, deployment timing, or measurement targets. It describes the system as designed.
@@ -39,6 +39,14 @@ Every summary shown in `W` conforms to a machine-checkable `SummaryContract`. A 
 
 The renderer may show contract-invalid nodes, but it marks them as invalid and prevents them from being treated as settled state. This makes summary drift visible rather than hiding it behind fluent prose, following `P1`, `P3`, and `P13`.
 
+### Configuration as Memory Semantics
+
+Graph and memory configuration is treated as part of the memory contract, not setup preference. Schema choices, summary contract templates, optimizer cadence and scope, render budget caps, capability fingerprints, provider routing, memory-policy defaults, index scopes, and default unpack policies all change what the agent can see and what failures mean. They are recorded as versioned configuration state and cited by renders, optimizer edits, and audit events. This addresses `D17`; it implements `P1`, `P3`, `P7`, `P13`, and `P15`.
+
+The harness ships with conservative defaults that produce a usable graph without user configuration, but defaults are never invisible. Every render and inspection surface can distinguish configured values from defaulted values, inherited values, and system-required values. The user can ask two pre-operational questions before trusting the graph: "what would happen on an empty graph?" and "why is the graph in this shape?" Both answers are computed from the same policies used by live renders and optimizer edits, not from explanatory prose detached from execution.
+
+When the agent makes a bad decision, failure attribution must include the substrate. The harness records enough state to distinguish agent reasoning failure from an empty graph, badly-shaped graph, incomplete index, optimizer mis-curation, wrong provider route, missing entitlement, or field-meaning disagreement. This is a governance requirement, not a help-text feature.
+
 ### Stable Identity
 
 Every graph object with operational meaning has a stable identifier independent of text, path, parent, or current summary. Splits, merges, re-parents, and summary regeneration produce identity records, not silent replacement. This addresses `D4`, `D6`, `D8`, `D9`, and `D16`; it implements `P4` and `P15`.
@@ -62,7 +70,15 @@ The harness uses each CLI's strongest available context injection surface:
 
 This addresses `D7`, `D8`, `D9`, and `D10`; it implements `P8` and `P11`.
 
-The UI exposes a per-session `CapabilityFingerprint` so the user and orchestrator can see when a worker has weaker context injection, weaker tool interception, or weaker resume guarantees. The harness does not pretend all CLIs are equivalent.
+The UI exposes a per-session `CapabilityFingerprint` so the user and orchestrator can see when a worker has weaker context injection, weaker tool interception, weaker resume guarantees, missing provider features, missing account entitlements, unavailable local runtimes, or sandbox constraints. The harness does not pretend all CLIs or providers are equivalent.
+
+### Provider State as Observable State
+
+Provider availability is first-class local state. Auth presence, account identity, billing/quota health, model entitlement, feature support, local runtime availability, network reachability, sandbox boundaries, and provider-specific restrictions are represented as inspectable records before work is routed. This addresses `D18`; it implements `P8`, `P12`, `P13`, `P14`, and `P15`.
+
+The harness does not own vendor auth stores such as `~/.claude/`, `~/.codex/`, `~/.config/opencode/`, or local runtime registries. It reads and audits them through documented or observable local boundaries, stores only derived `ProviderState` and entitlement snapshots, redacts secrets, and records the freshness and confidence of those observations. Local control means the harness controls its graph and provenance; it does not require taking control of every provider's credential store.
+
+Provider routing is denied, degraded, or revalidated when state is not sufficient for the workload. A worker cannot be sent to a provider that lacks a required feature, is unauthenticated, is locked by quota or billing, cannot reach the network path the task needs, lacks the local runtime, or is constrained by a sandbox in a way that would make the task misleading. Mid-run provider failure creates a `RecoveryAction` with explicit provider cause, preserved trace, replayability classification, and possible reroute targets.
 
 ### No In-Product Compaction
 
@@ -98,15 +114,15 @@ The system does not treat cost as billing-only telemetry. A graph that is too ex
 `GraphStore`
 
 - Local SQLite database plus filesystem-backed evidence blobs.
-- Stores graph objects, revisions, evidence, renders, worker slices, questions, budgets, recovery actions, and audit events.
+- Stores graph objects, revisions, evidence, renders, worker slices, questions, budgets, configuration records, provider-state snapshots, recovery actions, and audit events.
 - The harness graph is canonical. CLI transcripts and `agent-runner` state are evidence sources, not canonical graph state.
-- Addresses `D4`, `D10`, `D12`, `D15`, `D16`; implements `P4`, `P7`, `P15`.
+- Addresses `D4`, `D10`, `D12`, `D15`, `D16`, `D17`, and `D18`; implements `P4`, `P7`, `P15`.
 
 `RenderEngine`
 
 - Converts a graph snapshot into CLI-specific prompt material and tool affordances.
-- Applies working-set policy, summary contract validation, privilege labels, cost constraints, and capability fingerprints.
-- Addresses `D1`, `D5`, `D7`, `D15`; implements `P1`, `P2`, `P3`, `P8`, `P12`.
+- Applies working-set policy, summary contract validation, configuration defaults, privilege labels, cost constraints, provider state, and capability fingerprints.
+- Addresses `D1`, `D5`, `D7`, `D15`, `D17`, and `D18`; implements `P1`, `P2`, `P3`, `P8`, `P12`.
 
 `OrchestratorBridge`
 
@@ -118,15 +134,17 @@ The system does not treat cost as billing-only telemetry. A graph that is too ex
 `WorkerDispatcher`
 
 - Creates `WorkerSlice` records, selects configured model names, starts sessions through `agents`, tracks acceptance, and captures session evidence through `agent-runner` ingestion.
+- Preflights target provider state and capability fingerprints before launch, and records explicit denial reasons when routing cannot satisfy the workload.
 - Does not directly merge worker output into graph truth. It stages output for reintegration.
-- Addresses `D8`, `D9`, `D13`; implements `P8`, `P10`, `P11`, `P12`.
+- Addresses `D8`, `D9`, `D13`, and `D18`; implements `P8`, `P10`, `P11`, `P12`, and `P13`.
 
 `Optimizer`
 
 - Background `glm` actor that proposes summary regenerations, stale markers, cross-references, topology edits, provenance repair, and repacking.
 - Writes `OptimizerEdit` drafts against a base snapshot. The backend validates and merges them.
 - May consume `OptimizerRequest` artifacts from the orchestrator, workers, backend, or user surface, but evaluates them as advisory inputs rather than delegated instructions.
-- Addresses `D2`, `D3`, `D4`, `D6`, `D12`, `D13`, `D15`; implements `P3`, `P4`, `P6`, `P7`, `P12`.
+- Receives configuration records as explicit inputs so summary templates, schema fields, optimizer cadence, and memory-policy defaults are not hidden prompt assumptions.
+- Addresses `D2`, `D3`, `D4`, `D6`, `D12`, `D13`, `D15`, and `D17`; implements `P3`, `P4`, `P6`, `P7`, `P12`.
 
 `WorkflowReviewer`
 
@@ -138,13 +156,26 @@ The system does not treat cost as billing-only telemetry. A graph that is too ex
 
 - Deterministic validator for schema constraints, privilege boundaries, tool-call protocol integrity, render limits, identity invariants, and budget gates.
 - Owns policy versioning and attaches `policy_version` to decisions.
-- Addresses `D10`, `D11`, `D12`, `D13`, `D16`; implements `P10`, `P12`, `P14`, `P15`.
+- Validates configuration provenance and provider readiness before renders, optimizer edits, worker launches, and recovery actions.
+- Addresses `D10`, `D11`, `D12`, `D13`, `D16`, `D17`, and `D18`; implements `P10`, `P12`, `P14`, `P15`.
+
+`ConfigurationRegistry`
+
+- Owns versioned graph and memory configuration: graph schema fields, summary contract templates, optimizer cadence and scope, render budget caps, memory-policy defaults, index scopes, provider routing defaults, and explanation labels for configured fields.
+- Computes defaulted configuration for an empty graph and exposes configuration provenance for every effective value.
+- Addresses `D17`; implements `P1`, `P3`, `P7`, `P13`, and `P15`.
+
+`ProviderStateMonitor`
+
+- Reads provider state from `agent-runner`, CLI capability probes, documented local files, environment boundaries, and local runtime probes without taking ownership of vendor credential stores.
+- Produces redacted `ProviderState` and `EntitlementSnapshot` records used by routing, capability fingerprints, budget policy, user surface badges, and recovery.
+- Addresses `D18`; implements `P8`, `P12`, `P13`, `P14`, and `P15`.
 
 `UserSurface`
 
-- Single-tab UI with structured panes for initiatives, current focus, working set, questions, workers, optimizer edits, cost, recovery, and evidence drill-down.
+- Single-tab UI with structured panes for initiatives, current focus, working set, configuration provenance, provider state, questions, workers, optimizer edits, cost, recovery, and evidence drill-down.
 - It is not a sidebar of separate chats.
-- Addresses `D14`; implements `P1`, `P13`, and `P16`.
+- Addresses `D14`, `D17`, and `D18`; implements `P1`, `P13`, and `P16`.
 
 ## Data Model
 
@@ -162,13 +193,46 @@ Fields:
 - `current_graph_version`: latest accepted graph version.
 - `storage_root`: filesystem root for evidence blobs.
 - `policy_set_id`: active policy bundle.
+- `active_configuration_id`: active graph and memory configuration.
 
 Relationships:
 
-- Owns `GraphNode`, `GraphEdge`, `GraphSnapshot`, `AuditEvent`, and `BudgetLedger`.
+- Owns `GraphNode`, `GraphEdge`, `GraphSnapshot`, `GraphConfiguration`, `ProviderState`, `AuditEvent`, and `BudgetLedger`.
 - Has exactly one active orchestrator, matching `P16`.
 
-Addresses `D15` and `D16`; implements `P15` and `P16`.
+Addresses `D15`, `D16`, `D17`, and `D18`; implements `P15` and `P16`.
+
+### GraphConfiguration
+
+Purpose: versioned configuration that defines how graph memory becomes usable working context.
+
+Fields:
+
+- `configuration_id`.
+- `workspace_id`.
+- `configuration_version`.
+- `schema_profile`: enabled node kinds, edge kinds, required fields, and field meaning descriptions.
+- `summary_contract_template_ids`: templates by node kind or initiative type.
+- `optimizer_policy_ref`: cadence, scope limits, edit-type allowlist, stale thresholds, and review sampling hooks.
+- `render_policy_ref`: node, evidence, depth, priority, and token caps.
+- `memory_policy_ref`: promotion defaults, archival rules, index scopes, default unpack policy, and stale-index handling.
+- `provider_routing_policy_ref`: preferred providers, hard exclusions, fallback ordering, and feature requirements.
+- `capability_fingerprint_policy_ref`: which provider and CLI dimensions must be probed.
+- `effective_value_sources`: per-field source map of `system_required`, `default`, `inherited`, `user_configured`, or `recovered`.
+- `created_from_configuration_id`: prior configuration if this is a revision.
+- `validation_state`: `valid`, `valid_with_warnings`, `invalid_schema`, `invalid_provider_route`, `invalid_budget`, `invalid_index`, `needs_user_attention`.
+
+Relationships:
+
+- Referenced by `GraphSnapshot`, `WorkingSetSnapshot`, `OptimizerEdit`, `PolicySet`, `AuditEvent`, and UI inspection records.
+- Changes through append-only configuration revisions; existing snapshots keep their original configuration.
+
+Inspection semantics:
+
+- Empty-graph inspection runs render, optimizer scoping, indexing, and provider-routing preflight against this configuration without creating graph truth.
+- Shape explanation traces any node kind, field, edge, summary template, index, or routing decision back to its effective value source and policy version.
+
+Addresses `D17` and `D18`; implements `P1`, `P3`, `P7`, `P13`, and `P15`.
 
 ### GraphNode
 
@@ -235,20 +299,21 @@ Fields:
 - `edge_ids`: active edge set at snapshot time.
 - `identity_resolution_id`: forwarding map used by this snapshot.
 - `policy_set_id`.
+- `configuration_id`.
 - `sealed_at`.
 - `created_for`: `orchestrator_turn`, `worker_slice`, `optimizer_edit`, `recovery_preflight`, `ui_inspection`.
 - `base_transaction_id`.
 
 Relationships:
 
-- Referenced by `WorkingSetSnapshot`, `OptimizerEdit`, `WorkerSlice`, `ConflictRecord`, and `RecoveryAction`.
+- Referenced by `WorkingSetSnapshot`, `OptimizerEdit`, `WorkerSlice`, `ConflictRecord`, configuration inspections, and `RecoveryAction`.
 - Never changes after creation.
 
 Identity semantics:
 
 - A snapshot resolves IDs according to its own identity map. Later forwarding does not rewrite what a prior snapshot meant.
 
-Addresses `D3`, `D4`, `D5`, `D16`; implements `P4`, `P6`, `P14`.
+Addresses `D3`, `D4`, `D5`, `D16`, and `D17`; implements `P4`, `P6`, `P14`.
 
 ### GraphEdge
 
@@ -303,6 +368,7 @@ Fields:
 - `summary_contract_id`.
 - `node_id`, `revision_id`.
 - `contract_version`.
+- `template_source`: `system_default`, `workspace_default`, `node_kind_default`, `user_configured`, `recovered`.
 - `focus`: current purpose of the node.
 - `status`: `not_started`, `active`, `blocked`, `waiting_for_user`, `waiting_for_worker`, `recovering`, `complete`, `archived`, `invalid`.
 - `decision_state`: decisions made, deferred, or disputed.
@@ -320,8 +386,9 @@ Relationships:
 
 - Must cite `EvidenceArtifact` or `NodeRevision` through `ProvenancePointer`.
 - Consumed by `RenderEngine` and inspected by `PolicyEngine`.
+- Its template source is part of failure attribution when summaries omit fields or expose disputed field meanings.
 
-Addresses `D2`, `D12`, `D15`; implements `P3`, `P7`.
+Addresses `D2`, `D12`, `D15`, and `D17`; implements `P3`, `P7`.
 
 ### EvidenceArtifact
 
@@ -376,6 +443,7 @@ Fields:
 
 - `working_set_id`.
 - `graph_snapshot_id`.
+- `configuration_id`.
 - `turn_id`.
 - `target_actor`: `orchestrator` or `worker`.
 - `target_cli`, `target_model`.
@@ -390,14 +458,17 @@ Fields:
 - `reasoning_budget_class`: `small`, `standard`, `large`, `exception`.
 - `prefix_hash`: prompt-cache locality key.
 - `capability_fingerprint_id`.
+- `provider_state_id`: provider state used for the route, if applicable.
+- `configuration_explanation_ref`: compact provenance of configured/defaulted values that affected this render.
 - `rendered_blob_ref`.
 
 Relationships:
 
 - Referenced by every orchestrator turn, worker launch, and question artifact.
 - Provides the answer to "what did the model see?"
+- Provides the answer to "which configuration and provider state caused this render to look this way?"
 
-Addresses `D1`, `D5`, `D7`, `D15`; implements `P1`, `P2`, `P8`, `P12`.
+Addresses `D1`, `D5`, `D7`, `D15`, `D17`, and `D18`; implements `P1`, `P2`, `P8`, `P12`, and `P13`.
 
 ### GraphAction
 
@@ -478,6 +549,8 @@ Fields:
 - `render_id`.
 - `worker_id`.
 - `target_cli`, `target_model`.
+- `required_provider_features`: model features, tool support, network needs, local runtime needs, and sandbox assumptions required by the workload.
+- `provider_state_id`: preflight state used to approve or deny launch.
 - `state`: `draft`, `validated`, `launched`, `accepted`, `running`, `needs_input`, `completed`, `failed`, `cancelled`, `reintegrating`, `integrated`, `conflicted`.
 
 Relationships:
@@ -485,7 +558,7 @@ Relationships:
 - Owned by `WorkerRun`.
 - May produce `QuestionArtifact`, `WorkerOutput`, `OptimizerRequest`, and `ConflictRecord`.
 
-Addresses `D8`, `D9`, `D13`; implements `P8`, `P11`, `P12`.
+Addresses `D8`, `D9`, `D13`, and `D18`; implements `P8`, `P11`, `P12`, and `P13`.
 
 ### WorkerRun
 
@@ -497,6 +570,7 @@ Fields:
 - `slice_id`.
 - `agent_runner_invocation_id`.
 - `session_id`.
+- `provider_state_id`.
 - `resume_supported`: boolean from capability fingerprint and observed acceptance.
 - `acceptance_state`: `unknown`, `accepted`, `rejected`, `timed_out`, `ambiguous`.
 - `last_ingested_message_id`.
@@ -507,7 +581,7 @@ Relationships:
 
 - Links harness slice state to `agent-runner` invocation/session state.
 
-Addresses `D7`, `D8`, `D16`; implements `P8`, `P11`, `P15`.
+Addresses `D7`, `D8`, `D16`, and `D18`; implements `P8`, `P11`, `P14`, and `P15`.
 
 ### OrchestratorTurn
 
@@ -599,7 +673,7 @@ Fields:
 - `source_ref`.
 - `base_graph_snapshot_id`.
 - `target_node_ids`.
-- `request_type`: `consider_summary_refresh`, `consider_stale_mark`, `consider_cross_reference`, `consider_repack`, `consider_split`, `consider_merge`, `consider_reparent`, `consider_provenance_repair`, `consider_quarantine`.
+- `request_type`: `consider_summary_refresh`, `consider_stale_mark`, `consider_cross_reference`, `consider_repack`, `consider_split`, `consider_merge`, `consider_reparent`, `consider_provenance_repair`, `consider_quarantine`, `consider_configuration_warning`, `consider_provider_route_warning`.
 - `rationale_ref`: evidence, turn output, worker output, or audit note that motivated the request.
 - `priority_hint`: `low`, `normal`, `high`, `urgent`.
 - `advisory_state`: `queued`, `accepted_for_scoping`, `ignored`, `superseded`, `converted_to_optimizer_edit`.
@@ -612,7 +686,7 @@ Relationships:
 - Does not authorize the source actor to decide that nodes, revisions, edges, summaries, or topology changes should exist.
 - If the optimizer acts on the request, it creates a separate `OptimizerEdit` with its own scope, evidence, validation, reviewer state, audit trail, and actor attribution.
 
-Addresses `D3`, `D4`, `D5`, `D6`, and `D15`; implements `P1`, `P4`, `P5`, and `P6`.
+Addresses `D3`, `D4`, `D5`, `D6`, `D15`, `D17`, and `D18`; implements `P1`, `P4`, `P5`, `P6`, and `P13`.
 
 ### OptimizerEdit
 
@@ -622,11 +696,13 @@ Fields:
 
 - `optimizer_edit_id`.
 - `base_graph_snapshot_id`.
+- `configuration_id`.
 - `actor_model`: normally `glm`.
 - `edit_type`: `summary_regeneration`, `stale_mark`, `cross_reference`, `repack`, `split`, `merge`, `reparent`, `provenance_repair`, `poison_quarantine`.
 - `touched_node_ids`.
 - `operation_payload_ref`.
 - `evidence_ids`.
+- `configuration_refs`: configuration values that constrained or motivated the edit.
 - `expected_invariants`.
 - `deterministic_validation_state`: `pending`, `passed`, `failed`.
 - `reviewer_state`: `not_required`, `sampled_pending`, `passed`, `flagged`, `inconclusive`.
@@ -638,7 +714,7 @@ Relationships:
 - Produces `IdentityEvent`, `NodeRevision`, `GraphEdge`, and `AuditEvent` only after merge.
 - May cite `OptimizerRequest` as an input, but the edit remains an optimizer-owned curation decision and is shown in the user surface as such.
 
-Addresses `D3`, `D4`, `D6`, `D11`, `D12`, `D13`; implements `P1`, `P4`, `P5`, `P6`, `P10`, `P12`, `P14`.
+Addresses `D3`, `D4`, `D6`, `D11`, `D12`, `D13`, and `D17`; implements `P1`, `P4`, `P5`, `P6`, `P10`, `P12`, `P14`.
 
 ### ConflictRecord
 
@@ -650,7 +726,7 @@ Fields:
 - `base_graph_snapshot_id`.
 - `current_graph_snapshot_id`.
 - `actor_a`, `actor_b`.
-- `conflict_type`: `identity`, `content`, `summary_contract`, `edge`, `worker_overlap`, `question_route`, `tool_protocol`, `budget`.
+- `conflict_type`: `identity`, `content`, `summary_contract`, `configuration`, `edge`, `worker_overlap`, `question_route`, `tool_protocol`, `provider_state`, `budget`.
 - `affected_node_ids`.
 - `resolution_state`: `open`, `auto_resolved`, `needs_orchestrator`, `needs_user`, `rejected`, `superseded`.
 - `resolution_edit_id`.
@@ -659,7 +735,62 @@ Relationships:
 
 - Blocks merge or reintegration until resolved.
 
-Addresses `D3`, `D4`, `D8`, `D16`; implements `P6`, `P14`.
+Addresses `D3`, `D4`, `D8`, `D16`, `D17`, and `D18`; implements `P6`, `P14`.
+
+### ProviderState
+
+Purpose: redacted, observable state of a provider/CLI/account/runtime route.
+
+Fields:
+
+- `provider_state_id`.
+- `provider`: `anthropic`, `openai`, `google`, `local_runtime`, `openai_compatible`, `other`.
+- `cli`: `claude`, `codex`, `opencode`, or `agent_runner`.
+- `account_ref`: redacted account or profile identifier.
+- `auth_state`: `present`, `missing`, `expired`, `invalid`, `unknown`.
+- `billing_state`: `healthy`, `near_limit`, `over_limit`, `payment_required`, `unknown`.
+- `quota_state`: `available`, `rate_limited`, `exhausted`, `unknown`.
+- `network_state`: `available`, `blocked_by_sandbox`, `blocked_by_host`, `degraded`, `unknown`.
+- `runtime_state`: `installed`, `missing`, `wrong_version`, `unreachable`, `not_applicable`, `unknown`.
+- `sandbox_constraints`: declared or detected network, filesystem, process, or tool limits.
+- `store_locations_checked`: redacted paths or sources checked, such as vendor config directories, `agent-runner` state, environment, and runtime registries.
+- `secret_material_stored`: always false for harness-owned records.
+- `freshness`: `fresh`, `stale`, `probe_failed`, `manual`.
+- `confidence`: `high`, `medium`, `low`.
+- `last_probe_at`.
+
+Relationships:
+
+- Has many `EntitlementSnapshot`.
+- Referenced by `CapabilityFingerprint`, `WorkerSlice`, `WorkerRun`, `WorkingSetSnapshot`, `BudgetLedger`, `RecoveryAction`, and `AuditEvent`.
+- Produced by `ProviderStateMonitor`, not by the orchestrator.
+
+Addresses `D18`; implements `P8`, `P13`, `P14`, and `P15`.
+
+### EntitlementSnapshot
+
+Purpose: feature and model availability observed for a provider/account/runtime at a point in time.
+
+Fields:
+
+- `entitlement_snapshot_id`.
+- `provider_state_id`.
+- `model_id`.
+- `feature_matrix`: context length class, tool calling, MCP support, file/image support, reasoning controls, structured output, streaming, resume, approval, and local runtime features.
+- `entitlement_state`: `available`, `not_entitled`, `billing_locked`, `region_locked`, `disabled_by_policy`, `unknown`.
+- `requires_network`: boolean.
+- `requires_local_runtime`: boolean.
+- `observed_limit_ref`: quota, rate limit, credit, or plan note if available.
+- `probe_method`: `agent_runner`, `cli_probe`, `local_file_audit`, `dry_run`, `manual`, `provider_error`.
+- `evidence_id`: redacted evidence for the observation.
+- `valid_from`, `valid_to`.
+
+Relationships:
+
+- Feeds `CapabilityFingerprint`, provider routing policy, worker launch preflight, and recovery reroute decisions.
+- Does not store tokens or credential material.
+
+Addresses `D18`; implements `P8`, `P12`, `P13`, and `P15`.
 
 ### CapabilityFingerprint
 
@@ -674,14 +805,22 @@ Fields:
 - `resume_surface`: session ID support, acceptance signal, known limits.
 - `tool_interception_surface`.
 - `context_strength`: `strong`, `medium`, `weak`, `unknown`.
+- `provider_state_id`.
+- `entitlement_snapshot_ids`.
+- `account_state`: auth, billing, quota, and account-profile readiness summarized from provider state.
+- `feature_support`: workload-relevant features that are supported, unsupported, or unknown.
+- `runtime_support`: local runtime availability and version class when relevant.
+- `sandbox_support`: network, filesystem, process, and tool constraints relevant to the session.
+- `route_state`: `eligible`, `eligible_with_warnings`, `degraded`, `blocked`, `unknown`.
+- `route_denial_reasons`: explicit reasons a workload cannot be routed to this provider or CLI.
 - `known_asymmetries`.
 - `observed_failures`.
 
 Relationships:
 
-- Attached to renders, worker runs, and UI session badges.
+- Attached to renders, worker runs, provider state, and UI session badges.
 
-Addresses `D7`, `D9`, `D10`; implements `P8`, `P11`, `P13`.
+Addresses `D7`, `D9`, `D10`, and `D18`; implements `P8`, `P11`, `P13`, and `P15`.
 
 ### BudgetLedger
 
@@ -695,6 +834,7 @@ Fields:
 - `input_tokens`, `output_tokens`, `cache_read_tokens`, `cache_write_tokens`.
 - `latency_ms`.
 - `provider_cost_estimate`.
+- `provider_state_id`: optional provider state used for cost/quota interpretation.
 - `cache_prefix_hash`.
 - `budget_state`: `within`, `near_limit`, `exceeded`, `blocked`.
 - `policy_action`: `none`, `warn`, `narrow_scope`, `require_user_approval`, `block`.
@@ -703,7 +843,7 @@ Relationships:
 
 - Consulted by renderer, optimizer, worker dispatcher, and reviewer sampler.
 
-Addresses `D13`; implements `P12`.
+Addresses `D13` and `D18`; implements `P12`.
 
 ### RecoveryAction
 
@@ -717,6 +857,9 @@ Fields:
 - `affected_session_ids`.
 - `affected_node_ids`.
 - `affected_edit_ids`.
+- `affected_provider_state_ids`.
+- `provider_failure_cause`: `none`, `auth`, `billing`, `quota`, `entitlement`, `network`, `sandbox`, `runtime`, `feature_missing`, `unknown`.
+- `reroute_candidate_refs`: alternate capability fingerprints or provider states if substitution is possible.
 - `side_effect_classification`: `deferred_recording`, `deferred_execution`, `unknown`.
 - `user_confirmation_state`: `not_required`, `required`, `granted`, `denied`.
 - `result_state`: `planned`, `applied`, `failed`, `partially_applied`, `reverted`.
@@ -726,7 +869,7 @@ Relationships:
 
 - Produces audit events and may produce conflict records.
 
-Addresses `D16`; implements `P14`, `P15`.
+Addresses `D16` and `D18`; implements `P14`, `P15`.
 
 ### PolicySet
 
@@ -743,13 +886,15 @@ Fields:
 - `budget_policy_version`.
 - `review_sampling_policy_version`.
 - `recovery_policy_version`.
+- `configuration_policy_version`.
+- `provider_policy_version`.
 
 Relationships:
 
 - Referenced by all decisions and audit events.
 - Allows later explanation of why a decision was accepted at the time.
 
-Addresses `D11`, `D12`, `D13`, `D16`; implements `P10`, `P12`, `P14`.
+Addresses `D11`, `D12`, `D13`, `D16`, `D17`, and `D18`; implements `P10`, `P12`, `P14`.
 
 ### AuditEvent
 
@@ -761,6 +906,8 @@ Fields:
 - `event_type`.
 - `actor`.
 - `policy_set_id`.
+- `configuration_id`: optional effective configuration involved in the decision.
+- `provider_state_id`: optional provider state involved in the decision.
 - `input_refs`.
 - `output_refs`.
 - `decision`: `accepted`, `rejected`, `deferred`, `quarantined`, `user_required`.
@@ -769,9 +916,9 @@ Fields:
 
 Relationships:
 
-- Every graph mutation, render, optimizer edit, reviewer decision, question route, and recovery action emits audit events.
+- Every graph mutation, render, configuration inspection, provider probe, routing denial, optimizer edit, reviewer decision, question route, and recovery action emits audit events.
 
-Addresses `D11`, `D12`, `D14`, `D16`; implements `P1`, `P10`, `P13`, `P14`, `P15`.
+Addresses `D11`, `D12`, `D14`, `D16`, `D17`, and `D18`; implements `P1`, `P10`, `P13`, `P14`, `P15`.
 
 ## Working-Set Policy
 
@@ -805,6 +952,8 @@ Recursive unpack is bounded by:
 
 Recursive unpack never crosses into `poison_quarantined`, `deleted`, or `unresolved_conflict` nodes without an explicit tool action. This addresses `D6` and `D12`; it implements `P2`, `P6`, `P7`, and `P14`.
 
+Configuration participates in working-set policy. The renderer records which budget caps, recursive-depth defaults, node-kind allowlists, summary templates, index scopes, provider routing defaults, and memory promotion rules affected `W`. If an empty or thin render is caused by configuration rather than graph content, the working-set inspector labels that cause directly. This addresses `D17` and `D18`; it implements `P1`, `P2`, `P8`, and `P13`.
+
 ## Operational Lifecycle
 
 ### Orchestrator Turn
@@ -827,9 +976,9 @@ States:
 Transitions:
 
 - `idle -> snapshotting` when a turn is requested.
-- `snapshotting -> rendering` after identity forwarding and policy validation.
-- `rendering -> launching_or_resuming` if the render is within budget.
-- `rendering -> blocked` if required context exceeds budget or has unreconciled corruption.
+- `snapshotting -> rendering` after identity forwarding, configuration resolution, provider-state preflight, and policy validation.
+- `rendering -> launching_or_resuming` if the render is within budget and the target provider route is eligible.
+- `rendering -> blocked` if required context exceeds budget, provider state is insufficient, configuration is invalid for the render, or graph state has unreconciled corruption.
 - `launching_or_resuming -> thinking` when the CLI accepts the session.
 - `thinking -> tool_pending` when the model calls a tool.
 - `tool_pending -> capturing` when the result is available or fails.
@@ -837,13 +986,46 @@ Transitions:
 - `capturing -> committing` after evidence and protocol records are durable.
 - `committing -> optimizer_enqueue` after bounded `GraphAction` records pass policy and any `OptimizerRequest` artifacts are queued as advisory input.
 - `optimizer_enqueue -> complete` after queues and audit events are written.
-- Any state -> `recovering` on session loss, protocol corruption, or storage conflict.
+- Any state -> `recovering` on session loss, protocol corruption, provider lockout, entitlement change, sandbox denial, runtime loss, or storage conflict.
 
 `GraphAction` in this lifecycle is not a topology mutation path. The allowed set is limited to recording orchestrator output, recording tool provenance, attaching audit notes, emitting user-facing output, and creating advisory `OptimizerRequest` artifacts. It cannot create or change `GraphNode`, `GraphEdge`, `NodeRevision`, `SummaryContract`, or `IdentityEvent`; it cannot summarize, cross-reference, repack, split, merge, re-parent, forward identity, repair provenance, or quarantine graph truth.
 
 If the orchestrator believes one of those curation operations is needed, it emits an `OptimizerRequest`; the optimizer later decides whether to draft an `OptimizerEdit`, and any resulting user-visible topology or summary change is attributed to the optimizer.
 
-This lifecycle addresses `D1`, `D3`, `D4`, `D5`, `D7`, `D10`, `D13`, and `D16`; it implements `P1`, `P2`, `P4`, `P5`, `P6`, `P8`, `P12`, and `P14`.
+This lifecycle addresses `D1`, `D3`, `D4`, `D5`, `D7`, `D10`, `D13`, `D16`, `D17`, and `D18`; it implements `P1`, `P2`, `P4`, `P5`, `P6`, `P8`, `P12`, and `P14`.
+
+### Configuration Inspection and Validation
+
+States:
+
+- `resolved`: effective configuration is assembled from system-required values, defaults, inherited values, user-configured values, and recovered values.
+- `empty_graph_simulated`: renderer and optimizer scoping run against an empty graph with this configuration.
+- `shape_explained`: existing topology, summary templates, indexes, provider routes, and memory policies are traced to the configuration values that produced them.
+- `validated`: deterministic checks accept the configuration for render, optimizer, indexing, routing, and recovery use.
+- `warning`: configuration is usable but may create ambiguous memory semantics.
+- `invalid`: configuration would produce unusable graph state, invalid summaries, incomplete indexing, impossible provider routing, or over-budget renders.
+- `superseded`: a newer configuration revision replaced it.
+
+The inspection output is operational, not tutorial text. "What would happen on an empty graph?" shows initial roots, default node kinds, summary templates, render caps, provider routes, optimizer scope, and indexes that would exist before any user data. "Why is the graph in this shape?" traces each node kind, required field, containment rule, cross-reference, stale marker, index, and optimizer edit back to configuration, evidence, or explicit user action.
+
+Configuration warnings create `AuditEvent` records and may create advisory `OptimizerRequest` records when existing graph shape appears inconsistent with current configuration. They do not silently rewrite graph truth. This addresses `D17`; it implements `P1`, `P3`, `P7`, `P13`, and `P15`.
+
+### Provider Preflight and Routing
+
+States:
+
+- `unprobed`: provider state is not current enough for routing.
+- `probing`: the monitor checks `agent-runner`, CLI probes, local files, environment, runtime availability, network boundaries, and sandbox constraints.
+- `ready`: required auth, entitlement, feature, runtime, and network state is available.
+- `degraded`: the route can run only with weaker context, weaker tool support, higher cost risk, or missing optional features.
+- `blocked`: the route lacks a required auth, entitlement, feature, runtime, network path, quota, or sandbox permission.
+- `running`: a session has been launched using this state.
+- `failed_mid_run`: provider state changed or was discovered wrong during execution.
+- `revalidating`: provider state is refreshed before retry, resume, or reroute.
+
+Routing decisions are workload-specific. A provider can be ready for a text-only review and blocked for a task requiring MCP, network, file patches, local model runtime, long context, or a specific resume surface. The user surface shows "this work cannot route to provider X because [reason]" using `route_denial_reasons`, not a generic failure.
+
+If provider failure occurs mid-run, the harness preserves the trace captured so far, classifies side effects, revalidates the graph snapshot and worker slice, and opens a `RecoveryAction`. Reroute is allowed only if the alternate provider's capability fingerprint satisfies the original slice requirements or the user accepts a changed execution contract. This addresses `D18` and `D16`; it implements `P8`, `P12`, `P13`, `P14`, and `P15`.
 
 ### Pack, Unpack, and Focus Tools
 
@@ -903,13 +1085,13 @@ The optimizer cannot directly change the orchestrator's current turn. Its accept
 States:
 
 - `slice_draft`: orchestrator or backend proposes a worker slice.
-- `slice_validated`: policy checks overlap, evidence, capability, and budget.
+- `slice_validated`: policy checks overlap, evidence, capability, provider state, entitlement, runtime, sandbox, and budget.
 - `launched`: `agents` invocation created.
 - `accepted`: child session acceptance observed.
 - `running`: worker is producing trace.
 - `needs_input`: worker emitted a valid question artifact.
 - `completed`: worker finished without pending question.
-- `failed`: worker failed or session evidence is incomplete.
+- `failed`: worker failed, provider route failed, or session evidence is incomplete.
 - `reintegrating`: output is mapped to graph operations.
 - `integrated`: accepted output is merged.
 - `conflicted`: output overlaps or contradicts active graph state.
@@ -928,7 +1110,7 @@ Worker output reintegration is not final-response paste. It produces one or more
 
 Curation-affecting candidates from reintegration follow the same boundary as orchestrator suggestions: they may become `OptimizerRequest` inputs, but only optimizer-owned `OptimizerEdit` records mutate summaries, cross-references, topology, identity, provenance repair, or quarantine state.
 
-This addresses `D3`, `D8`, `D9`, `D10`, `D11`, and `D13`; it implements `P5`, `P6`, `P7`, `P8`, `P10`, `P11`, and `P12`.
+This addresses `D3`, `D8`, `D9`, `D10`, `D11`, `D13`, and `D18`; it implements `P5`, `P6`, `P7`, `P8`, `P10`, `P11`, and `P12`.
 
 Parallel workers may share read context, but overlapping write scope creates a `ConflictRecord` unless the slice policy explicitly allows staged merge. This addresses worker interference in `D8` and implements `P6`.
 
@@ -959,16 +1141,16 @@ This addresses `D9` and `D16`; it implements `P11` and `P14`.
 
 States:
 
-- `detected`: inconsistency, session loss, failed resume, corrupt compact, or merge failure is detected.
+- `detected`: inconsistency, session loss, provider failure, entitlement lockout, failed resume, corrupt compact, or merge failure is detected.
 - `classified`: backend classifies deferred recording versus deferred execution, consequence level, and side-effect class.
-- `preflight`: policy checks current graph, session availability, and tool protocol state.
+- `preflight`: policy checks current graph, session availability, provider state, entitlement snapshot, runtime availability, sandbox constraints, and tool protocol state.
 - `requires_user`: high-consequence or unknown-side-effect actions wait for confirmation.
 - `applying`: recovery action runs.
 - `reconciled`: graph, evidence, and audit records agree.
 - `partial`: some state was preserved and some was discarded.
 - `failed`: recovery could not complete.
 
-Recovery actions show preserved, replayed, and discarded state. Fresh worker substitution is explicit and visible; it is never reported as a successful resume. This addresses `D16`; it implements `P14` and `P13`.
+Recovery actions show preserved, replayed, and discarded state. Fresh worker substitution is explicit and visible; it is never reported as a successful resume. If recovery reroutes to another provider, the user sees which original contract changed: model, feature set, tool surface, runtime, cost/quota exposure, or sandbox boundary. This addresses `D16` and `D18`; it implements `P14`, `P13`, and `P15`.
 
 ### User Surface
 
@@ -977,14 +1159,16 @@ The single-tab UI has structured regions backed by the same graph:
 - Initiative map: initiative roots with `active`, `blocked`, `waiting`, `recovering`, `stale`, and `archived` states.
 - Current focus: the orchestrator's active focus path, pins, unpacked nodes, and evicted nodes.
 - Working set inspector: exact nodes and evidence pointers imposed on the current or last turn.
+- Configuration inspector: effective configuration, configured/defaulted value sources, empty-graph simulation, index state, render caps, summary templates, and graph-shape explanations.
+- Provider state panel: redacted account state, entitlement snapshots, local runtime state, sandbox/network state, route eligibility, and route denial reasons.
 - Question queue: action-needed `QuestionArtifact` records across all initiatives.
 - Worker board: active and blocked `WorkerSlice` records with capability fingerprints.
 - Optimizer log: advisory requests plus accepted, rejected, conflicted, and reverted optimizer-owned edits.
 - Evidence drill-down: summary claim to provenance to raw local evidence.
 - Cost surface: budget ledgers by initiative, worker, optimizer pass, reviewer pass, and render.
-- Recovery surface: active and historical recovery actions.
+- Recovery surface: active and historical recovery actions, including provider-caused failures and reroute decisions.
 
-The UI separates action-needed notifications from passive progress events. This addresses `D14`, `D15`, and `D16`; it implements `P1`, `P13`, `P14`, and `P16`.
+The UI separates action-needed notifications from passive progress events. Configuration warnings and provider route denials are visible state, but only consequential cases interrupt the user. This addresses `D14`, `D15`, `D16`, `D17`, and `D18`; it implements `P1`, `P13`, `P14`, `P15`, and `P16`.
 
 ## Governance
 
@@ -996,17 +1180,20 @@ The `PolicyEngine` enforces:
 - Evidence pointer existence and locator validity.
 - Stable identity resolution.
 - No unresolved forwarding cycles.
+- Configuration schema validity and effective-value provenance.
+- Empty-graph simulation validity before a configuration is trusted.
 - Foreground `GraphAction` allowed-effect boundary.
 - `OptimizerRequest` advisory-only boundary and optimizer attribution.
 - Worker write-scope compliance.
+- Provider route eligibility, entitlement availability, runtime presence, and sandbox compatibility.
 - Question correlation validity.
 - Tool-call protocol completeness.
 - Privilege-origin preservation.
 - Poison-risk quarantine.
 - Render budget and required-pin handling.
-- Recovery side-effect classification.
+- Recovery side-effect classification, including provider-caused failures and reroute contract changes.
 
-These gates address `D3`, `D4`, `D5`, `D10`, `D11`, `D12`, `D13`, and `D16`; they implement `P1`, `P3`, `P4`, `P5`, `P7`, `P10`, `P12`, and `P14`.
+These gates address `D3`, `D4`, `D5`, `D10`, `D11`, `D12`, `D13`, `D16`, `D17`, and `D18`; they implement `P1`, `P3`, `P4`, `P5`, `P7`, `P8`, `P10`, `P12`, `P13`, and `P14`.
 
 ### Reviewer Sampling
 
@@ -1015,6 +1202,8 @@ The workflow reviewer is invoked for:
 - high-consequence optimizer edits, including splits, merges, re-parenting, and poison quarantine reversals.
 - worker reintegration that changes decisions, blockers, or user-visible status.
 - anomaly-triggered cases, such as missing evidence, high uncertainty, repeated failed resumes, or protocol mismatches.
+- configuration-shape anomalies, such as configured fields with unclear meaning, empty graph renders that hide required roots, or optimizer edits that contradict memory-policy defaults.
+- provider anomalies, such as repeated route denials, provider feature mismatches, or recovery that proposes changing the execution contract.
 - sampled low-consequence edits according to the active review policy.
 
 Reviewer output can:
@@ -1031,7 +1220,7 @@ Reviewer output cannot:
 - authorize privilege escalation.
 - prove an edit correct.
 
-This addresses reviewer fallibility in `D11` and implements `P10` and `P12`.
+This addresses reviewer fallibility in `D11` while supporting `D17` and `D18`; it implements `P10`, `P12`, and `P13`.
 
 ### Privilege and Poisoning Controls
 
@@ -1045,11 +1234,21 @@ All graph mutations are append-only at the revision layer. Reverts are new recov
 
 This addresses `D3`, `D4`, `D12`, and `D16`; it implements `P6`, `P14`, and `P15`.
 
+### Configuration and Provider Accountability
+
+Configuration changes are append-only revisions with effective-value provenance. A changed summary template, optimizer cadence, render cap, index scope, memory-promotion rule, or provider route cannot be treated as ambient state; later renders and optimizer edits cite the configuration revision that governed them. Configuration inspection is therefore part of audit and reversibility: the user can compare graph shape before and after a configuration change without relying on the optimizer's explanation alone.
+
+Provider state is audited as observation, not ownership. The harness records which store or probe was checked, when it was checked, what non-secret state was derived, and how confident the result was. It does not copy credentials or require vendor stores to move under harness control. Provider failures, route denials, entitlement gaps, and sandbox conflicts create audit events that are visible beside worker and recovery state.
+
+This addresses `D17` and `D18`; it implements `P8`, `P13`, `P14`, and `P15`.
+
 ## Observability
 
 The harness records:
 
 - rendered working sets and cache prefix hashes.
+- configuration revisions, effective-value sources, empty-graph simulations, shape explanations, and index states.
+- provider states, entitlement snapshots, route eligibility, route denials, probe freshness, and sandbox/runtime constraints.
 - node and evidence counts per render.
 - summary contract validation outcomes.
 - foreground graph-action validation outcomes and optimizer-request disposition.
@@ -1058,9 +1257,9 @@ The harness records:
 - tool-call protocol states.
 - reviewer sample rates and outcomes.
 - budget ledger usage.
-- recovery actions and results.
+- recovery actions and results, including provider-caused failures and reroute contract changes.
 
-Observability is graph-addressed, not just log-addressed. A user can start at an initiative, node, question, worker, or edit and drill to relevant events. This addresses `D14` and `D16`; it implements `P1`, `P13`, and `P14`.
+Observability is graph-addressed, not just log-addressed. A user can start at an initiative, node, question, worker, configuration value, provider route, or edit and drill to relevant events. This addresses `D14`, `D16`, `D17`, and `D18`; it implements `P1`, `P13`, `P14`, and `P15`.
 
 ## AI and ML Use
 
@@ -1075,6 +1274,7 @@ Inputs:
 - sub-agent dispatch affordances.
 - question queue relevant to current focus.
 - recovery and conflict notices.
+- configuration and provider warnings relevant to the current focus.
 
 Outputs:
 
@@ -1089,11 +1289,12 @@ Limitations:
 - The orchestrator is still bounded by effective working-set quality, not nominal context.
 - It cannot see evidence not rendered or unpacked.
 - It cannot override deterministic graph policy.
+- It cannot override invalid configuration or blocked provider routes.
 - It cannot directly create or mutate graph topology, summaries, cross-references, node revisions, identity events, repacks, splits, merges, re-parents, provenance repairs, or quarantine state.
 - Its curation suggestions are advisory `OptimizerRequest` artifacts; accepted topology or summary changes remain optimizer-authored decisions in the user surface.
 - It may misunderstand lower-privilege evidence, so privilege labels and provenance must remain visible.
 
-Addresses `D1`, `D3`, `D4`, `D5`, `D12`, `D15`; implements `P1`, `P2`, `P4`, `P5`, `P6`, `P7`.
+Addresses `D1`, `D3`, `D4`, `D5`, `D12`, `D15`, `D17`, and `D18`; implements `P1`, `P2`, `P4`, `P5`, `P6`, `P7`, `P13`.
 
 ### Sub-Agent Dispatch
 
@@ -1104,6 +1305,7 @@ Inputs:
 - `WorkerSlice`.
 - CLI-specific render.
 - capability fingerprint.
+- provider state and entitlement snapshot.
 - write-scope instructions.
 - question envelope contract.
 
@@ -1117,11 +1319,12 @@ Outputs:
 Limitations:
 
 - Workers have asymmetric context injection depending on CLI.
+- Workers have asymmetric provider entitlements, feature support, runtime availability, and sandbox boundaries.
 - Final output is not trusted without trace/provenance.
 - Resume acceptance may fail or be ambiguous.
 - Parallel workers can conflict.
 
-Addresses `D7`, `D8`, `D9`, `D10`; implements `P8`, `P10`, `P11`.
+Addresses `D7`, `D8`, `D9`, `D10`, and `D18`; implements `P8`, `P10`, `P11`, and `P13`.
 
 ### Continuous Optimizer
 
@@ -1133,6 +1336,7 @@ Inputs:
 - changed node set.
 - advisory `OptimizerRequest` artifacts.
 - summary contracts.
+- graph configuration records.
 - provenance pointers.
 - budget policy.
 - stale, conflict, and poison signals.
@@ -1147,9 +1351,10 @@ Limitations:
 - It may ignore, supersede, or reinterpret advisory requests; requests do not delegate curation authority to their source actor.
 - It can introduce poisoning or drift if deterministic gates fail, so gates and audit are mandatory.
 - It can destabilize cost and cache locality, so budget policy can narrow or block it.
+- It can mis-curate when configuration semantics are wrong or unclear, so edits cite configuration and shape explanations.
 - It cannot mutate the orchestrator's current snapshot.
 
-Addresses `D2`, `D3`, `D4`, `D6`, `D12`, `D13`, `D15`; implements `P1`, `P3`, `P4`, `P5`, `P6`, `P7`, `P12`.
+Addresses `D2`, `D3`, `D4`, `D6`, `D12`, `D13`, `D15`, and `D17`; implements `P1`, `P3`, `P4`, `P5`, `P6`, `P7`, `P12`.
 
 ### Workflow Reviewer
 
@@ -1189,6 +1394,7 @@ Inputs:
 - prior summary.
 - stale markers.
 - contract version.
+- summary template source and effective configuration.
 
 Outputs:
 
@@ -1201,8 +1407,9 @@ Limitations:
 - Missing evidence yields invalid summary, not confident prose.
 - Contradictory evidence yields uncertainty or conflict.
 - Regeneration cannot change node identity.
+- Template or field-meaning disagreement yields configuration warning or invalid summary, not silent prose repair.
 
-Addresses `D2`, `D4`, `D10`; implements `P3`, `P4`, `P7`.
+Addresses `D2`, `D4`, `D10`, and `D17`; implements `P3`, `P4`, `P7`.
 
 ### Fact Extraction
 
@@ -1233,6 +1440,8 @@ Addresses `D10` and `D12`; implements `P7`, `P10`.
 - Snapshot-walk-then-merge accepts delayed optimizer visibility. The loss is that a helpful optimizer edit may wait until the next turn; the gain is deterministic foreground reasoning. Addresses `D3`; implements `P6`.
 - Summary contracts may mark nodes invalid instead of useful. The loss is less fluent continuity when evidence is poor; the gain is no confident drift. Addresses `D2`; implements `P3`.
 - Cross-CLI capability differences are exposed. The loss is a less uniform mental model; the gain is honest operational semantics. Addresses `D7`; implements `P8`.
+- Configuration is explicit state. The loss is that graph/memory setup cannot be hidden behind a purely magical experience; the gain is that empty graphs, bad schema shape, incomplete indexes, and field-meaning disagreements can be attributed. Addresses `D17`; implements `P1`, `P3`, `P13`, and `P15`.
+- Provider state is observed, not owned. The loss is that the harness cannot guarantee every vendor auth store, entitlement, billing state, or local runtime will be repairable from inside the app; the gain is honest routing, auditable failure causes, and local graph control without copying credentials. Addresses `D18`; implements `P8`, `P13`, `P14`, and `P15`.
 - `/compact` is treated as corruption, not a fallback. The loss is compatibility with native compaction workflows; the gain is one coherent memory system. Addresses `D15` and `D16`; implements `P9`.
 - Reviewer coverage is sampled. The loss is incomplete LLM review coverage; the gain is bounded cost and reliance on deterministic gates. Addresses `D11` and `D13`; implements `P10` and `P12`.
 
@@ -1245,6 +1454,8 @@ Addresses `D10` and `D12`; implements `P7`, `P10`.
 - `/compact` interoperability. Native compaction conflicts with graph provenance and summary contracts. This follows `P9`.
 - Treating AI reviewers as policy engines. Reviewer output is evidence only. This follows `P10`.
 - Infinite memory. Packing depth does not mean unlimited retention. Explicit deletion, archive, and render exclusion remain possible under policy. This follows `P2`, `P7`, `P12`, and `P15`.
+- Credential management or provider account ownership. The harness audits provider state and guides recovery, but it does not become the canonical store for vendor credentials, billing accounts, or local runtime installers. This follows `P15` while addressing `D18`.
+- Invisible auto-configuration. Defaults exist, but the harness does not hide which schema, memory, index, routing, or render policy is shaping the graph. This follows `P1` and `P13` while addressing `D17`.
 - AI-owned product strategy. The orchestrator may organize work, but it does not own product direction. This follows the philosophy anti-goals.
 
 ## Philosophy Gaps and Tensions
@@ -1257,6 +1468,8 @@ No difficulty in `problem.md` appears ungrounded by the current philosophy. The 
 - `P2` versus `P3`: bounded renders rely on contract-valid summaries and explicit invalid states when detail cannot be faithfully compressed.
 - `P8` versus `P16`: per-CLI asymmetry is represented through concise capability fingerprints rather than exposing every mechanism in the main UI.
 - `P13` versus `P14`: recovery is visible, but only consequential recovery interrupts the user.
+- `P1` and `P13` versus configuration burden: defaults make the graph usable without pre-work, but every default remains inspectable because configuration changes memory semantics.
+- `P15` versus provider reality: the harness keeps graph/provenance under local control while treating vendor credential stores as external evidence sources, not state it must own.
 
 ## Alignment Matrix
 
@@ -1278,6 +1491,8 @@ No difficulty in `problem.md` appears ungrounded by the current philosophy. The 
 | `D14` multi-workstream legibility | single-tab structured panes, status states, notification classes | `P13`, `P16` |
 | `D15` imposed context precedent gap | imposed render contract, optimizer-owned curation, bounded foreground actions, local graph source of truth, no `/compact` | `P1`, `P5`, `P9`, `P15` |
 | `D16` recovery surfaces | `RecoveryAction`, explicit preserved/replayed/discarded records | `P14`, `P15` |
+| `D17` graph and memory configuration overhead | `GraphConfiguration`, configuration provenance, empty-graph simulation, shape explanations, configuration validation gates | `P1`, `P3`, `P7`, `P13`, `P15` |
+| `D18` provider/account/entitlement friction | `ProviderState`, `EntitlementSnapshot`, extended `CapabilityFingerprint`, provider preflight, route denial reasons, provider-aware recovery | `P8`, `P12`, `P13`, `P14`, `P15` |
 
 ## Quality Checks
 
