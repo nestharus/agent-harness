@@ -29,9 +29,10 @@ No `engineering-surfaces.md` was written. I found no problem surface under the o
 | Append-only audit writer and `AuditEvent` base table | VS-001 through VS-021, directly called out for VS-003, VS-006, VS-010, VS-020 | No | M |
 | RenderEngine core interfaces and snapshot DTOs | VS-001, VS-002, VS-004, VS-005, VS-006, VS-007, VS-008, VS-009, VS-014, VS-015, VS-017, VS-020 | No; research names `RenderEngine` as absent and cross-cutting | L |
 | PolicyEngine deterministic gate framework with versioned decisions | VS-002, VS-003, VS-004, VS-006, VS-008, VS-009, VS-010, VS-011, VS-012, VS-013, VS-014, VS-015, VS-017, VS-018, VS-019, VS-020, VS-021 | No; research warns individual validators would conflict | L |
+| `ConfigurationRegistry` skeleton and read API over `GraphConfiguration` | VS-001, VS-002, VS-004, VS-005, VS-009, VS-010, VS-011, VS-015, VS-020 | No; proposal names it as a top-level component, but the operator-visible inspector remains VS-005 | M |
 | BudgetLedger core tables and token/cache accounting interfaces | VS-001, VS-004, VS-008, VS-009, VS-010, VS-015, VS-016, VS-019, VS-020, VS-021 | No; agent-runner quota state is provider telemetry only | M |
-| ProviderStateMonitor and CapabilityFingerprint record model | VS-001, VS-006, VS-015, VS-016, VS-017, VS-020, VS-021 | Partial external substrate only; agent-runner has provider config, quota, resume config, diagnostics | M |
-| CLI subprocess supervisor around `/home/nes/.local/bin/agents` | VS-001, VS-003, VS-006, VS-009, VS-015, VS-017, VS-020, VS-021 | Partial external substrate only; harness still needs process lifecycle, prompt files, stderr invocation capture, cancellation, and child acceptance | M |
+| ProviderStateMonitor, `ProviderState`, `EntitlementSnapshot`, `CapabilityFingerprint`, and denial-reason taxonomy | VS-001, VS-006, VS-015, VS-016, VS-017, VS-020, VS-021 | Partial external substrate only; agent-runner has provider config, quota, resume config, diagnostics | M |
+| CLI subprocess supervisor around `/home/nes/.local/bin/agents` | VS-001, VS-003, VS-006, VS-009, VS-015, VS-016, VS-017, VS-020, VS-021 | Partial external substrate only; harness still needs process lifecycle, prompt files, env-var propagation, session-id capture, trace stitching, cancellation, and child acceptance | M |
 | Hook/MCP/plugin injection scaffold and capability boundary abstraction | VS-001, VS-003, VS-006, VS-008, VS-009, VS-015, VS-017, VS-018 | No; research says no harness MCP or hook/plugin code exists | L |
 | Tauri IPC commands and Channel event stream layer | VS-001, VS-005, VS-006, VS-007, VS-010, VS-016, VS-017, VS-020, VS-021 | Pattern only from agent-runner `invoke` / `Channel` | M |
 | `AgentWalkState` schema and navigation state service shell | VS-001, VS-007, VS-008, VS-009, VS-012, VS-013 | No | M |
@@ -44,7 +45,7 @@ No `engineering-surfaces.md` was written. I found no problem surface under the o
 | Test harness and fixtures: temp SQLite DBs, fake `agents`, provider configs, transcript samples, UI seeds | VS-001 through VS-021 | No; research says no tests exist and `sqlite3` CLI cannot be assumed | L |
 | Logging/tracing infrastructure for backend spans, subprocess correlation, and UI event streams | VS-001, VS-003, VS-006, VS-009, VS-015, VS-017, VS-020, VS-021 | Partial external trace substrate only | M |
 
-**Total foundation effort:** XL. The serial sum is larger than a normal bootstrap because the worktree is empty and the value slices share storage, render, policy, IPC, and test surfaces. Best-case foundation parallelization is possible if ownership is explicit: one lane for desktop/tooling, one for SQLite schema/migrations, one for subprocess/provider fixtures, one for UI shell, and one for tests. The dependency graph is acyclic if Phase 0 is treated as substrate, not as hidden delivery of value slices.
+**Total foundation effort:** XL, roughly 12-20 weeks serial equivalent. The serial sum is larger than a normal bootstrap because the worktree is empty and the value slices share storage, render, policy, IPC, and test surfaces. Best-case foundation parallelization is possible if ownership is explicit: one lane for desktop/tooling, one for SQLite schema/migrations, one for subprocess/provider fixtures, one for UI shell, and one for tests. The dependency graph is acyclic if Phase 0 is treated as substrate, not as hidden delivery of value slices.
 
 ## Initiative Assessments
 
@@ -64,7 +65,9 @@ No `engineering-surfaces.md` was written. I found no problem surface under the o
 
 **What is new:** The actual renderer, snapshot store, render blob storage, token/cache estimator, IPC commands, inspector pane, and audit integration.
 
-**Foundation dependencies:** Tauri scaffold, GraphStore, evidence/provenance interfaces, RenderEngine core, BudgetLedger core, ProviderState/CapabilityFingerprint records, IPC, UI shell, fake `agents`, logging.
+**Foundation dependencies:** Tauri scaffold, GraphStore, evidence/provenance interfaces, RenderEngine core, BudgetLedger core, `ProviderState` / `EntitlementSnapshot` / `CapabilityFingerprint` records, IPC, UI shell, fake `agents`, logging.
+
+**Acceptance prerequisite:** VS-001 remains the first operator-visible Phase 1 target, but it is not accepted until VS-003's evidence/audit backbone and VS-004's budget/cache primitives are real enough for `WorkingSetSnapshot` rows to include evidence pointers, token estimates, cache-prefix hashes, provider-state references, configuration-explanation references, and audit links without later migration.
 
 **Parallelizable with:** Partial with VS-002, VS-003, VS-004, VS-005, VS-006, and VS-007 only after stable schema and DTO boundaries. It shares `RenderEngine`, `WorkingSetSnapshot`, evidence pointers, budget fields, capability fingerprints, configuration attribution, and UI shell.
 
@@ -134,7 +137,7 @@ No `engineering-surfaces.md` was written. I found no problem surface under the o
 
 **Effort:** M.
 
-**Effort reasoning:** Research says this needs `ConfigurationRegistry`, effective value source tracking, empty-graph simulator, shape explanation, configuration validation UI, and audit events. The agent-runner model/provider config locations can inform only the provider/model subset. This introduces a new registry, but the pattern has clear analogues in proposal-defined versioned configuration and policy gates.
+**Effort reasoning:** Research says this needs effective value source tracking, empty-graph simulator, shape explanation, configuration validation UI, warning emission, advisory optimizer-request creation, and audit events. The Phase 0 `ConfigurationRegistry` skeleton and read API already exist so VS-001's RenderEngine can consume configuration from day one; VS-005 turns that substrate into the operator-visible inspection and warning surface. The agent-runner model/provider config locations can inform only the provider/model subset.
 
 **Risk:** Medium.
 
@@ -142,9 +145,9 @@ No `engineering-surfaces.md` was written. I found no problem surface under the o
 
 **What exists:** Proposal defines `GraphConfiguration`, effective value sources, and inspection lifecycle.
 
-**What is new:** Registry implementation, default/inherited/source maps, empty-graph simulation, shape explanation, validation warnings, and inspector pane.
+**What is new:** Operator-visible configuration inspector, default/inherited/source maps, empty-graph simulation, shape explanation, configuration-warning emission, advisory `OptimizerRequest` creation for user-surface configuration concerns, and inspector-pane audit events. It does not create the registry itself; Phase 0 owns the registry skeleton and read path.
 
-**Foundation dependencies:** GraphStore, PolicyEngine, RenderEngine core, audit writer, IPC/UI shell, test fixtures.
+**Foundation dependencies:** GraphStore, `ConfigurationRegistry` skeleton/read API, PolicyEngine, RenderEngine core, audit writer, IPC/UI shell, test fixtures.
 
 **Parallelizable with:** Mostly yes with VS-003. Partial with VS-001, VS-002, VS-004, VS-006, and VS-007 because configuration fields affect render attribution, summary templates, budget caps, provider routing, and focus labels.
 
@@ -160,11 +163,11 @@ No `engineering-surfaces.md` was written. I found no problem surface under the o
 
 **Risk factors:** Provider-specific risk across auth, billing, quota, entitlement, runtime, sandbox, network, and resume features; external dependency risk from Anthropic/OpenAI/z.ai limits; substrate risk because agent-runner provider state may evolve; security risk around redaction and not storing secrets.
 
-**What exists:** agent-runner provider configuration, quota and diagnostic substrate; proposal-defined `ProviderState`, `EntitlementSnapshot`, and `CapabilityFingerprint`.
+**What exists:** agent-runner provider configuration, quota and diagnostic substrate; Phase 0 owns proposal-defined `ProviderState`, `EntitlementSnapshot`, `CapabilityFingerprint`, and route-denial taxonomy contracts.
 
-**What is new:** Redacted probes, entitlement model, capability matrix, route eligibility logic, denial reasons, and provider panel.
+**What is new:** Redacted probes over the Phase 0 provider contracts, entitlement observations, capability matrix population, route eligibility logic, operator-visible denial reasons, and provider panel.
 
-**Foundation dependencies:** ProviderStateMonitor records, CLI supervisor, audit writer, PolicyEngine, IPC/UI shell, fake provider probes.
+**Foundation dependencies:** ProviderStateMonitor records, `ProviderState` / `EntitlementSnapshot` / `CapabilityFingerprint` schemas, denial-reason taxonomy, CLI supervisor, audit writer, PolicyEngine, IPC/UI shell, fake provider probes.
 
 **Parallelizable with:** Mostly yes with VS-002, VS-003, and VS-007. Partial with VS-001, VS-004, and VS-005 because render route display, provider cost interpretation, and provider-routing defaults share state.
 
@@ -254,7 +257,7 @@ No `engineering-surfaces.md` was written. I found no problem surface under the o
 
 **Effort:** M.
 
-**Effort reasoning:** Research says only agent-runner config can inform provider/model parts. Missing work is config anomaly detection, shape-repair request generation, UI warnings, and optimizer request linkage. It builds directly on VS-005 configuration inspection and VS-010 optimizer request handling.
+**Effort reasoning:** Research says only agent-runner config can inform provider/model parts. Missing work is deeper config anomaly detection, shape-repair request generation, and optimizer request linkage for repairs beyond VS-005's operator-visible warning emission. It builds directly on VS-005 configuration inspection and VS-010 optimizer request handling.
 
 **Risk:** Medium.
 
@@ -262,35 +265,15 @@ No `engineering-surfaces.md` was written. I found no problem surface under the o
 
 **What exists:** `GraphConfiguration` inspection lifecycle and warning-to-advisory-request design.
 
-**What is new:** Warning categories, anomaly detectors, request creation flow, and UI linkage.
+**What is new:** Expanded warning categories, anomaly detectors, shape-repair request flow over the Phase 0 `OptimizerRequest` contract, and UI linkage from simulated configuration effects to optimizer-owned repair consideration.
 
 **Foundation dependencies:** ConfigurationRegistry, OptimizerRequest store, PolicyEngine, audit writer, UI shell.
 
-**Parallelizable with:** Partial with VS-012 and VS-013 because warnings may become topology edits or conflicts. Mostly yes with VS-014 if PolicyEngine ownership is coordinated.
-
-### VS-012: Repack Hierarchy and Discover Cross-References (Phase 3)
-
-**Executive priority:** Phase 3, position 2 in the executive sequence; engineering recommends implementing after VS-013's conflict/identity mechanics are in place.
-
-**Effort:** L.
-
-**Effort reasoning:** Research says there is no graph-topology substrate; missing work includes cross-reference discovery, repack/split/merge/reparent operations, containment edge updates, identity forwarding, and conflict creation. This is a significant schema and merge-behavior slice with no code analogue in the current repo.
-
-**Risk:** High.
-
-**Risk factors:** New-technology risk from unbounded hierarchical packing without bounded-depth precedent; concurrency risk from topology edits against snapshots; identity risk across split/merge/reparent; policy risk if cross-references or repacks traverse poisoned or unresolved nodes.
-
-**What exists:** Proposal-defined `GraphEdge`, `IdentityEvent`, `OptimizerEdit` edit types, and recursive unpack bounds.
-
-**What is new:** Topology edit operations, cross-reference discovery, repack planning, identity forwarding application, conflict generation, and UI inspection.
-
-**Foundation dependencies:** GraphStore, OptimizerEdit store, Identity resolver, ConflictRecord workflow, PolicyEngine, evidence/provenance, topology invariant tests.
-
-**Parallelizable with:** Not safely parallelizable with VS-013 without tight coordination. Partial with VS-011 and VS-014 due shared `OptimizerEdit`, `GraphEdge`, conflict, render traversal, and policy surfaces.
+**Parallelizable with:** Partial with VS-013 and VS-012 because warnings may become conflicts or topology edits. Mostly yes with VS-014 if PolicyEngine ownership is coordinated.
 
 ### VS-013: Resolve Snapshot-Merge Conflicts and Identity Forwarding (Phase 3)
 
-**Executive priority:** Phase 3, position 3 in the executive sequence; engineering recommends moving before VS-012.
+**Executive priority:** Phase 3, position 3 in the executive sequence; engineering order position 2, before VS-012.
 
 **Effort:** L.
 
@@ -307,6 +290,26 @@ No `engineering-surfaces.md` was written. I found no problem surface under the o
 **Foundation dependencies:** GraphStore, Identity resolver base, ConflictRecord base, OptimizerEdit store, PolicyEngine, audit writer, concurrency fixtures.
 
 **Parallelizable with:** Partial with VS-011 and VS-014. No with VS-012 unless one team owns the merge/identity API and the other builds only clients against it.
+
+### VS-012: Repack Hierarchy and Discover Cross-References (Phase 3)
+
+**Executive priority:** Phase 3, position 2 in the executive sequence; engineering order position 3, after VS-013's conflict/identity mechanics are in place.
+
+**Effort:** L.
+
+**Effort reasoning:** Research says there is no graph-topology substrate; missing work includes cross-reference discovery, repack/split/merge/reparent operations, containment edge updates, identity forwarding, and conflict creation. This is a significant schema and merge-behavior slice with no code analogue in the current repo.
+
+**Risk:** High.
+
+**Risk factors:** New-technology risk from unbounded hierarchical packing without bounded-depth precedent; concurrency risk from topology edits against snapshots; identity risk across split/merge/reparent; policy risk if cross-references or repacks traverse poisoned or unresolved nodes.
+
+**What exists:** Proposal-defined `GraphEdge`, `IdentityEvent`, `OptimizerEdit` edit types, and recursive unpack bounds.
+
+**What is new:** Topology edit operations, cross-reference discovery, repack planning, identity forwarding application, conflict generation, and UI inspection.
+
+**Foundation dependencies:** GraphStore, OptimizerEdit store, Identity resolver, ConflictRecord workflow, PolicyEngine, evidence/provenance, topology invariant tests.
+
+**Parallelizable with:** Not safely parallelizable with VS-013 without tight coordination. VS-012 design and fixture work may begin while VS-013 is underway, but topology mutation should not merge before the VS-013 identity resolver and conflict state machine exist. Partial with VS-011 and VS-014 due shared `OptimizerEdit`, `GraphEdge`, conflict, render traversal, and policy surfaces.
 
 ### VS-014: Quarantine Poisoned or Privilege-Unsafe Graph Content (Phase 3)
 
@@ -386,6 +389,8 @@ No `engineering-surfaces.md` was written. I found no problem surface under the o
 
 **Foundation dependencies:** QuestionArtifact schema, WorkerRun records, CLI supervisor, ProviderStateMonitor, RecoveryAction skeleton, evidence/audit, UI queue.
 
+**Acceptance prerequisite:** VS-017 is not accepted until a failed-resume handoff path writes durable `RecoveryAction` records with side-effect class, affected worker/session/question refs, audit linkage, and enough preserved/replayed/discarded placeholders for VS-020 to surface later without migration. Full operator-visible recovery remains VS-020.
+
 **Parallelizable with:** Partial with VS-016 and VS-018. It shares `WorkerRun`, `QuestionArtifact`, evidence ingestion, blocked/needs-input state, and recovery handoff.
 
 ### VS-018: Stage Worker Output for Graph Reintegration (Phase 5)
@@ -422,9 +427,9 @@ No `engineering-surfaces.md` was written. I found no problem surface under the o
 
 **What exists:** Proposal-defined `WorkflowReviewer`, reviewer sampling rules, and deterministic limits.
 
-**What is new:** Sampling decisions, prompt packer, result schema, UI flags, and budget-ledger integration.
+**What is new:** Sampling decisions, prompt packer, result schema, UI flags, budget-ledger integration, and a recovery-anomaly trigger hook that subscribes to VS-020 events once recovery accounting ships.
 
-**Foundation dependencies:** PolicyEngine, BudgetLedger, evidence/provenance, OptimizerEdit store, Worker reintegration staging, CLI supervisor, audit writer.
+**Foundation dependencies:** PolicyEngine, BudgetLedger, evidence/provenance, OptimizerEdit store, Worker reintegration staging, RecoveryAction event contract, CLI supervisor, audit writer.
 
 **Parallelizable with:** Partial with VS-020 because both share `PolicySet`, `BudgetLedger`, `AuditEvent`, UI flags, and recovery may trigger reviewer sampling.
 
@@ -470,13 +475,15 @@ No `engineering-surfaces.md` was written. I found no problem surface under the o
 
 ## Pushback Summary
 
-The executive ordering is strategically coherent, but engineering should apply five cost-driven sequencing adjustments. These do not drop or change any value slice; they prevent duplicate schema/render/policy work and avoid building user-visible surfaces on temporary contracts.
+The executive ordering is strategically coherent, and this revision applies five cost-driven sequencing adjustments. These do not drop or change any value slice; they prevent duplicate schema/render/policy work and avoid building user-visible surfaces on temporary contracts.
 
 ### Pushback P-1: Expand Phase 0 before Phase 1 acceptance
 
+**Status:** Applied.
+
 **Executive ordering:** Phase 1 slices begin after an engineering-defined Phase 0 placeholder with no detailed scope.
 
-**Engineering recommendation:** Treat Phase 0 as an XL substrate phase containing GraphStore/migrations, evidence/audit, RenderEngine core, PolicyEngine, BudgetLedger core, ProviderState/CapabilityFingerprint records, CLI supervisor, IPC, UI shell, and test fixtures.
+**Engineering recommendation:** Treat Phase 0 as an XL substrate phase containing GraphStore/migrations, evidence/audit backbone, RenderEngine core, PolicyEngine, BudgetLedger core, `ProviderState` / `EntitlementSnapshot` / `CapabilityFingerprint` records, CLI supervisor with subprocess management, `OULIPOLY_INVOCATION` / parent-invocation propagation, session-id capture and trace stitching, Tauri IPC layer, frontend stack scaffolding and UI shell, and test fixtures.
 
 **Implementation cost of executive ordering:** If VS-001 through VS-007 are built directly from the empty worktree, each slice will invent its own DTOs, schema migrations, render result states, audit calls, and UI event streams. Research explicitly warns that `RenderEngine`, `PolicyEngine`, `GraphStore`, `BudgetLedger`, provider state, and UI shell are shared surfaces across most slices.
 
@@ -485,6 +492,8 @@ The executive ordering is strategically coherent, but engineering should apply f
 **Recommendation:** Apply the engineering ordering. The delay buys one canonical substrate instead of seven incompatible Phase 1 prototypes.
 
 ### Pushback P-2: Build provenance/audit and budget gate backends before declaring VS-001 complete
+
+**Status:** Applied.
 
 **Executive ordering:** VS-001 inspect renders appears before VS-003 provenance/audit and VS-004 budget/cache.
 
@@ -498,6 +507,8 @@ The executive ordering is strategically coherent, but engineering should apply f
 
 ### Pushback P-3: Implement VS-013 conflict/identity mechanics before VS-012 topology edits
 
+**Status:** Applied.
+
 **Executive ordering:** VS-012 repack/cross-reference appears before VS-013 conflict and identity forwarding in Phase 3.
 
 **Engineering recommendation:** Build VS-013's identity resolver, optimistic merge engine, and `ConflictRecord` state machine before enabling VS-012 topology edit types.
@@ -510,6 +521,8 @@ The executive ordering is strategically coherent, but engineering should apply f
 
 ### Pushback P-4: Pull a recovery skeleton into Phase 0 / Phase 5 prerequisites
 
+**Status:** Applied.
+
 **Executive ordering:** Full recovery accounting is VS-020 in Phase 6, after NEEDS_INPUT routing and worker reintegration.
 
 **Engineering recommendation:** Keep operator-visible recovery in VS-020, but implement `RecoveryAction` schema, side-effect taxonomy, and audit linkage in Phase 0, and require a failed-resume handoff path before VS-017 acceptance.
@@ -521,6 +534,8 @@ The executive ordering is strategically coherent, but engineering should apply f
 **Recommendation:** Apply the engineering ordering. This preserves the executive value order while preventing question-routing failures from becoming unstructured dead ends.
 
 ### Pushback P-5: Treat provider fingerprints as an early contract, not just a VS-006 UI feature
+
+**Status:** Applied.
 
 **Executive ordering:** VS-006 is one Phase 1 slice among seven.
 
@@ -536,15 +551,69 @@ The executive ordering is strategically coherent, but engineering should apply f
 
 ### Phase 0A: Repository and Runtime Skeleton
 
-Initialize the fixed Tauri/Turbo/React/Rust/Tokio/SQLite stack, backend app state, settings, logging, IPC/event streams, UI shell, test harness, fake `agents`, and basic CI-quality local commands. This phase has no operator-visible value beyond a running shell.
+Initialize the fixed Tauri/Turbo/React/Rust/Tokio/SQLite stack, backend app state, settings, logging, Tauri IPC/event streams, frontend stack scaffolding, single-tab UI shell, test harness, fake `agents`, and basic CI-quality local commands. This phase has no operator-visible value beyond a running shell. It is the host substrate for the XL Phase 0 work: later sub-phases should be able to add GraphStore migrations, shared engines, subprocess supervision, provider fixtures, and seeded panes without changing the repository shape.
 
 ### Phase 0B: Canonical State and Contracts
 
-Create migration infrastructure and base GraphStore tables for graph snapshots, working-set snapshots, summaries, evidence, provenance, audit events, budget ledgers, provider state, capability fingerprints, policy sets, agent walk state, optimizer requests/edits, identity events, conflict records, worker runs, question artifacts, and recovery actions. Implement repository boundaries and fixture builders, but keep features inert unless a value slice turns them on.
+Create migration infrastructure and the complete base GraphStore schema. Implement repository boundaries and fixture builders, but keep features inert unless a value slice turns them on. Phase 0B owns the durable objects and contracts below:
+
+- `GraphWorkspace`: root local container for the single user's harness graph, active configuration, active policy set, storage root, and current graph version.
+- `GraphConfiguration`: versioned graph and memory configuration, including schema profile, summary templates, render policy, memory policy, provider routing policy, and effective-value sources.
+- `GraphNode`: stable logical object the agent can see, unpack, reference, assign, derive from, quarantine, archive, or delete.
+- `GraphEdge`: typed relationship between graph nodes, including containment, evidence, blockers, worker ownership, cross-references, forwarding, and recovery relationships.
+- `NodeRevision`: immutable content revision for a node, supported by evidence and valid over explicit graph-version bounds.
+- `GraphSnapshot`: immutable read view used for renders, optimizer drafts, worker slices, configuration inspections, conflicts, and recovery preflight.
+- `SummaryContract`: machine-checkable packed-node summary contract with evidence pointers, stale markers, omitted-detail classes, poison risk, and validation state.
+- `ProvenancePointer`: claim-level pointer from derived graph content to evidence locators with derivation type, confidence, and privilege-transform data.
+- `EvidenceArtifact`: raw or normalized source content such as CLI transcripts, tool results, command output, user messages, worker output, optimizer prompts, reviewer output, or external documents.
+- `ToolCallProvenance`: protocol-sensitive tool-call lifecycle, approval state, side-effect class, retry semantics, and reconciliation state.
+- `IdentityEvent`: durable record of identity-preserving topology changes such as move, split, merge, forwarding, restore, or delete.
+- `WorkingSetSnapshot`: exact rendered context imposed on an orchestrator or worker, including evidence pointers, budget fields, provider state, capability fingerprint, configuration explanation, and rendered blob reference.
+- `GraphAction`: bounded foreground graph-adjacent write for turn output, tool provenance, audit notes, user-facing output, or advisory optimizer-request creation.
+- `AgentWalkState`: current orchestrator focus, pinned nodes, unpacked stack, pending focus requests, and graph snapshot used by renders.
+- `OrchestratorTurn`: durable foreground turn record linking session, graph snapshot, working set, input/output evidence, tool events, graph actions, optimizer requests, and cost ledger.
+- `OptimizerRequest`: advisory request asking the optimizer to consider curation, without authorizing direct graph mutation.
+- `OptimizerEdit`: optimizer-authored draft mutation against a base snapshot, with deterministic validation, reviewer state, merge state, and result graph version.
+- `ConflictRecord`: explicit record for optimistic-merge failures across identity, content, summary, configuration, edge, worker-overlap, question-route, tool-protocol, provider-state, or budget conflicts.
+- `BudgetLedger`: cost, latency, token, cache, provider-cost, and budget-policy record for workspace, initiative, turn, worker, optimizer, reviewer, or render scopes.
+- `ProviderState`: redacted observable provider/CLI/account/runtime state, including auth, billing, quota, network, runtime, sandbox, checked locations, freshness, and confidence.
+- `EntitlementSnapshot`: point-in-time feature and model availability for a provider/account/runtime, including feature matrix, entitlement state, required network/runtime, probe method, and evidence.
+- `CapabilityFingerprint`: visible per-CLI/session capability contract with injection, resume, tool-interception, context-strength, provider, entitlement, route-state, denial-reason, asymmetry, and observed-failure fields.
+- `WorkerSlice`: bounded subgraph assignment and write-scope contract for a sub-agent, without launch UI.
+- `WorkerRun`: provider-level execution record tying worker slice state to `agent-runner` invocation, session, acceptance, provider, resume, and cost state.
+- `QuestionArtifact`: durable continuation record for `NEEDS_INPUT` routing, answer payloads, exact worker resume, child acceptance, and failed-resume handoff.
+- `RecoveryAction`: auditable recovery plan or operation with preconditions, affected sessions/nodes/edits/providers, provider failure cause, reroute candidates, side-effect classification, confirmation state, result state, and preserved/replayed/discarded refs.
+- `AuditEvent`: append-only decision and state-change event tying actor, policy, configuration, provider state, inputs, outputs, decision, and reason code together.
+- `PolicySet`: versioned deterministic governance bundle for summary, render, identity, privilege, tool protocol, budget, reviewer, recovery, configuration, and provider rules.
+- `ConfigurationRegistry`: Phase 0 read API and provenance resolver over `GraphConfiguration` rows, with no operator-visible inspector yet.
 
 ### Phase 0C: Shared Engines and Integration Shells
 
-Implement RenderEngine core interfaces, PolicyEngine gate framework, CLI subprocess supervisor around `agents`, provider probe adapters, hook/MCP/plugin abstraction points, optimizer queue shell, identity/conflict shell, and seeded UI panes. This phase should include golden render fixtures per CLI shape and no value-slice-specific claims such as "workers can launch" or "optimizer refreshes summaries."
+Implement RenderEngine core interfaces, PolicyEngine gate framework, BudgetLedger core service, `ConfigurationRegistry` skeleton/read API, CLI subprocess supervisor around `agents`, provider probe adapters, hook/MCP/plugin abstraction points, optimizer queue shell, identity/conflict shell, recovery-action writer, Tauri IPC commands/Channel event streams, and seeded UI panes. This phase should include golden render fixtures per CLI shape and no value-slice-specific claims such as "workers can launch" or "optimizer refreshes summaries."
+
+#### Substrate Integration Contract
+
+Phase 0C owns the unified agent-runner contract the rest of the harness depends on:
+
+- Subprocess spawn semantics for `/home/nes/.local/bin/agents`, including project directory, model selection, prompt-file invocation, stdout/stderr capture, cancellation, timeout, and child-acceptance accounting.
+- `OULIPOLY_INVOCATION` and `OULIPOLY_PARENT_INVOCATION` propagation, including stderr parsing and trace correlation when a subprocess produces nested invocations.
+- Session-id capture per CLI: Claude `--session-id`, Codex `thread_id` / thread-start output, and opencode session-row mapping when available.
+- Trace stitching through `agents trace --json`, with invocation trees treated as evidence/substrate rather than canonical graph truth.
+- Read-only ingestion from agent-runner `session_turns`, including explicit handling of missing transcript locators and opencode gaps.
+- Awareness of `providers.toml`, `sessions.toml`, model configuration files, and agents configuration files, with redaction and no harness ownership of vendor credentials.
+- A single wrapper API for active subprocess management, passive trace/state/config reads, provider diagnostics, resume attempts, and test fakes, so VS-009, VS-015, VS-016, VS-017, VS-020, and VS-021 do not invent separate agent-runner readers.
+
+#### Cross-slice contract: `OptimizerRequest` emission
+
+Phase 0C freezes the `OptimizerRequest` schema and full request taxonomy before any emitter ships. The optimizer cycle in Phase 2 consumes these records, but every source remains advisory-only:
+
+- `orchestrator_turn` is emitted by VS-009 when a bounded foreground turn requests curation.
+- `worker_output` is emitted by VS-018 when reintegration staging identifies graph-candidate work.
+- `user_surface` is emitted by VS-005 / VS-011 when configuration inspection or shape-repair surfaces request optimizer consideration.
+- `backend_signal` is emitted by VS-010 for stale/summary signals that should enter the optimizer queue.
+- `recovery_action` is emitted by VS-020 when recovery accounting suggests optimizer-owned repair or curation.
+
+The contract guarantees stable fields, stable enum values, advisory-only semantics, no direct graph mutation by the emitter, and uniform validation gates across emitters. Later slices may add emission sites only by using this contract, not by adding source-specific queue variants.
 
 ### Phase 1: Observable Imposed Context
 
@@ -553,11 +622,11 @@ Engineering order inside the executive phase:
 1. VS-003 backend evidence/audit spine and VS-004 budget/cache ledger primitives.
 2. VS-001 working-set render inspection, using the real evidence/budget/provider/config fields.
 3. VS-002 summary contract validation and invalid/stale render labels.
-4. VS-005 configuration inspector and empty-graph simulation.
-5. VS-006 provider preflight panel and capability fingerprints.
+4. VS-005 configuration inspector, warning emission, advisory optimizer-request creation, and empty-graph simulation over the Phase 0 registry read API.
+5. VS-006 provider preflight panel and capability fingerprints over the Phase 0 provider contracts.
 6. VS-007 initiative roots and current focus UI.
 
-VS-003, VS-004, VS-005, VS-006, and VS-007 can have parallel backend/UI lanes once the Phase 0 DTOs are frozen, but VS-001 acceptance should wait for evidence and budget fields.
+VS-003, VS-004, VS-005, VS-006, and VS-007 can have parallel backend/UI lanes once the Phase 0 DTOs are frozen, but VS-001 acceptance should wait for VS-003 evidence/audit and VS-004 budget/cache primitives. The `ConfigurationRegistry` skeleton/read API and provider-state contracts are already Phase 0 substrate; VS-005 and VS-006 deliver the operator-visible surfaces, warning emission, and panel behavior.
 
 ### Phase 2: Lead Orchestrator Loop and Initial Curation
 
@@ -601,7 +670,7 @@ Engineering order:
 1. VS-019 reviewer sampling over high-consequence edits.
 2. VS-020 recovery preflight and state accounting.
 
-They share `PolicySet`, `BudgetLedger`, `AuditEvent`, and UI flags; recovery may trigger reviewer sampling. Keep one policy owner.
+They share `PolicySet`, `BudgetLedger`, `AuditEvent`, and UI flags; recovery may trigger reviewer sampling. Keep one policy owner. VS-019 can ship its core sampler first, then subscribe to VS-020 recovery-anomaly events once the recovery surface emits them; this adds the explicit `VS-020 -> VS-019` event edge without changing the Phase 6 sequence.
 
 ### Phase 7: Provider-Aware Recovery Closure
 
@@ -633,7 +702,7 @@ Deliver VS-021 last. It depends on provider fingerprints, worker dispatch, and r
 
 The longest dependency chain is:
 
-Phase 0 GraphStore / RenderEngine / PolicyEngine / Evidence / Budget / Provider / CLI supervisor / tests (XL) -> VS-001 inspect renders (L) -> VS-003 provenance and VS-004 budget gates (L/M, needed before turns are trustworthy) -> VS-009 bounded orchestrator turns (L) -> VS-010 summary/stale optimizer (L) -> VS-013 identity/conflict (L) -> VS-015 worker dispatch (L) -> VS-017 NEEDS_INPUT continuations and VS-018 reintegration staging (L/L) -> VS-020 recovery preflight (L) -> VS-021 provider-aware reroute/substitution (M).
+Phase 0 GraphStore / RenderEngine / PolicyEngine / Evidence / Budget / Provider / CLI supervisor / tests (XL, roughly 12-20 weeks serial equivalent) -> VS-003 provenance and VS-004 budget/cache primitives (L/M, needed before VS-001 acceptance) -> VS-001 inspect renders (L, first operator-visible target) -> VS-009 bounded orchestrator turns (L) -> VS-010 summary/stale optimizer (L) -> VS-013 identity/conflict (L) -> VS-015 worker dispatch (L) -> VS-017 NEEDS_INPUT continuations with failed-resume handoff and VS-018 reintegration staging (L/L) -> VS-020 recovery preflight (L) -> VS-021 provider-aware reroute/substitution (M).
 
 The chain is acyclic: downstream worker, question, reintegration, reviewer, and recovery slices consume graph/provenance/provider/budget/conflict contracts but do not redefine them.
 
@@ -643,7 +712,7 @@ This table uses approximate serial ranges from the T-shirt scale. Parallel effor
 
 | Phase | Initiatives | Serial effort | Parallel effort, best case |
 |---|---:|---:|---:|
-| 0 | 21 foundation items | XL, roughly 12-20 weeks serial equivalent | 6-10 weeks with 4-5 lanes |
+| 0 | 22 foundation items | XL, roughly 12-20 weeks serial equivalent | 6-10 weeks with 4-5 lanes |
 | 1 | 7 value slices | 1 L + 6 M/L mix, roughly 10-16 weeks | 5-8 weeks with backend/UI lanes and schema freeze |
 | 2 | 3 value slices | M + L + L, roughly 5-10 weeks | 4-7 weeks |
 | 3 | 4 value slices | M + L + L + L, roughly 7-14 weeks | 5-9 weeks if VS-013 owns merge semantics |
@@ -709,8 +778,10 @@ VS-015, VS-010, VS-013, VS-003 -> VS-018.
 
 VS-010, VS-018, VS-003, VS-004 -> VS-019.
 
+VS-020 recovery-anomaly events -> VS-019 reviewer sampling triggers.
+
 VS-003, VS-006, VS-013, VS-017, VS-018 -> VS-020.
 
 VS-006, VS-015, VS-020 -> VS-021.
 
-This graph has no cycles. The only executive-order change is moving VS-013 before VS-012 inside Phase 3 and treating selected schemas/engines as Phase 0 foundations rather than hidden work inside the first slice that happens to need them.
+This graph has no cycles at the acceptance-prerequisite level. The `VS-020 -> VS-019` recovery edge is an event-subscription addition inside Phase 6: VS-019's core sampler can ship before VS-020, then activate recovery-anomaly sampling once VS-020 emits the events. The only executive-order change is moving VS-013 before VS-012 inside Phase 3 and treating selected schemas/engines as Phase 0 foundations rather than hidden work inside the first slice that happens to need them.
