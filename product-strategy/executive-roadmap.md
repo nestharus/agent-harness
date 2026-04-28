@@ -10,6 +10,8 @@
 
 The roadmap floats cost observability and provider/configuration legibility earlier than their dependency depth might otherwise suggest. `P12` says cost is correctness, and `D17`/`D18` are load-bearing market surfaces: if render budgets, cache-prefix effects, provider readiness, and configuration semantics are invisible, later optimizer and worker slices cannot be evaluated.
 
+The roadmap also treats three high-fanout slices as structural load-bearing constraints rather than optional sequencing choices: `VS-002` makes summary contracts the only render-time validity gate for packed nodes; `VS-003` makes provenance the universal evidence contract that summaries, recovery, and reviews can cite; and `VS-010` is the first concurrent-mutation surface where optimizer edits touch the graph the orchestrator walks. If any of these slips, downstream Phase 2/3/5/6 slices that depend on contract validity, evidence preservation, or summary-refresh discipline experience cascading delay.
+
 ## Value Slice Inventory
 
 ### VS-001: Inspect imposed working-set renders
@@ -186,6 +188,11 @@ The roadmap floats cost observability and provider/configuration legibility earl
 
 Placeholder: the engineering layer determines what technical foundations are needed before value slices can begin. This phase may include storage, eventing, migrations, local process boundaries, testing substrate, and app shell wiring, but those are not detailed here because they are not independently operator-visible value slices.
 
+Phase 0 also carries two pervasive constraints that apply across the roadmap:
+
+- **Local Control of State:** Graph and provenance state live under the user filesystem or local SQLite owned by the harness; no critical state lives only in vendor session stores. This constraint is pervasive across every slice.
+- **No In-Product Compaction:** The harness replaces `/compact` and equivalents with explicit graph discipline: imposed working set, summary contracts, provenance, and optimizer maintenance. This constraint is not interoperable with vendor-side compaction and is pervasive across every slice that touches CLI sessions.
+
 ### Phase 1: Observable Imposed Context
 
 **Capability gained:** The harness can render graph-backed working context, validate visible summaries, preserve tool evidence, expose budget/cache behavior, and show configuration/provider readiness before the lead agent or user trusts long-running state.
@@ -205,7 +212,7 @@ Placeholder: the engineering layer determines what technical foundations are nee
 #### VS-002: Enforce summary contracts on visible nodes
 
 - **Pain severity:** 4 — context compression and memory loss are visible in coding agents, and memory quality/write policy issues appear in Mem0, Zep/Graphiti, and Letta with moderate evidence (`market-research.md`, Context Graph & Provenance user pain signals).
-- **Competitive position:** parity — GraphRAG, Generative Agents, Cline Memory Bank, and memory products offer partial summary or memory structure, but none provides the proposal's general-purpose contract for packed graph nodes (`market-research.md`, Context Graph & Provenance competitive landscape and differentiation opportunities).
+- **Competitive position:** parity — GraphRAG, Generative Agents, Cline Memory Bank, and memory products offer partial summary or memory structure, but none provides the proposal's general-purpose contract for packed graph nodes (`problem.md` §2; `market-research.md`, Context Graph & Provenance competitive landscape and differentiation opportunities).
 - **Dependency depth:** 0 — contract validation can operate on graph records before optimizer regeneration exists.
 - **Operational risk of delay:** active-harm — stale or speculative summary text causes the agent to make decisions without unpacking evidence (`problem.md` §2).
 - **Composite priority:** 6.00.
