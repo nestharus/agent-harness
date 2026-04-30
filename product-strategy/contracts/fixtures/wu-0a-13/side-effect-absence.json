@@ -1,0 +1,27 @@
+{
+  "routeRenderMustNot": [
+    {
+      "kind": "spawn",
+      "target": "/home/nes/.local/bin/agents"
+    },
+    {
+      "kind": "provider_config_read",
+      "target": "provider configuration files"
+    },
+    {
+      "kind": "ipc",
+      "target": "GraphStore query command"
+    },
+    {
+      "kind": "ipc",
+      "target": "sqlx migration apply command"
+    },
+    {
+      "kind": "ipc",
+      "target": "ping_runtime"
+    }
+  ],
+  "phase0aRegisteredCommandsRemain": [
+    "subscribe_workspace_events"
+  ]
+}

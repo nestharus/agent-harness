@@ -1,0 +1,270 @@
+[
+  {
+    "name": "workspace route default pane",
+    "path": "/workspace/workspace-alpha",
+    "params": {
+      "workspaceId": "workspace-alpha"
+    },
+    "search": {},
+    "expectedState": {
+      "workspaceId": "workspace-alpha",
+      "activePane": "runtimeStatus",
+      "actionNeededCount": 0,
+      "passiveProgressCount": 0,
+      "runtimeConnected": false
+    },
+    "fallbackUsed": true
+  },
+  {
+    "name": "workspace node route default pane",
+    "path": "/workspace/workspace-alpha/node/node-42",
+    "params": {
+      "workspaceId": "workspace-alpha",
+      "nodeId": "node-42"
+    },
+    "search": {},
+    "expectedState": {
+      "workspaceId": "workspace-alpha",
+      "activePane": "runtimeStatus",
+      "selectedNodeId": "node-42",
+      "actionNeededCount": 0,
+      "passiveProgressCount": 0,
+      "runtimeConnected": false
+    },
+    "fallbackUsed": true
+  },
+  {
+    "name": "pane query initiativeMap",
+    "path": "/workspace/workspace-alpha?pane=initiativeMap",
+    "params": {
+      "workspaceId": "workspace-alpha"
+    },
+    "search": {
+      "pane": "initiativeMap"
+    },
+    "expectedState": {
+      "workspaceId": "workspace-alpha",
+      "activePane": "initiativeMap",
+      "actionNeededCount": 0,
+      "passiveProgressCount": 0,
+      "runtimeConnected": false
+    },
+    "fallbackUsed": false
+  },
+  {
+    "name": "pane query currentFocus",
+    "path": "/workspace/workspace-alpha?pane=currentFocus",
+    "params": {
+      "workspaceId": "workspace-alpha"
+    },
+    "search": {
+      "pane": "currentFocus"
+    },
+    "expectedState": {
+      "workspaceId": "workspace-alpha",
+      "activePane": "currentFocus",
+      "actionNeededCount": 0,
+      "passiveProgressCount": 0,
+      "runtimeConnected": false
+    },
+    "fallbackUsed": false
+  },
+  {
+    "name": "pane query workingSetInspector",
+    "path": "/workspace/workspace-alpha?pane=workingSetInspector",
+    "params": {
+      "workspaceId": "workspace-alpha"
+    },
+    "search": {
+      "pane": "workingSetInspector"
+    },
+    "expectedState": {
+      "workspaceId": "workspace-alpha",
+      "activePane": "workingSetInspector",
+      "actionNeededCount": 0,
+      "passiveProgressCount": 0,
+      "runtimeConnected": false
+    },
+    "fallbackUsed": false
+  },
+  {
+    "name": "pane query configurationInspector",
+    "path": "/workspace/workspace-alpha?pane=configurationInspector",
+    "params": {
+      "workspaceId": "workspace-alpha"
+    },
+    "search": {
+      "pane": "configurationInspector"
+    },
+    "expectedState": {
+      "workspaceId": "workspace-alpha",
+      "activePane": "configurationInspector",
+      "actionNeededCount": 0,
+      "passiveProgressCount": 0,
+      "runtimeConnected": false
+    },
+    "fallbackUsed": false
+  },
+  {
+    "name": "pane query providerPanel",
+    "path": "/workspace/workspace-alpha?pane=providerPanel",
+    "params": {
+      "workspaceId": "workspace-alpha"
+    },
+    "search": {
+      "pane": "providerPanel"
+    },
+    "expectedState": {
+      "workspaceId": "workspace-alpha",
+      "activePane": "providerPanel",
+      "actionNeededCount": 0,
+      "passiveProgressCount": 0,
+      "runtimeConnected": false
+    },
+    "fallbackUsed": false
+  },
+  {
+    "name": "pane query questionQueue",
+    "path": "/workspace/workspace-alpha?pane=questionQueue",
+    "params": {
+      "workspaceId": "workspace-alpha"
+    },
+    "search": {
+      "pane": "questionQueue"
+    },
+    "expectedState": {
+      "workspaceId": "workspace-alpha",
+      "activePane": "questionQueue",
+      "actionNeededCount": 0,
+      "passiveProgressCount": 0,
+      "runtimeConnected": false
+    },
+    "fallbackUsed": false
+  },
+  {
+    "name": "pane query workerBoard",
+    "path": "/workspace/workspace-alpha?pane=workerBoard",
+    "params": {
+      "workspaceId": "workspace-alpha"
+    },
+    "search": {
+      "pane": "workerBoard"
+    },
+    "expectedState": {
+      "workspaceId": "workspace-alpha",
+      "activePane": "workerBoard",
+      "actionNeededCount": 0,
+      "passiveProgressCount": 0,
+      "runtimeConnected": false
+    },
+    "fallbackUsed": false
+  },
+  {
+    "name": "pane query optimizerLog",
+    "path": "/workspace/workspace-alpha?pane=optimizerLog",
+    "params": {
+      "workspaceId": "workspace-alpha"
+    },
+    "search": {
+      "pane": "optimizerLog"
+    },
+    "expectedState": {
+      "workspaceId": "workspace-alpha",
+      "activePane": "optimizerLog",
+      "actionNeededCount": 0,
+      "passiveProgressCount": 0,
+      "runtimeConnected": false
+    },
+    "fallbackUsed": false
+  },
+  {
+    "name": "pane query evidenceDrilldown",
+    "path": "/workspace/workspace-alpha?pane=evidenceDrilldown",
+    "params": {
+      "workspaceId": "workspace-alpha"
+    },
+    "search": {
+      "pane": "evidenceDrilldown"
+    },
+    "expectedState": {
+      "workspaceId": "workspace-alpha",
+      "activePane": "evidenceDrilldown",
+      "actionNeededCount": 0,
+      "passiveProgressCount": 0,
+      "runtimeConnected": false
+    },
+    "fallbackUsed": false
+  },
+  {
+    "name": "pane query costSurface",
+    "path": "/workspace/workspace-alpha?pane=costSurface",
+    "params": {
+      "workspaceId": "workspace-alpha"
+    },
+    "search": {
+      "pane": "costSurface"
+    },
+    "expectedState": {
+      "workspaceId": "workspace-alpha",
+      "activePane": "costSurface",
+      "actionNeededCount": 0,
+      "passiveProgressCount": 0,
+      "runtimeConnected": false
+    },
+    "fallbackUsed": false
+  },
+  {
+    "name": "pane query recoverySurface",
+    "path": "/workspace/workspace-alpha?pane=recoverySurface",
+    "params": {
+      "workspaceId": "workspace-alpha"
+    },
+    "search": {
+      "pane": "recoverySurface"
+    },
+    "expectedState": {
+      "workspaceId": "workspace-alpha",
+      "activePane": "recoverySurface",
+      "actionNeededCount": 0,
+      "passiveProgressCount": 0,
+      "runtimeConnected": false
+    },
+    "fallbackUsed": false
+  },
+  {
+    "name": "pane query runtimeStatus",
+    "path": "/workspace/workspace-alpha?pane=runtimeStatus",
+    "params": {
+      "workspaceId": "workspace-alpha"
+    },
+    "search": {
+      "pane": "runtimeStatus"
+    },
+    "expectedState": {
+      "workspaceId": "workspace-alpha",
+      "activePane": "runtimeStatus",
+      "actionNeededCount": 0,
+      "passiveProgressCount": 0,
+      "runtimeConnected": false
+    },
+    "fallbackUsed": false
+  },
+  {
+    "name": "unknown pane query falls back",
+    "path": "/workspace/workspace-alpha?pane=unknown_value",
+    "params": {
+      "workspaceId": "workspace-alpha"
+    },
+    "search": {
+      "pane": "unknown_value"
+    },
+    "expectedState": {
+      "workspaceId": "workspace-alpha",
+      "activePane": "runtimeStatus",
+      "actionNeededCount": 0,
+      "passiveProgressCount": 0,
+      "runtimeConnected": false
+    },
+    "fallbackUsed": true
+  }
+]

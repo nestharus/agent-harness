@@ -70,3 +70,108 @@ body {
   font-size: 1rem;
   line-height: 1.65;
 }
+
+.workspace-shell {
+  display: grid;
+  min-height: 100vh;
+  gap: 24px;
+  padding: 28px;
+}
+
+.workspace-shell__summary,
+.workspace-shell__runtime {
+  border-bottom: 1px solid var(--color-line);
+  padding-bottom: 22px;
+}
+
+.workspace-shell__summary h1 {
+  margin: 0;
+  font-size: 2rem;
+  line-height: 1.1;
+  letter-spacing: 0;
+}
+
+.workspace-shell__state-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 14px;
+  margin: 22px 0 0;
+}
+
+.workspace-shell__state-list div {
+  border: 1px solid var(--color-line);
+  border-radius: 8px;
+  background: var(--color-panel);
+  padding: 14px;
+}
+
+.workspace-shell__state-list dt,
+.workspace-shell__runtime-grid span {
+  color: var(--color-muted);
+  font-size: 0.8125rem;
+}
+
+.workspace-shell__state-list dd {
+  margin: 6px 0 0;
+  overflow-wrap: anywhere;
+  font-weight: 700;
+}
+
+.workspace-shell__runtime h2 {
+  margin: 0 0 14px;
+  font-size: 1.125rem;
+  letter-spacing: 0;
+}
+
+.workspace-shell__runtime-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(120px, 1fr));
+  gap: 12px 18px;
+  max-width: 720px;
+}
+
+.workspace-shell__runtime-grid strong {
+  overflow-wrap: anywhere;
+}
+
+.workspace-shell__panes {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+  gap: 14px;
+}
+
+.workspace-shell__pane {
+  min-height: 112px;
+  border: 1px solid var(--color-line);
+  border-radius: 8px;
+  background: var(--color-panel);
+  padding: 16px;
+}
+
+.workspace-shell__pane[data-active="true"] {
+  border-color: var(--color-accent);
+  box-shadow: inset 0 0 0 1px var(--color-accent);
+}
+
+.workspace-shell__pane h2 {
+  margin: 0;
+  font-size: 1rem;
+  letter-spacing: 0;
+}
+
+.workspace-shell__pane p {
+  margin: 10px 0 0;
+  color: var(--color-muted);
+  font-size: 0.875rem;
+  line-height: 1.45;
+}
+
+@media (max-width: 640px) {
+  .workspace-shell {
+    padding: 18px;
+  }
+
+  .workspace-shell__runtime-grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}

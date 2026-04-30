@@ -1,0 +1,108 @@
+[
+  {
+    "workspaceId": "workspace-alpha",
+    "activePane": "runtimeStatus",
+    "actionNeededCount": 0,
+    "passiveProgressCount": 0,
+    "runtimeConnected": false
+  },
+  {
+    "workspaceId": "workspace-alpha",
+    "activePane": "runtimeStatus",
+    "selectedNodeId": "node-42",
+    "actionNeededCount": 0,
+    "passiveProgressCount": 0,
+    "runtimeConnected": false
+  },
+  {
+    "workspaceId": "workspace-alpha",
+    "activePane": "initiativeMap",
+    "actionNeededCount": 0,
+    "passiveProgressCount": 0,
+    "runtimeConnected": false
+  },
+  {
+    "workspaceId": "workspace-alpha",
+    "activePane": "currentFocus",
+    "actionNeededCount": 0,
+    "passiveProgressCount": 0,
+    "runtimeConnected": false
+  },
+  {
+    "workspaceId": "workspace-alpha",
+    "activePane": "workingSetInspector",
+    "actionNeededCount": 0,
+    "passiveProgressCount": 0,
+    "runtimeConnected": false
+  },
+  {
+    "workspaceId": "workspace-alpha",
+    "activePane": "configurationInspector",
+    "actionNeededCount": 0,
+    "passiveProgressCount": 0,
+    "runtimeConnected": false
+  },
+  {
+    "workspaceId": "workspace-alpha",
+    "activePane": "providerPanel",
+    "actionNeededCount": 0,
+    "passiveProgressCount": 0,
+    "runtimeConnected": false
+  },
+  {
+    "workspaceId": "workspace-alpha",
+    "activePane": "questionQueue",
+    "actionNeededCount": 0,
+    "passiveProgressCount": 0,
+    "runtimeConnected": false
+  },
+  {
+    "workspaceId": "workspace-alpha",
+    "activePane": "workerBoard",
+    "actionNeededCount": 0,
+    "passiveProgressCount": 0,
+    "runtimeConnected": false
+  },
+  {
+    "workspaceId": "workspace-alpha",
+    "activePane": "optimizerLog",
+    "actionNeededCount": 0,
+    "passiveProgressCount": 0,
+    "runtimeConnected": false
+  },
+  {
+    "workspaceId": "workspace-alpha",
+    "activePane": "evidenceDrilldown",
+    "actionNeededCount": 0,
+    "passiveProgressCount": 0,
+    "runtimeConnected": false
+  },
+  {
+    "workspaceId": "workspace-alpha",
+    "activePane": "costSurface",
+    "actionNeededCount": 0,
+    "passiveProgressCount": 0,
+    "runtimeConnected": false
+  },
+  {
+    "workspaceId": "workspace-alpha",
+    "activePane": "recoverySurface",
+    "actionNeededCount": 0,
+    "passiveProgressCount": 0,
+    "runtimeConnected": false
+  },
+  {
+    "workspaceId": "workspace-alpha",
+    "activePane": "runtimeStatus",
+    "actionNeededCount": 0,
+    "passiveProgressCount": 0,
+    "runtimeConnected": false
+  },
+  {
+    "workspaceId": "workspace-alpha",
+    "activePane": "runtimeStatus",
+    "actionNeededCount": 0,
+    "passiveProgressCount": 0,
+    "runtimeConnected": false
+  }
+]

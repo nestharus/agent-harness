@@ -1,9 +1,15 @@
-import { createRootRoute, createRoute, createRouter } from "@tanstack/react-router";
+import { Outlet, createRootRoute, createRoute, createRouter } from "@tanstack/react-router";
 
 import { ShellRoot } from "./ShellRoot";
+import { createWorkspaceRoute } from "./routes/workspace.$workspaceId";
+import { createWorkspaceNodeRoute } from "./routes/workspace.$workspaceId.node.$nodeId";
+
+function RootOutlet() {
+  return <Outlet />;
+}
 
 const rootRoute = createRootRoute({
-  component: ShellRoot,
+  component: RootOutlet,
 });
 
 const indexRoute = createRoute({
@@ -12,7 +18,10 @@ const indexRoute = createRoute({
   component: ShellRoot,
 });
 
-const routeTree = rootRoute.addChildren([indexRoute]);
+const workspaceRoute = createWorkspaceRoute(rootRoute);
+const workspaceNodeRoute = createWorkspaceNodeRoute(rootRoute);
+
+const routeTree = rootRoute.addChildren([indexRoute, workspaceRoute, workspaceNodeRoute]);
 
 export function createAppRouter() {
   return createRouter({ routeTree });
