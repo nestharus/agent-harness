@@ -1,0 +1,6 @@
+{
+  "seed_name": "empty",
+  "trigger": "attempt_real_agents_spawn",
+  "refused_binary": "/home/nes/.local/bin/agents",
+  "expected_error": "RealAgentsInvocationAttempted"
+}

@@ -1,0 +1,5 @@
+{
+  "seed_name": "missing-manifest",
+  "missing_manifest": "manifests/missing-manifest.json",
+  "expected_error": "FixtureManifestMissing"
+}

@@ -1,0 +1,5 @@
+{
+  "seed_name": "empty",
+  "trigger": "empty_workspace_id_after_successful_sqlite_probe",
+  "expected_error": "AppStateInitFailed"
+}

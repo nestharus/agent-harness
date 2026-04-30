@@ -1,0 +1,6 @@
+{
+  "seed_name": "minimal-runtime",
+  "expected_manifest_prefix": "manifest-minimal-runtime",
+  "expected_app_state_ready": true,
+  "expected_sqlite_tables": []
+}

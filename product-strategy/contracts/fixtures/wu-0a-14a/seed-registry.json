@@ -1,0 +1,14 @@
+{
+  "happy_seeds": [
+    "empty",
+    "minimal-runtime"
+  ],
+  "error_seeds": [
+    "missing-manifest"
+  ],
+  "manifests": {
+    "empty": "manifests/empty.json",
+    "minimal-runtime": "manifests/minimal-runtime.json",
+    "missing-manifest": "manifests/missing-manifest.json"
+  }
+}

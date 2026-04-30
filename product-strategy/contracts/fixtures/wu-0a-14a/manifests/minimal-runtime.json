@@ -1,0 +1,5 @@
+{
+  "manifest_id_prefix": "manifest-minimal-runtime",
+  "seed_name": "minimal-runtime",
+  "runtime_event_fixture_count": 1
+}

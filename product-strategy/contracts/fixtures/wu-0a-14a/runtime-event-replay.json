@@ -1,0 +1,20 @@
+{
+  "seed_name": "minimal-runtime",
+  "expected_topic": "runtime",
+  "expected_replayed_event_count": 1,
+  "events": [
+    {
+      "span_event_id": "span-contract-temp-harness-replay",
+      "trace_context": {
+        "correlation_id": "trace-contract-temp-harness-replay",
+        "workspace_id": "workspace-alpha",
+        "invocation_id": "invocation-temp-harness-replay",
+        "actor": "backend"
+      },
+      "span_name": "runtime.fixture.replay",
+      "started_at": "1000000000",
+      "completed_at": "1000000001",
+      "status": "completed"
+    }
+  ]
+}

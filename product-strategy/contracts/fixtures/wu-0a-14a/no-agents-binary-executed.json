@@ -1,0 +1,5 @@
+{
+  "seed_name": "empty",
+  "binary_path": "/home/nes/.local/bin/agents",
+  "assertion": "attempt_real_agents_spawn returns RealAgentsInvocationAttempted before any process execution"
+}

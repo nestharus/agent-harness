@@ -46,6 +46,10 @@ impl EventBusHandle {
         self.sender.subscribe()
     }
 
+    pub fn publish(&self, event: IpcEvent<Value>) -> usize {
+        self.sender.send(event).unwrap_or(0)
+    }
+
     pub fn receiver_count(&self) -> usize {
         self.sender.receiver_count()
     }

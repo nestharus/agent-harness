@@ -4,6 +4,7 @@ pub mod contracts;
 pub mod events;
 pub mod settings;
 pub mod storage;
+pub mod test_harness;
 pub mod tracing;
 
 use std::fs;

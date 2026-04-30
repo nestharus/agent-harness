@@ -1,0 +1,6 @@
+{
+  "seed_name": "empty",
+  "expected_manifest_prefix": "manifest-empty",
+  "expected_app_state_ready": true,
+  "expected_sqlite_tables": []
+}

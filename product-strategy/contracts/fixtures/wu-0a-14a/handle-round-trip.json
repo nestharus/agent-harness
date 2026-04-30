@@ -1,0 +1,6 @@
+{
+  "workspace_id": "workspace-contract-temp-harness",
+  "database_path": "/tmp/agent-harness-wu-0a-14a/contract/storage/harness.sqlite",
+  "fixture_manifest_id": "manifest-empty-contract",
+  "app_state_ready": true
+}
