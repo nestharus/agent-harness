@@ -1,0 +1,16 @@
+{
+  "expected_error": "InvariantViolation",
+  "modes": ["empty", "unknown", "non_monotonic", "malformed"],
+  "fields": [
+    "summary_contract_version",
+    "render_policy_version",
+    "identity_policy_version",
+    "privilege_policy_version",
+    "tool_protocol_policy_version",
+    "budget_policy_version",
+    "review_sampling_policy_version",
+    "recovery_policy_version",
+    "configuration_policy_version",
+    "provider_policy_version"
+  ]
+}

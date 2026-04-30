@@ -13,9 +13,11 @@
     "CREATE TABLE"
   ],
   "allowed_migration_files": [
-    "0001_schema_versions.sql"
+    "0001_schema_versions.sql",
+    "0b"
   ],
   "allowed_runtime_tables": [
+    "policy_sets",
     "schema_versions"
   ],
   "phase_0a_scaffold_commands": [

@@ -278,6 +278,35 @@ async fn duplicate_versions_are_rejected_before_later_migrations_apply() {
 }
 
 #[tokio::test]
+async fn recursive_migration_walk_rejects_duplicate_versions_across_subdirectories() {
+    // Risk: recursive migration discovery weakens WU-0B-01 version uniqueness.
+    // Level: particular-integration. Source: WU-0B-04 migration directory
+    // decision, option 1.
+    let pool = temp_pool().await;
+    let dir = migration_dir("recursive-duplicate");
+    let nested = dir.join("0b");
+    fs::create_dir_all(&nested).expect("nested migration directory should be creatable");
+    let bootstrap = schema_versions_migration();
+
+    write_migration(&dir, &bootstrap.filename, &bootstrap.sql);
+    write_migration(
+        &nested,
+        "0001_duplicate_schema_versions.sql",
+        "CREATE TABLE should_not_apply (id INTEGER PRIMARY KEY);\n",
+    );
+
+    let error = run_migrations(&pool, &dir)
+        .await
+        .expect_err("duplicate versions across the recursive tree should be rejected");
+
+    assert_eq!(error, MigrationError::OutOfOrderVersion);
+    assert!(
+        !schema_versions_exists(&pool).await,
+        "duplicate recursive manifests must not partially apply"
+    );
+}
+
+#[tokio::test]
 async fn lower_missing_version_after_higher_applied_version_is_out_of_order() {
     // Risk: ambiguous version history. Level: particular-integration. Source:
     // WU-0B-01 proposal test intent "Duplicate/out-of-order rejection".
@@ -529,21 +558,24 @@ fn migration_record_report_and_error_fixtures_round_trip_stable_shapes() {
 }
 
 #[tokio::test]
-async fn shipped_wu_0b_01_migration_emits_only_schema_versions() {
+async fn shipped_phase_0b_migrations_emit_schema_versions_and_policy_sets() {
     // Risk: table ownership leakage. Level: particular-integration. Source:
-    // WU-0B-01 proposal test intent "Domain-table absence".
+    // WU-0B-01 migration ownership plus WU-0B-04 first domain table contract.
     let pool = temp_pool().await;
     let migrations_dir = repo_root().join("src-tauri/migrations");
 
     let report = run_migrations(&pool, migrations_dir)
         .await
-        .expect("shipped WU-0B-01 migration should apply");
+        .expect("shipped Phase 0B migrations should apply");
     let tables = sqlite_table_names(&pool).await;
     let durable_tables: Vec<String> = tables
         .into_iter()
         .filter(|table| !table.starts_with("sqlite_"))
         .collect();
 
-    assert_eq!(report.applied_versions, vec![1]);
-    assert_eq!(durable_tables, vec!["schema_versions".to_string()]);
+    assert_eq!(report.applied_versions, vec![1, 4]);
+    assert_eq!(
+        durable_tables,
+        vec!["policy_sets".to_string(), "schema_versions".to_string()]
+    );
 }

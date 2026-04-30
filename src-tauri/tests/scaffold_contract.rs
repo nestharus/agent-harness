@@ -130,8 +130,8 @@ fn cargo_manifest_declares_phase_0a_runtime_dependencies_without_sqlx_migrate_fe
             .collect();
         assert_eq!(
             entries,
-            vec!["0001_schema_versions.sql"],
-            "WU-0B-01 may add only the schema_versions bootstrap migration"
+            vec!["0001_schema_versions.sql", "0b"],
+            "Phase 0B migrations may include the schema_versions bootstrap and bounded WU subdirectories"
         );
     }
 }

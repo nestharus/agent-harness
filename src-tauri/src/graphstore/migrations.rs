@@ -77,15 +77,7 @@ pub async fn rollback_migration(pool: &SqlitePool, version: i64) -> Result<(), M
 
 fn load_migration_files(migrations_dir: &Path) -> Result<Vec<MigrationFile>, MigrationError> {
     let mut files = Vec::new();
-
-    for entry in fs::read_dir(migrations_dir).map_err(|_| MigrationError::SqlxFailure)? {
-        let entry = entry.map_err(|_| MigrationError::SqlxFailure)?;
-        let path = entry.path();
-        if path.extension().and_then(|extension| extension.to_str()) != Some("sql") {
-            continue;
-        }
-        files.push(parse_migration_file(path)?);
-    }
+    collect_migration_files(migrations_dir, &mut files)?;
 
     files.sort_by(|left, right| {
         left.version
@@ -101,6 +93,26 @@ fn load_migration_files(migrations_dir: &Path) -> Result<Vec<MigrationFile>, Mig
     }
 
     Ok(files)
+}
+
+fn collect_migration_files(
+    directory: &Path,
+    files: &mut Vec<MigrationFile>,
+) -> Result<(), MigrationError> {
+    for entry in fs::read_dir(directory).map_err(|_| MigrationError::SqlxFailure)? {
+        let entry = entry.map_err(|_| MigrationError::SqlxFailure)?;
+        let path = entry.path();
+        if path.is_dir() {
+            collect_migration_files(&path, files)?;
+            continue;
+        }
+        if path.extension().and_then(|extension| extension.to_str()) != Some("sql") {
+            continue;
+        }
+        files.push(parse_migration_file(path)?);
+    }
+
+    Ok(())
 }
 
 fn parse_migration_file(path: PathBuf) -> Result<MigrationFile, MigrationError> {
