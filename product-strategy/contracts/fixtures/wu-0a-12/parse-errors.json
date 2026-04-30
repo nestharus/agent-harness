@@ -1,0 +1,82 @@
+[
+  {
+    "name": "empty workspace id",
+    "input": {
+      "workspaceId": "",
+      "activePane": "runtimeStatus",
+      "actionNeededCount": 0,
+      "passiveProgressCount": 0,
+      "runtimeConnected": true
+    },
+    "result": {
+      "ok": false,
+      "error": {
+        "kind": "EmptyWorkspaceId"
+      }
+    }
+  },
+  {
+    "name": "unknown active pane",
+    "input": {
+      "workspaceId": "workspace-alpha",
+      "activePane": "unknown",
+      "actionNeededCount": 0,
+      "passiveProgressCount": 0,
+      "runtimeConnected": true
+    },
+    "result": {
+      "ok": false,
+      "error": {
+        "kind": "UnknownPaneId"
+      }
+    }
+  },
+  {
+    "name": "negative action needed count",
+    "input": {
+      "workspaceId": "workspace-alpha",
+      "activePane": "runtimeStatus",
+      "actionNeededCount": -1,
+      "passiveProgressCount": 0,
+      "runtimeConnected": true
+    },
+    "result": {
+      "ok": false,
+      "error": {
+        "kind": "NegativeActionNeededCount"
+      }
+    }
+  },
+  {
+    "name": "negative passive progress count",
+    "input": {
+      "workspaceId": "workspace-alpha",
+      "activePane": "runtimeStatus",
+      "actionNeededCount": 0,
+      "passiveProgressCount": -1,
+      "runtimeConnected": true
+    },
+    "result": {
+      "ok": false,
+      "error": {
+        "kind": "NegativePassiveProgressCount"
+      }
+    }
+  },
+  {
+    "name": "invalid runtime connected",
+    "input": {
+      "workspaceId": "workspace-alpha",
+      "activePane": "runtimeStatus",
+      "actionNeededCount": 0,
+      "passiveProgressCount": 0,
+      "runtimeConnected": "true"
+    },
+    "result": {
+      "ok": false,
+      "error": {
+        "kind": "InvalidRuntimeConnected"
+      }
+    }
+  }
+]
