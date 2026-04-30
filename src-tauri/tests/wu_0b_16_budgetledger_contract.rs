@@ -121,7 +121,7 @@ async fn empty_budgetledger_fixture() -> (SqlitePool, BudgetLedgerRepo) {
         .expect("empty graphstore fixture should apply migrations");
     assert_eq!(
         fixture.pool.migrations_applied,
-        vec![1, 4, 5, 6, 7, 9, 15, 16]
+        vec![1, 4, 5, 6, 7, 9, 15, 16, 17]
     );
     let storage_root = fixture.pool.workspace_root.clone();
     let pool = fixture.pool.sqlite;
@@ -266,18 +266,13 @@ async fn budget_ledgers_schema_contains_declared_columns_constraints_and_indexes
         .fetch_all(&pool)
         .await
         .expect("foreign keys should be introspectable");
-    for expected_table in ["schema_versions", "graph_workspaces"] {
+    for expected_table in ["schema_versions", "graph_workspaces", "provider_states"] {
         assert!(
             fks.iter()
                 .any(|row| row.get::<String, _>("table") == expected_table),
             "budget_ledgers should reference {expected_table}"
         );
     }
-    assert!(
-        !fks.iter()
-            .any(|row| row.get::<String, _>("table").contains("provider")),
-        "provider_state_id must remain a soft ref in WU-0B-16"
-    );
 
     let indexes = sqlx::query("PRAGMA index_list(budget_ledgers)")
         .fetch_all(&pool)
@@ -387,6 +382,7 @@ async fn budgetledger_wu_has_no_operator_visible_behavior_or_extra_tables() {
             "graph_nodes",
             "graph_workspaces",
             "policy_sets",
+            "provider_states",
             "schema_versions"
         ]
     );

@@ -1,0 +1,8 @@
+{
+  "variants": [
+    "available",
+    "rate_limited",
+    "exhausted",
+    "unknown"
+  ]
+}

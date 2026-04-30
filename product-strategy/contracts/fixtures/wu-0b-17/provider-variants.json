@@ -1,0 +1,10 @@
+{
+  "variants": [
+    "anthropic",
+    "openai",
+    "google",
+    "local_runtime",
+    "openai_compatible",
+    "other"
+  ]
+}

@@ -93,7 +93,7 @@ async fn empty_seed_plan_creates_isolated_schema_versions_fixture() {
 
     assert_eq!(
         fixture.pool.migrations_applied,
-        vec![1, 4, 5, 6, 7, 9, 15, 16]
+        vec![1, 4, 5, 6, 7, 9, 15, 16, 17]
     );
     assert!(fixture.pool.sqlite_url.starts_with("sqlite://"));
     assert!(fixture.pool.workspace_root.ends_with("storage"));
@@ -110,6 +110,7 @@ async fn empty_seed_plan_creates_isolated_schema_versions_fixture() {
             "graph_nodes",
             "graph_workspaces",
             "policy_sets",
+            "provider_states",
             "schema_versions"
         ]
     );
@@ -166,7 +167,7 @@ async fn reset_preserves_schema_versions_history_exactly() {
         .await
         .expect("migrations should rerun idempotently after reset");
     assert_eq!(rerun.applied_versions, Vec::<i64>::new());
-    assert_eq!(rerun.skipped_versions, vec![1, 4, 5, 6, 7, 9, 15, 16]);
+    assert_eq!(rerun.skipped_versions, vec![1, 4, 5, 6, 7, 9, 15, 16, 17]);
     assert_eq!(migration_records(&fixture.pool.sqlite).await, before);
 }
 
@@ -243,6 +244,6 @@ async fn fixtures_created_in_same_test_have_independent_temp_paths() {
 
     assert_ne!(first.pool.sqlite_url, second.pool.sqlite_url);
     assert_ne!(first.pool.workspace_root, second.pool.workspace_root);
-    assert_eq!(migration_records(&first.pool.sqlite).await.len(), 8);
-    assert_eq!(migration_records(&second.pool.sqlite).await.len(), 8);
+    assert_eq!(migration_records(&first.pool.sqlite).await.len(), 9);
+    assert_eq!(migration_records(&second.pool.sqlite).await.len(), 9);
 }

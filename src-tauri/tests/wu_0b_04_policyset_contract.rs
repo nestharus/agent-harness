@@ -63,7 +63,7 @@ async fn empty_policyset_fixture() -> (SqlitePool, PolicySetRepo) {
         .expect("empty graphstore fixture should apply migrations");
     assert_eq!(
         fixture.pool.migrations_applied,
-        vec![1, 4, 5, 6, 7, 9, 15, 16]
+        vec![1, 4, 5, 6, 7, 9, 15, 16, 17]
     );
     let pool = fixture.pool.sqlite;
     let repo = PolicySetRepo::new(pool.clone());

@@ -1,0 +1,8 @@
+{
+  "reason": "auth_refresh",
+  "malformed_reasons": ["", " ", "Auth Refresh", "../escape", "has/slash"],
+  "unknown_provider_state_id": {
+    "value": "provider-state-missing",
+    "namespace": "provider-state"
+  }
+}

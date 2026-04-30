@@ -24,6 +24,7 @@
     "graph_nodes",
     "graph_workspaces",
     "policy_sets",
+    "provider_states",
     "schema_versions"
   ],
   "phase_0a_scaffold_commands": [

@@ -1,0 +1,9 @@
+{
+  "variants": [
+    "healthy",
+    "near_limit",
+    "over_limit",
+    "payment_required",
+    "unknown"
+  ]
+}

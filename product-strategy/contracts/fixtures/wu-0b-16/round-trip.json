@@ -19,10 +19,7 @@
     "cache_write_tokens": 128,
     "latency_ms": 1530,
     "provider_cost_estimate": 97,
-    "provider_state_id": {
-      "value": "provider-state-soft-ref-round-trip",
-      "namespace": "provider-state"
-    },
+    "provider_state_id": null,
     "cache_prefix_hash": "cache-prefix-round-trip",
     "budget_state": "exceeded",
     "policy_action": "require_user_approval",

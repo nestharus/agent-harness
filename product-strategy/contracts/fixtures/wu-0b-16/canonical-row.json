@@ -19,10 +19,7 @@
     "cache_write_tokens": 64,
     "latency_ms": 875,
     "provider_cost_estimate": 42,
-    "provider_state_id": {
-      "value": "provider-state-soft-ref-v1",
-      "namespace": "provider-state"
-    },
+    "provider_state_id": null,
     "cache_prefix_hash": "cache-prefix-canonical",
     "budget_state": "within",
     "policy_action": "warn",

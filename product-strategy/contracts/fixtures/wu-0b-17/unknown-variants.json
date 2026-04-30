@@ -1,0 +1,11 @@
+{
+  "provider": "mistral",
+  "cli": "terminal",
+  "auth_state": "revoked",
+  "billing_state": "past_due",
+  "quota_state": "warming",
+  "network_state": "offline",
+  "runtime_state": "booting",
+  "freshness": "aged",
+  "confidence": "certain"
+}

@@ -18,10 +18,7 @@
       "value": "graph-configuration-round-trip-v1",
       "namespace": "configuration"
     },
-    "provider_state_id": {
-      "value": "provider-state-soft-ref-round-trip",
-      "namespace": "provider-state"
-    },
+    "provider_state_id": null,
     "input_refs": [
       "configuration-input-v1"
     ],

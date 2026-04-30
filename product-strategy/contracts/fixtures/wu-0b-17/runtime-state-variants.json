@@ -1,0 +1,10 @@
+{
+  "variants": [
+    "installed",
+    "missing",
+    "wrong_version",
+    "unreachable",
+    "not_applicable",
+    "unknown"
+  ]
+}

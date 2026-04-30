@@ -1,0 +1,9 @@
+{
+  "variants": [
+    "available",
+    "blocked_by_sandbox",
+    "blocked_by_host",
+    "degraded",
+    "unknown"
+  ]
+}

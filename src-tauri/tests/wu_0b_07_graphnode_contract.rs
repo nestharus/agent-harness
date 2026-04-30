@@ -119,7 +119,7 @@ async fn empty_graphnode_fixture() -> (SqlitePool, GraphNodeRepo) {
         .expect("empty graphstore fixture should apply migrations");
     assert_eq!(
         fixture.pool.migrations_applied,
-        vec![1, 4, 5, 6, 7, 9, 15, 16]
+        vec![1, 4, 5, 6, 7, 9, 15, 16, 17]
     );
     let pool = fixture.pool.sqlite;
 
@@ -393,6 +393,7 @@ async fn graphnode_wu_has_no_operator_visible_behavior_or_extra_tables() {
             "graph_nodes",
             "graph_workspaces",
             "policy_sets",
+            "provider_states",
             "schema_versions"
         ]
     );

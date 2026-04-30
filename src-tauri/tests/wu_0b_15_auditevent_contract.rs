@@ -93,7 +93,7 @@ async fn empty_auditevent_fixture() -> (SqlitePool, AuditEventRepo) {
         .expect("empty graphstore fixture should apply migrations");
     assert_eq!(
         fixture.pool.migrations_applied,
-        vec![1, 4, 5, 6, 7, 9, 15, 16]
+        vec![1, 4, 5, 6, 7, 9, 15, 16, 17]
     );
     let storage_root = fixture.pool.workspace_root.clone();
     let pool = fixture.pool.sqlite;
@@ -240,6 +240,7 @@ async fn audit_events_schema_contains_declared_columns_constraints_and_indexes()
         "graph_workspaces",
         "policy_sets",
         "graph_configurations",
+        "provider_states",
     ] {
         assert!(
             fks.iter()
@@ -342,6 +343,7 @@ async fn auditevent_wu_has_no_operator_visible_behavior_or_extra_tables() {
             "graph_nodes",
             "graph_workspaces",
             "policy_sets",
+            "provider_states",
             "schema_versions"
         ]
     );
