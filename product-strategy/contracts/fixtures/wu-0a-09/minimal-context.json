@@ -1,0 +1,5 @@
+{
+  "correlation_id": "trace-contract-minimal",
+  "workspace_id": "workspace-alpha",
+  "actor": "user"
+}

@@ -1,0 +1,18 @@
+{
+  "input": {
+    "workspace_id": "workspace-alpha",
+    "actor": "worker",
+    "invocation_id": "invocation-child",
+    "parent_invocation_id": "invocation-parent",
+    "graph_ref": "graph:node:42",
+    "audit_event_ref": "audit:event:99"
+  },
+  "expected": {
+    "workspace_id": "workspace-alpha",
+    "actor": "worker",
+    "invocation_id": "invocation-child",
+    "parent_invocation_id": "invocation-parent",
+    "graph_ref": "graph:node:42",
+    "audit_event_ref": "audit:event:99"
+  }
+}

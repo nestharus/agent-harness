@@ -1,0 +1,35 @@
+[
+  {
+    "name": "missing correlation_id",
+    "value": {
+      "workspace_id": "workspace-alpha",
+      "actor": "user"
+    }
+  },
+  {
+    "name": "unknown actor",
+    "value": {
+      "correlation_id": "trace-contract-correlation",
+      "workspace_id": "workspace-alpha",
+      "actor": "unknown"
+    }
+  },
+  {
+    "name": "extra field",
+    "value": {
+      "correlation_id": "trace-contract-correlation",
+      "workspace_id": "workspace-alpha",
+      "actor": "user",
+      "extra": true
+    }
+  },
+  {
+    "name": "non-string graph_ref",
+    "value": {
+      "correlation_id": "trace-contract-correlation",
+      "workspace_id": "workspace-alpha",
+      "actor": "user",
+      "graph_ref": 42
+    }
+  }
+]

@@ -1,0 +1,10 @@
+{
+  "input": {
+    "workspace_id": "workspace-alpha",
+    "actor": "user"
+  },
+  "expected": {
+    "workspace_id": "workspace-alpha",
+    "actor": "user"
+  }
+}

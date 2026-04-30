@@ -1,0 +1,27 @@
+[
+  {
+    "name": "empty workspace id",
+    "input": {
+      "workspace_id": "",
+      "actor": "user"
+    },
+    "expected_error": "EmptyWorkspaceId"
+  },
+  {
+    "name": "unknown actor",
+    "input": {
+      "workspace_id": "workspace-alpha",
+      "actor": "unknown"
+    },
+    "expected_error": "UnknownActor"
+  },
+  {
+    "name": "parent without invocation",
+    "input": {
+      "workspace_id": "workspace-alpha",
+      "actor": "worker",
+      "parent_invocation_id": "invocation-parent"
+    },
+    "expected_error": "ParentWithoutInvocation"
+  }
+]

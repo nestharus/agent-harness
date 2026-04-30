@@ -1,0 +1,9 @@
+{
+  "correlation_id": "trace-contract-correlation",
+  "workspace_id": "workspace-alpha",
+  "invocation_id": "invocation-child",
+  "parent_invocation_id": "invocation-parent",
+  "actor": "worker",
+  "graph_ref": "graph:node:42",
+  "audit_event_ref": "audit:event:99"
+}
