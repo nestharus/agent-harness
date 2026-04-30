@@ -1,0 +1,9 @@
+{
+  "event_id": "event-contract-minimal",
+  "workspace_id": "workspace-alpha",
+  "topic": "runtime",
+  "payload": {
+    "kind": "runtime_ping"
+  },
+  "created_at": "2026-04-29T00:00:01.000Z"
+}

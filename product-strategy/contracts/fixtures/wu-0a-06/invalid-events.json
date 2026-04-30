@@ -1,0 +1,62 @@
+[
+  {
+    "name": "missing event_id",
+    "value": {
+      "workspace_id": "workspace-alpha",
+      "topic": "runtime",
+      "payload": {
+        "kind": "runtime_ping"
+      },
+      "created_at": "2026-04-29T00:00:00.000Z"
+    }
+  },
+  {
+    "name": "empty event_id",
+    "value": {
+      "event_id": "",
+      "workspace_id": "workspace-alpha",
+      "topic": "runtime",
+      "payload": {
+        "kind": "runtime_ping"
+      },
+      "created_at": "2026-04-29T00:00:00.000Z"
+    }
+  },
+  {
+    "name": "unknown topic",
+    "value": {
+      "event_id": "event-contract-unknown-topic",
+      "workspace_id": "workspace-alpha",
+      "topic": "unknown",
+      "payload": {
+        "kind": "runtime_ping"
+      },
+      "created_at": "2026-04-29T00:00:00.000Z"
+    }
+  },
+  {
+    "name": "extra field",
+    "value": {
+      "event_id": "event-contract-extra",
+      "workspace_id": "workspace-alpha",
+      "topic": "runtime",
+      "payload": {
+        "kind": "runtime_ping"
+      },
+      "created_at": "2026-04-29T00:00:00.000Z",
+      "extra": true
+    }
+  },
+  {
+    "name": "payload rejected by parser",
+    "value": {
+      "event_id": "event-contract-bad-payload",
+      "workspace_id": "workspace-alpha",
+      "topic": "runtime",
+      "payload": {
+        "kind": 42
+      },
+      "created_at": "2026-04-29T00:00:00.000Z"
+    }
+  }
+]

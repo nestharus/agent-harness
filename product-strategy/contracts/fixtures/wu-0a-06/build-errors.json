@@ -1,0 +1,33 @@
+[
+  {
+    "name": "empty workspace id",
+    "input": {
+      "workspace_id": "",
+      "topic": "runtime",
+      "payload": {
+        "kind": "runtime_ping"
+      }
+    },
+    "expected_error": "EmptyWorkspaceId"
+  },
+  {
+    "name": "unknown raw topic",
+    "input": {
+      "workspace_id": "workspace-alpha",
+      "raw_topic": "unknown",
+      "payload": {
+        "kind": "runtime_ping"
+      }
+    },
+    "expected_error": "UnknownTopic"
+  },
+  {
+    "name": "payload serialization failed",
+    "input": {
+      "workspace_id": "workspace-alpha",
+      "topic": "runtime",
+      "payload_fixture": "non_serializable"
+    },
+    "expected_error": "PayloadSerializationFailed"
+  }
+]

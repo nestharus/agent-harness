@@ -1,0 +1,22 @@
+{
+  "input": {
+    "workspace_id": "workspace-alpha",
+    "topic": "runtime",
+    "payload": {
+      "kind": "runtime_ping",
+      "sequence": 8,
+      "ok": true
+    },
+    "trace_context_id": "trace-contract-002"
+  },
+  "expected": {
+    "workspace_id": "workspace-alpha",
+    "topic": "runtime",
+    "payload": {
+      "kind": "runtime_ping",
+      "sequence": 8,
+      "ok": true
+    },
+    "trace_context_id": "trace-contract-002"
+  }
+}
