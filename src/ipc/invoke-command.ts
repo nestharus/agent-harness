@@ -17,10 +17,41 @@ export type InvokeCommand = <TCommand extends HarnessCommand>(
   args: HarnessCommandArgsByCommand[TCommand],
 ) => Promise<HarnessCommandResponseByCommand[TCommand]>;
 
+export type InvokeCommandFixtureResponses = Partial<{
+  [TCommand in HarnessCommand]: HarnessCommandResponseByCommand[TCommand];
+}>;
+
+let activeFixtureResponses: ReadonlyMap<HarnessCommand, unknown> | undefined;
+
+export function seedInvokeCommandFixtures(responses: InvokeCommandFixtureResponses): void {
+  activeFixtureResponses = new Map(
+    Object.entries(responses) as Array<[HarnessCommand, unknown]>,
+  );
+}
+
+export function clearInvokeCommandFixtures(): void {
+  activeFixtureResponses = undefined;
+}
+
 const defaultInvokeShim: TauriInvokeShim = <TResponse>(
   command: string,
   args: unknown,
-): Promise<TResponse> => tauriInvoke<TResponse>(command, args as Record<string, unknown>);
+): Promise<TResponse> => {
+  if (activeFixtureResponses) {
+    const parsedCommand = parseHarnessCommand(command);
+
+    if (activeFixtureResponses.has(parsedCommand)) {
+      return Promise.resolve(activeFixtureResponses.get(parsedCommand) as TResponse);
+    }
+
+    throw new CommandErrorFailure(CommandError.InvokeRejected, {
+      command: parsedCommand,
+      cause: new Error(`No invoke fixture seeded for ${parsedCommand}`),
+    });
+  }
+
+  return tauriInvoke<TResponse>(command, args as Record<string, unknown>);
+};
 
 export function createInvokeCommand(invokeShim: TauriInvokeShim = defaultInvokeShim): InvokeCommand {
   return async <TCommand extends HarnessCommand>(

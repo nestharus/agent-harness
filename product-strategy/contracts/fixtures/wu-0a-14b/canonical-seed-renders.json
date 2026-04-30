@@ -1,0 +1,22 @@
+[
+  {
+    "seed_name": "empty",
+    "source_seed_fixture": "../wu-0a-14a/happy-empty.json",
+    "handle": {
+      "workspace_id": "workspace-empty-temp-harness",
+      "database_path": "/tmp/agent-harness-wu-0a-14b/empty/storage/harness.sqlite",
+      "fixture_manifest_id": "manifest-empty-render",
+      "app_state_ready": true
+    }
+  },
+  {
+    "seed_name": "minimal-runtime",
+    "source_seed_fixture": "../wu-0a-14a/happy-minimal-runtime.json",
+    "handle": {
+      "workspace_id": "workspace-minimal-runtime-temp-harness",
+      "database_path": "/tmp/agent-harness-wu-0a-14b/minimal-runtime/storage/harness.sqlite",
+      "fixture_manifest_id": "manifest-minimal-runtime-render",
+      "app_state_ready": true
+    }
+  }
+]

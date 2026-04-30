@@ -1,0 +1,15 @@
+{
+  "required_keys": [
+    "container",
+    "baseElement",
+    "debug",
+    "rerender",
+    "unmount",
+    "asFragment"
+  ],
+  "query_examples": [
+    "getByTestId",
+    "queryByText",
+    "findByRole"
+  ]
+}

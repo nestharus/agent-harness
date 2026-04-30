@@ -1,0 +1,5 @@
+{
+  "query_client_probe_test_id": "query-provider-probe",
+  "router_probe_test_id": "router-provider-probe",
+  "combined_ready_text": "providers-ready"
+}

@@ -1,0 +1,13 @@
+{
+  "forbidden_agents_binary": "/home/nes/.local/bin/agents",
+  "forbidden_tauri_commands": [
+    "spawn_agents",
+    "apply_graphstore_migrations",
+    "sqlx_migrate"
+  ],
+  "phase0a_registered_commands_remain": [
+    "subscribe_workspace_events"
+  ],
+  "renderer_invokes_tauri": false,
+  "renderer_applies_migrations": false
+}

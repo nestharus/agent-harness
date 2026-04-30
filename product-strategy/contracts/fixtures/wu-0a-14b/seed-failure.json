@@ -1,0 +1,12 @@
+[
+  {
+    "seed_name": "unknown",
+    "source_seed_fixture": "../wu-0a-14a/error-unknown-seed.json",
+    "expected_error": "UnknownSeed"
+  },
+  {
+    "seed_name": "missing-manifest",
+    "source_seed_fixture": "../wu-0a-14a/error-fixture-manifest-missing.json",
+    "expected_error": "FixtureManifestMissing"
+  }
+]

@@ -1,0 +1,43 @@
+[
+  {
+    "seed_name": "empty",
+    "responses": {
+      "get_harness_settings": {
+        "workspace_id": "workspace-empty-temp-harness",
+        "storage_root": "/tmp/agent-harness-wu-0a-14b/empty/storage",
+        "database_path": "/tmp/agent-harness-wu-0a-14b/empty/storage/harness.sqlite",
+        "agent_runner_bin": "product-strategy/contracts/fixtures/wu-0a-02/bin/fake-agents",
+        "log_level": "info"
+      },
+      "ping_runtime": {
+        "ok": true,
+        "command": "ping_runtime",
+        "runtime": "agent-harness",
+        "phase": "0A"
+      }
+    }
+  },
+  {
+    "seed_name": "minimal-runtime",
+    "responses": {
+      "get_harness_settings": {
+        "workspace_id": "workspace-minimal-runtime-temp-harness",
+        "storage_root": "/tmp/agent-harness-wu-0a-14b/minimal-runtime/storage",
+        "database_path": "/tmp/agent-harness-wu-0a-14b/minimal-runtime/storage/harness.sqlite",
+        "agent_runner_bin": "product-strategy/contracts/fixtures/wu-0a-02/bin/fake-agents",
+        "log_level": "info"
+      },
+      "ping_runtime": {
+        "ok": true,
+        "command": "ping_runtime",
+        "runtime": "agent-harness",
+        "phase": "0A"
+      },
+      "subscribe_workspace_events": {
+        "subscribed": true,
+        "topic": "runtime",
+        "channelId": "channel-minimal-runtime"
+      }
+    }
+  }
+]
