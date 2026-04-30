@@ -1,0 +1,20 @@
+{
+  "event_id": "event-contract-backend-span-001",
+  "workspace_id": "workspace-alpha",
+  "topic": "runtime",
+  "payload": {
+    "span_event_id": "span-contract-runtime-envelope",
+    "trace_context": {
+      "correlation_id": "trace-contract-runtime-envelope",
+      "workspace_id": "workspace-alpha",
+      "invocation_id": "invocation-runtime-envelope",
+      "actor": "backend"
+    },
+    "span_name": "runtime.bootstrap",
+    "started_at": "1000000000",
+    "completed_at": "1000000001",
+    "status": "completed"
+  },
+  "created_at": "1000000002",
+  "trace_context_id": "trace-contract-runtime-envelope"
+}

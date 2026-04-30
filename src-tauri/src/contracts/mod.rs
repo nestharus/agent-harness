@@ -1,3 +1,4 @@
+pub mod backend_span_event;
 pub mod event_topic;
 pub mod harness_app_state;
 pub mod harness_command;

@@ -1,0 +1,58 @@
+[
+  {
+    "name": "missing span_event_id",
+    "value": {
+      "trace_context": {
+        "correlation_id": "trace-contract-invalid-shape",
+        "workspace_id": "workspace-alpha",
+        "actor": "backend"
+      },
+      "span_name": "runtime.bootstrap",
+      "started_at": "1000000000",
+      "status": "started"
+    }
+  },
+  {
+    "name": "unknown status",
+    "value": {
+      "span_event_id": "span-contract-invalid-status",
+      "trace_context": {
+        "correlation_id": "trace-contract-invalid-status",
+        "workspace_id": "workspace-alpha",
+        "actor": "backend"
+      },
+      "span_name": "runtime.bootstrap",
+      "started_at": "1000000000",
+      "status": "unknown"
+    }
+  },
+  {
+    "name": "unknown field",
+    "value": {
+      "span_event_id": "span-contract-extra",
+      "trace_context": {
+        "correlation_id": "trace-contract-extra",
+        "workspace_id": "workspace-alpha",
+        "actor": "backend"
+      },
+      "span_name": "runtime.bootstrap",
+      "started_at": "1000000000",
+      "status": "started",
+      "extra": true
+    }
+  },
+  {
+    "name": "invalid nested trace context",
+    "value": {
+      "span_event_id": "span-contract-invalid-trace",
+      "trace_context": {
+        "correlation_id": "trace-contract-invalid-trace",
+        "workspace_id": "workspace-alpha",
+        "actor": "unknown"
+      },
+      "span_name": "runtime.bootstrap",
+      "started_at": "1000000000",
+      "status": "started"
+    }
+  }
+]

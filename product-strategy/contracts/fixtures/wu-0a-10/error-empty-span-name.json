@@ -1,0 +1,14 @@
+{
+  "name": "empty span name",
+  "input": {
+    "trace_context": {
+      "correlation_id": "trace-contract-empty-span",
+      "workspace_id": "workspace-alpha",
+      "actor": "backend"
+    },
+    "span_name": "",
+    "started_at": "1000000000",
+    "status": "started"
+  },
+  "expected_error": "EmptySpanName"
+}

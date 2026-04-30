@@ -1,0 +1,27 @@
+{
+  "input": {
+    "trace_context": {
+      "correlation_id": "trace-contract-completed",
+      "workspace_id": "workspace-alpha",
+      "invocation_id": "invocation-completed",
+      "actor": "backend"
+    },
+    "span_name": "runtime.bootstrap",
+    "started_at": "1000000000",
+    "completed_at": "1000000001",
+    "status": "completed"
+  },
+  "expected": {
+    "span_event_id": "span-contract-completed",
+    "trace_context": {
+      "correlation_id": "trace-contract-completed",
+      "workspace_id": "workspace-alpha",
+      "invocation_id": "invocation-completed",
+      "actor": "backend"
+    },
+    "span_name": "runtime.bootstrap",
+    "started_at": "1000000000",
+    "completed_at": "1000000001",
+    "status": "completed"
+  }
+}

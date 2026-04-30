@@ -1,0 +1,15 @@
+{
+  "name": "trace context invalid",
+  "input": {
+    "trace_context": {
+      "correlation_id": "trace-contract-invalid",
+      "workspace_id": "",
+      "actor": "backend"
+    },
+    "span_name": "runtime.bootstrap",
+    "started_at": "1000000000",
+    "status": "started"
+  },
+  "expected_error": "TraceContextInvalid",
+  "delegated_trace_context_error": "EmptyWorkspaceId"
+}

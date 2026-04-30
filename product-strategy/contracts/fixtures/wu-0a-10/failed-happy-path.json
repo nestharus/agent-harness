@@ -1,0 +1,27 @@
+{
+  "input": {
+    "trace_context": {
+      "correlation_id": "trace-contract-failed",
+      "workspace_id": "workspace-alpha",
+      "invocation_id": "invocation-failed",
+      "actor": "backend"
+    },
+    "span_name": "runtime.bootstrap",
+    "started_at": "1000000000",
+    "status": "failed",
+    "error_ref": "error:runtime-bootstrap"
+  },
+  "expected": {
+    "span_event_id": "span-contract-failed",
+    "trace_context": {
+      "correlation_id": "trace-contract-failed",
+      "workspace_id": "workspace-alpha",
+      "invocation_id": "invocation-failed",
+      "actor": "backend"
+    },
+    "span_name": "runtime.bootstrap",
+    "started_at": "1000000000",
+    "status": "failed",
+    "error_ref": "error:runtime-bootstrap"
+  }
+}
