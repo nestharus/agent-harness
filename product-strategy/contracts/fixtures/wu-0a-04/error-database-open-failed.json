@@ -1,0 +1,20 @@
+{
+  "settings": {
+    "workspace_id": "workspace-wu-0a-04",
+    "storage_root": "__TEMP_ROOT__/storage",
+    "database_path": "__TEMP_ROOT__/storage/unopenable.sqlite",
+    "agent_runner_bin": "__TEMP_ROOT__/bin/fake-agents",
+    "log_level": "info",
+    "profile_name": "contract"
+  },
+  "storage_layout": {
+    "storage_root": "__TEMP_ROOT__/storage",
+    "database_path": "__TEMP_ROOT__/storage/unopenable.sqlite",
+    "evidence_root": "__TEMP_ROOT__/storage/evidence",
+    "fixture_root": "__TEMP_ROOT__/storage/fixtures",
+    "log_root": "__TEMP_ROOT__/storage/logs",
+    "temp_root": "__TEMP_ROOT__/storage/tmp"
+  },
+  "expected_error": "DatabaseOpenFailed",
+  "database_path_is_directory": true
+}

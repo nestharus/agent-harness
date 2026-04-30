@@ -1,0 +1,7 @@
+[
+  "SettingsInvalid",
+  "StorageLayoutInvalid",
+  "DatabaseOpenFailed",
+  "EventBusInitFailed",
+  "TraceInitFailed"
+]
