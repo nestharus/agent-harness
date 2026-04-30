@@ -1,0 +1,18 @@
+{
+  "valid": [
+    { "from": "active", "to": "packed" },
+    { "from": "packed", "to": "unpacked" },
+    { "from": "active", "to": "blocked" },
+    { "from": "blocked", "to": "active" },
+    { "from": "active", "to": "stale" },
+    { "from": "stale", "to": "active" },
+    { "from": "recovering", "to": "archived" },
+    { "from": "unpacked", "to": "quarantined" },
+    { "from": "quarantined", "to": "recovering" }
+  ],
+  "invalid": [
+    { "from": "packed", "to": "active" },
+    { "from": "recovering", "to": "active" }
+  ],
+  "deleted_terminal_target": "active"
+}

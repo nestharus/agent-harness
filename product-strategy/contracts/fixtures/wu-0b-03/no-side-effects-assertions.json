@@ -18,6 +18,7 @@
   ],
   "allowed_runtime_tables": [
     "graph_configurations",
+    "graph_nodes",
     "graph_workspaces",
     "policy_sets",
     "schema_versions"

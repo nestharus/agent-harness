@@ -1,0 +1,6 @@
+{
+  "kind": "operator_panel",
+  "lifecycle_state": "paused",
+  "privilege_origin": "administrator",
+  "trust_state": "trusted_by_default"
+}

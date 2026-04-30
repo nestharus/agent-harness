@@ -1,0 +1,9 @@
+{
+  "variants": [
+    "trusted",
+    "derived",
+    "unverified",
+    "suspect",
+    "poison_quarantined"
+  ]
+}

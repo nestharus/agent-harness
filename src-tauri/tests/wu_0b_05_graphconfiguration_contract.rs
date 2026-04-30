@@ -76,7 +76,7 @@ async fn empty_graphconfiguration_fixture() -> (SqlitePool, GraphConfigurationRe
     let fixture = create_graphstore_fixture(GraphStoreSeedPlan::default())
         .await
         .expect("empty graphstore fixture should apply migrations");
-    assert_eq!(fixture.pool.migrations_applied, vec![1, 4, 5, 6]);
+    assert_eq!(fixture.pool.migrations_applied, vec![1, 4, 5, 6, 7]);
     let pool = fixture.pool.sqlite;
     let policy_repo = PolicySetRepo::new(pool.clone());
     let policy_fixture: PolicySetFixture = read_fixture(POLICYSET_FIXTURE_DIR, "round-trip.json");
@@ -331,6 +331,7 @@ async fn no_operator_visible_behavior_or_extra_tables_are_enabled() {
         sqlite_table_names(&pool).await,
         [
             "graph_configurations",
+            "graph_nodes",
             "graph_workspaces",
             "policy_sets",
             "schema_versions"

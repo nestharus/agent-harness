@@ -1,0 +1,15 @@
+{
+  "variants": [
+    "initiative",
+    "work_unit",
+    "summary",
+    "evidence",
+    "question",
+    "decision",
+    "blocker",
+    "worker_output",
+    "recovery",
+    "policy_note",
+    "archive"
+  ]
+}

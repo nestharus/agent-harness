@@ -1,0 +1,13 @@
+{
+  "variants": [
+    "active",
+    "packed",
+    "unpacked",
+    "blocked",
+    "stale",
+    "recovering",
+    "archived",
+    "quarantined",
+    "deleted"
+  ]
+}
