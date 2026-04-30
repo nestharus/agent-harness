@@ -1,7 +1,7 @@
 {
   "pool": {
     "sqlite_url": "sqlite:///tmp/agent-harness-wu-0a-14a-empty-*/storage/harness.sqlite",
-    "migrations_applied": [1, 4, 5, 6, 7, 9],
+    "migrations_applied": [1, 4, 5, 6, 7, 9, 15],
     "workspace_root": "/tmp/agent-harness-wu-0a-14a-empty-*/storage"
   },
   "workspace_id": null,

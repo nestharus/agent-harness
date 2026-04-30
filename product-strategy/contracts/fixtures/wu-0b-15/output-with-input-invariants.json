@@ -1,0 +1,143 @@
+{
+  "output_refs_without_input_refs": {
+    "audit_event_id": {
+      "value": "audit-event-output-without-inputs",
+      "namespace": "workspace-alpha"
+    },
+    "workspace_id": {
+      "value": "workspace-alpha",
+      "namespace": "workspace"
+    },
+    "event_type": "graph_node_state_changed",
+    "actor": "audit-author",
+    "policy_set_id": {
+      "value": "policy-set-round-trip-v1",
+      "namespace": "workspace-alpha"
+    },
+    "configuration_id": {
+      "value": "graph-configuration-round-trip-v1",
+      "namespace": "configuration"
+    },
+    "provider_state_id": null,
+    "input_refs": [],
+    "output_refs": [
+      "graph-node-output-v1"
+    ],
+    "decision": "accepted",
+    "reason_code": "policy.accepted",
+    "created_at": "2026-04-30T15:20:00Z",
+    "meta": {
+      "created_at": "2026-04-30T15:20:00Z",
+      "updated_at": "2026-04-30T15:20:00Z",
+      "actor": {
+        "value": "audit-recorder"
+      },
+      "policy_version": "v1.0.0"
+    }
+  },
+  "output_refs_with_empty_policy_id": {
+    "audit_event_id": {
+      "value": "audit-event-output-empty-policy",
+      "namespace": "workspace-alpha"
+    },
+    "workspace_id": {
+      "value": "workspace-alpha",
+      "namespace": "workspace"
+    },
+    "event_type": "graph_node_state_changed",
+    "actor": "audit-author",
+    "policy_set_id": {
+      "value": "",
+      "namespace": "workspace-alpha"
+    },
+    "configuration_id": null,
+    "provider_state_id": null,
+    "input_refs": [
+      "graph-node-input-v1"
+    ],
+    "output_refs": [
+      "graph-node-output-v1"
+    ],
+    "decision": "accepted",
+    "reason_code": "policy.accepted",
+    "created_at": "2026-04-30T15:21:00Z",
+    "meta": {
+      "created_at": "2026-04-30T15:21:00Z",
+      "updated_at": "2026-04-30T15:21:00Z",
+      "actor": {
+        "value": "audit-recorder"
+      },
+      "policy_version": "v1.0.0"
+    }
+  },
+  "output_refs_with_empty_actor": {
+    "audit_event_id": {
+      "value": "audit-event-output-empty-actor",
+      "namespace": "workspace-alpha"
+    },
+    "workspace_id": {
+      "value": "workspace-alpha",
+      "namespace": "workspace"
+    },
+    "event_type": "graph_node_state_changed",
+    "actor": "",
+    "policy_set_id": {
+      "value": "policy-set-round-trip-v1",
+      "namespace": "workspace-alpha"
+    },
+    "configuration_id": null,
+    "provider_state_id": null,
+    "input_refs": [
+      "graph-node-input-v1"
+    ],
+    "output_refs": [
+      "graph-node-output-v1"
+    ],
+    "decision": "accepted",
+    "reason_code": "policy.accepted",
+    "created_at": "2026-04-30T15:22:00Z",
+    "meta": {
+      "created_at": "2026-04-30T15:22:00Z",
+      "updated_at": "2026-04-30T15:22:00Z",
+      "actor": {
+        "value": "audit-recorder"
+      },
+      "policy_version": "v1.0.0"
+    }
+  },
+  "output_refs_with_empty_reason_code": {
+    "audit_event_id": {
+      "value": "audit-event-output-empty-reason",
+      "namespace": "workspace-alpha"
+    },
+    "workspace_id": {
+      "value": "workspace-alpha",
+      "namespace": "workspace"
+    },
+    "event_type": "graph_node_state_changed",
+    "actor": "audit-author",
+    "policy_set_id": {
+      "value": "policy-set-round-trip-v1",
+      "namespace": "workspace-alpha"
+    },
+    "configuration_id": null,
+    "provider_state_id": null,
+    "input_refs": [
+      "graph-node-input-v1"
+    ],
+    "output_refs": [
+      "graph-node-output-v1"
+    ],
+    "decision": "accepted",
+    "reason_code": "",
+    "created_at": "2026-04-30T15:23:00Z",
+    "meta": {
+      "created_at": "2026-04-30T15:23:00Z",
+      "updated_at": "2026-04-30T15:23:00Z",
+      "actor": {
+        "value": "audit-recorder"
+      },
+      "policy_version": "v1.0.0"
+    }
+  }
+}

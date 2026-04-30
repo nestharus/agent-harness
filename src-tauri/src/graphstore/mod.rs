@@ -1,3 +1,4 @@
+pub mod auditevent;
 pub mod evidenceartifact;
 pub mod fixture;
 pub mod graphconfiguration;

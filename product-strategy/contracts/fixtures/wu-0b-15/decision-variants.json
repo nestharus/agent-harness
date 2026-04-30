@@ -1,0 +1,9 @@
+{
+  "variants": [
+    "accepted",
+    "rejected",
+    "deferred",
+    "quarantined",
+    "user_required"
+  ]
+}

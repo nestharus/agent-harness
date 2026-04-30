@@ -1,3 +1,4 @@
+pub mod auditevent;
 pub mod backend_span_event;
 pub mod event_topic;
 pub mod evidenceartifact;

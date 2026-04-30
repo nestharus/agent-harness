@@ -17,6 +17,7 @@
     "0b"
   ],
   "allowed_runtime_tables": [
+    "audit_events",
     "evidence_artifacts",
     "graph_configurations",
     "graph_nodes",

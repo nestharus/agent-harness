@@ -4,6 +4,6 @@
   "preserve_row_content": true,
   "rerun_after_reset": {
     "applied_versions": [],
-    "skipped_versions": [1, 4, 5, 6, 7, 9]
+    "skipped_versions": [1, 4, 5, 6, 7, 9, 15]
   }
 }
