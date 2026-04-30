@@ -1,0 +1,32 @@
+{
+  "row": {
+    "workspace_id": {
+      "value": "workspace-missing-fk",
+      "namespace": "workspace"
+    },
+    "schema_version": 6,
+    "active_orchestrator_id": {
+      "value": "orchestrator-default",
+      "namespace": "orchestrator"
+    },
+    "current_graph_version": 0,
+    "storage_root": "/tmp/agent-harness/workspace-missing-fk/storage",
+    "policy_set_id": {
+      "value": "policy-set-does-not-exist",
+      "namespace": "workspace-alpha"
+    },
+    "active_configuration_id": {
+      "value": "graph-configuration-does-not-exist",
+      "namespace": "configuration"
+    },
+    "is_active_default": false,
+    "meta": {
+      "created_at": "2026-04-30T12:35:00Z",
+      "updated_at": "2026-04-30T12:35:00Z",
+      "actor": {
+        "value": "workspace-author"
+      },
+      "policy_version": "v1.0.0"
+    }
+  }
+}

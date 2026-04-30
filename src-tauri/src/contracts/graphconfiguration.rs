@@ -1,4 +1,4 @@
 pub use crate::graphstore::graphconfiguration::{
-    EffectiveValueSource, EffectiveValueSourceEntry, GraphConfiguration, GraphWorkspace,
-    ValidationState,
+    EffectiveValueSource, EffectiveValueSourceEntry, GraphConfiguration, ValidationState,
 };
+pub use crate::graphstore::graphworkspace::GraphWorkspace;

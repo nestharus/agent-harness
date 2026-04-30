@@ -5,6 +5,7 @@ pub mod graphconfiguration;
 pub mod graphstore_fixture;
 pub mod graphstore_migrations;
 pub mod graphstore_prelude;
+pub mod graphworkspace;
 pub mod harness_app_state;
 pub mod harness_command;
 pub mod harness_settings;

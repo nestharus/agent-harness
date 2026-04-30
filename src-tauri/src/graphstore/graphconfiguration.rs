@@ -8,6 +8,7 @@ use sqlx::types::Type;
 use sqlx::{Database, Sqlite, SqlitePool};
 
 use crate::graphstore::fixture::{GraphStoreRepo, GraphStoreRepoFuture, GraphWorkspaceRef};
+pub use crate::graphstore::graphworkspace::GraphWorkspace;
 use crate::graphstore::policyset::PolicySet;
 use crate::graphstore::prelude::{
     validate_record_meta, ActorRef, GraphStoreError, JsonField, OpaqueId, RecordMeta,
@@ -24,9 +25,6 @@ const ATTRIBUTED_FIELDS: &[&str] = &[
     "capability_fingerprint_policy_ref",
     "validation_state",
 ];
-
-#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
-pub struct GraphWorkspace;
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Serialize, Deserialize)]
 #[serde(rename_all = "snake_case")]
