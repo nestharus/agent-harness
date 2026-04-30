@@ -1,0 +1,14 @@
+[
+  "initiativeMap",
+  "currentFocus",
+  "workingSetInspector",
+  "configurationInspector",
+  "providerPanel",
+  "questionQueue",
+  "workerBoard",
+  "optimizerLog",
+  "evidenceDrilldown",
+  "costSurface",
+  "recoverySurface",
+  "runtimeStatus"
+]

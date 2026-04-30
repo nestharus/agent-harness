@@ -1,0 +1,86 @@
+[
+  {
+    "raw": "initiativeMap",
+    "result": {
+      "ok": true,
+      "value": "initiativeMap"
+    }
+  },
+  {
+    "raw": "currentFocus",
+    "result": {
+      "ok": true,
+      "value": "currentFocus"
+    }
+  },
+  {
+    "raw": "workingSetInspector",
+    "result": {
+      "ok": true,
+      "value": "workingSetInspector"
+    }
+  },
+  {
+    "raw": "configurationInspector",
+    "result": {
+      "ok": true,
+      "value": "configurationInspector"
+    }
+  },
+  {
+    "raw": "providerPanel",
+    "result": {
+      "ok": true,
+      "value": "providerPanel"
+    }
+  },
+  {
+    "raw": "questionQueue",
+    "result": {
+      "ok": true,
+      "value": "questionQueue"
+    }
+  },
+  {
+    "raw": "workerBoard",
+    "result": {
+      "ok": true,
+      "value": "workerBoard"
+    }
+  },
+  {
+    "raw": "optimizerLog",
+    "result": {
+      "ok": true,
+      "value": "optimizerLog"
+    }
+  },
+  {
+    "raw": "evidenceDrilldown",
+    "result": {
+      "ok": true,
+      "value": "evidenceDrilldown"
+    }
+  },
+  {
+    "raw": "costSurface",
+    "result": {
+      "ok": true,
+      "value": "costSurface"
+    }
+  },
+  {
+    "raw": "recoverySurface",
+    "result": {
+      "ok": true,
+      "value": "recoverySurface"
+    }
+  },
+  {
+    "raw": "runtimeStatus",
+    "result": {
+      "ok": true,
+      "value": "runtimeStatus"
+    }
+  }
+]
