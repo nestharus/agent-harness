@@ -1,0 +1,9 @@
+{
+  "variants": [
+    "system_required",
+    "default",
+    "inherited",
+    "user_configured",
+    "recovered"
+  ]
+}

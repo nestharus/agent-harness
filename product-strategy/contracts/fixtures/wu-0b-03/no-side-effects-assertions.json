@@ -17,6 +17,7 @@
     "0b"
   ],
   "allowed_runtime_tables": [
+    "graph_configurations",
     "policy_sets",
     "schema_versions"
   ],

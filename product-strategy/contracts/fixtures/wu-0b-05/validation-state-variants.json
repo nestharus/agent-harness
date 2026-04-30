@@ -1,0 +1,11 @@
+{
+  "variants": [
+    "valid",
+    "valid_with_warnings",
+    "invalid_schema",
+    "invalid_provider_route",
+    "invalid_budget",
+    "invalid_index",
+    "needs_user_attention"
+  ]
+}

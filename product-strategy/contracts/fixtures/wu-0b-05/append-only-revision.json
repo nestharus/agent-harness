@@ -1,0 +1,191 @@
+{
+  "rows": [
+    {
+      "configuration_id": {
+        "value": "graph-configuration-append-v1",
+        "namespace": "configuration"
+      },
+      "workspace_id": {
+        "value": "workspace-alpha",
+        "namespace": "workspace"
+      },
+      "configuration_version": 1,
+      "schema_profile": "phase_0b_append",
+      "summary_contract_template_ids": [
+        "summary-template-append-v1"
+      ],
+      "optimizer_policy_ref": {
+        "value": "policy-set-round-trip-v1",
+        "namespace": "workspace-alpha"
+      },
+      "render_policy_ref": {
+        "value": "policy-set-round-trip-v1",
+        "namespace": "workspace-alpha"
+      },
+      "memory_policy_ref": {
+        "value": "policy-set-round-trip-v1",
+        "namespace": "workspace-alpha"
+      },
+      "provider_routing_policy_ref": {
+        "value": "policy-set-round-trip-v1",
+        "namespace": "workspace-alpha"
+      },
+      "capability_fingerprint_policy_ref": {
+        "value": "policy-set-round-trip-v1",
+        "namespace": "workspace-alpha"
+      },
+      "effective_value_sources": [
+        {
+          "field_name": "configuration_version",
+          "source": "system_required",
+          "source_ref": "WU-0B-05"
+        },
+        {
+          "field_name": "schema_profile",
+          "source": "default",
+          "source_ref": "append-defaults"
+        },
+        {
+          "field_name": "summary_contract_template_ids",
+          "source": "default",
+          "source_ref": "append-defaults"
+        },
+        {
+          "field_name": "optimizer_policy_ref",
+          "source": "user_configured",
+          "source_ref": "policy-set-round-trip-v1"
+        },
+        {
+          "field_name": "render_policy_ref",
+          "source": "user_configured",
+          "source_ref": "policy-set-round-trip-v1"
+        },
+        {
+          "field_name": "memory_policy_ref",
+          "source": "user_configured",
+          "source_ref": "policy-set-round-trip-v1"
+        },
+        {
+          "field_name": "provider_routing_policy_ref",
+          "source": "user_configured",
+          "source_ref": "policy-set-round-trip-v1"
+        },
+        {
+          "field_name": "capability_fingerprint_policy_ref",
+          "source": "user_configured",
+          "source_ref": "policy-set-round-trip-v1"
+        },
+        {
+          "field_name": "validation_state",
+          "source": "system_required",
+          "source_ref": "validation-state-evaluator"
+        }
+      ],
+      "created_from_configuration_id": null,
+      "validation_state": "valid",
+      "meta": {
+        "created_at": "2026-04-30T12:10:00Z",
+        "updated_at": "2026-04-30T12:10:00Z",
+        "actor": {
+          "value": "configuration-author"
+        },
+        "policy_version": "v1.0.0"
+      }
+    },
+    {
+      "configuration_id": {
+        "value": "graph-configuration-append-v2",
+        "namespace": "configuration"
+      },
+      "workspace_id": {
+        "value": "workspace-alpha",
+        "namespace": "workspace"
+      },
+      "configuration_version": 2,
+      "schema_profile": "phase_0b_append",
+      "summary_contract_template_ids": [
+        "summary-template-append-v2"
+      ],
+      "optimizer_policy_ref": {
+        "value": "policy-set-round-trip-v1",
+        "namespace": "workspace-alpha"
+      },
+      "render_policy_ref": {
+        "value": "policy-set-round-trip-v1",
+        "namespace": "workspace-alpha"
+      },
+      "memory_policy_ref": {
+        "value": "policy-set-round-trip-v1",
+        "namespace": "workspace-alpha"
+      },
+      "provider_routing_policy_ref": {
+        "value": "policy-set-round-trip-v1",
+        "namespace": "workspace-alpha"
+      },
+      "capability_fingerprint_policy_ref": {
+        "value": "policy-set-round-trip-v1",
+        "namespace": "workspace-alpha"
+      },
+      "effective_value_sources": [
+        {
+          "field_name": "configuration_version",
+          "source": "system_required",
+          "source_ref": "WU-0B-05"
+        },
+        {
+          "field_name": "schema_profile",
+          "source": "inherited",
+          "source_ref": "graph-configuration-append-v1"
+        },
+        {
+          "field_name": "summary_contract_template_ids",
+          "source": "user_configured",
+          "source_ref": "graph-configuration-append-v2"
+        },
+        {
+          "field_name": "optimizer_policy_ref",
+          "source": "inherited",
+          "source_ref": "graph-configuration-append-v1"
+        },
+        {
+          "field_name": "render_policy_ref",
+          "source": "inherited",
+          "source_ref": "graph-configuration-append-v1"
+        },
+        {
+          "field_name": "memory_policy_ref",
+          "source": "inherited",
+          "source_ref": "graph-configuration-append-v1"
+        },
+        {
+          "field_name": "provider_routing_policy_ref",
+          "source": "inherited",
+          "source_ref": "graph-configuration-append-v1"
+        },
+        {
+          "field_name": "capability_fingerprint_policy_ref",
+          "source": "inherited",
+          "source_ref": "graph-configuration-append-v1"
+        },
+        {
+          "field_name": "validation_state",
+          "source": "system_required",
+          "source_ref": "validation-state-evaluator"
+        }
+      ],
+      "created_from_configuration_id": {
+        "value": "graph-configuration-append-v1",
+        "namespace": "configuration"
+      },
+      "validation_state": "valid_with_warnings",
+      "meta": {
+        "created_at": "2026-04-30T12:15:00Z",
+        "updated_at": "2026-04-30T12:15:00Z",
+        "actor": {
+          "value": "configuration-author"
+        },
+        "policy_version": "v1.1.0"
+      }
+    }
+  ]
+}

@@ -558,7 +558,7 @@ fn migration_record_report_and_error_fixtures_round_trip_stable_shapes() {
 }
 
 #[tokio::test]
-async fn shipped_phase_0b_migrations_emit_schema_versions_and_policy_sets() {
+async fn shipped_phase_0b_migrations_emit_schema_versions_policy_sets_and_graph_configurations() {
     // Risk: table ownership leakage. Level: particular-integration. Source:
     // WU-0B-01 migration ownership plus WU-0B-04 first domain table contract.
     let pool = temp_pool().await;
@@ -573,9 +573,13 @@ async fn shipped_phase_0b_migrations_emit_schema_versions_and_policy_sets() {
         .filter(|table| !table.starts_with("sqlite_"))
         .collect();
 
-    assert_eq!(report.applied_versions, vec![1, 4]);
+    assert_eq!(report.applied_versions, vec![1, 4, 5]);
     assert_eq!(
         durable_tables,
-        vec!["policy_sets".to_string(), "schema_versions".to_string()]
+        vec![
+            "graph_configurations".to_string(),
+            "policy_sets".to_string(),
+            "schema_versions".to_string()
+        ]
     );
 }

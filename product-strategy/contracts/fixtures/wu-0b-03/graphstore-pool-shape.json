@@ -1,5 +1,5 @@
 {
   "sqlite_url": "sqlite:///tmp/agent-harness-wu-0a-14a-empty-*/storage/harness.sqlite",
-  "migrations_applied": [1, 4],
+  "migrations_applied": [1, 4, 5],
   "workspace_root": "/tmp/agent-harness-wu-0a-14a-empty-*/storage"
 }
