@@ -1,0 +1,5 @@
+{
+  "ok": false,
+  "command": "pingRuntime",
+  "runtime": "agent-harness"
+}

@@ -1,0 +1,5 @@
+[
+  "get_harness_settings",
+  "subscribe_workspace_events",
+  "ping_runtime"
+]

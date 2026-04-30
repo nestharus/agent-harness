@@ -1,0 +1,12 @@
+{
+  "command": "get_harness_settings",
+  "args": {},
+  "response": {
+    "workspace_id": "workspace-alpha",
+    "storage_root": "product-strategy/contracts/fixtures/wu-0a-02/storage",
+    "database_path": "product-strategy/contracts/fixtures/wu-0a-02/storage/harness.sqlite",
+    "agent_runner_bin": "product-strategy/contracts/fixtures/wu-0a-02/bin/fake-agents",
+    "log_level": "info",
+    "profile_name": "contract"
+  }
+}

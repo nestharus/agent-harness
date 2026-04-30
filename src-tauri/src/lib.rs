@@ -1,4 +1,5 @@
 pub mod app_state;
+pub mod commands;
 pub mod contracts;
 pub mod events;
 pub mod settings;

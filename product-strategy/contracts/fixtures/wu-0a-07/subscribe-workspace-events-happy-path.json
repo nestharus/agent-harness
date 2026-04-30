@@ -1,0 +1,12 @@
+{
+  "command": "subscribe_workspace_events",
+  "args": {
+    "topic": "runtime",
+    "channelId": "channel-contract-runtime"
+  },
+  "response": {
+    "subscribed": true,
+    "topic": "runtime",
+    "channelId": "channel-contract-runtime"
+  }
+}

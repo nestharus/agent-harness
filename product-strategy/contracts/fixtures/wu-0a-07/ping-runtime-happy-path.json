@@ -1,0 +1,10 @@
+{
+  "command": "ping_runtime",
+  "args": {},
+  "response": {
+    "ok": true,
+    "command": "ping_runtime",
+    "runtime": "agent-harness",
+    "phase": "0A"
+  }
+}
