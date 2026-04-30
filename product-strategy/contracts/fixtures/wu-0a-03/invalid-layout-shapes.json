@@ -1,0 +1,35 @@
+[
+  {
+    "name": "missing temp root",
+    "value": {
+      "storage_root": "product-strategy/contracts/fixtures/wu-0a-03/workspace-alpha/storage",
+      "database_path": "product-strategy/contracts/fixtures/wu-0a-03/workspace-alpha/storage/harness.sqlite",
+      "evidence_root": "product-strategy/contracts/fixtures/wu-0a-03/workspace-alpha/storage/evidence",
+      "fixture_root": "product-strategy/contracts/fixtures/wu-0a-03/workspace-alpha/storage/fixtures",
+      "log_root": "product-strategy/contracts/fixtures/wu-0a-03/workspace-alpha/storage/logs"
+    }
+  },
+  {
+    "name": "extra field",
+    "value": {
+      "storage_root": "product-strategy/contracts/fixtures/wu-0a-03/workspace-alpha/storage",
+      "database_path": "product-strategy/contracts/fixtures/wu-0a-03/workspace-alpha/storage/harness.sqlite",
+      "evidence_root": "product-strategy/contracts/fixtures/wu-0a-03/workspace-alpha/storage/evidence",
+      "fixture_root": "product-strategy/contracts/fixtures/wu-0a-03/workspace-alpha/storage/fixtures",
+      "log_root": "product-strategy/contracts/fixtures/wu-0a-03/workspace-alpha/storage/logs",
+      "temp_root": "product-strategy/contracts/fixtures/wu-0a-03/workspace-alpha/storage/tmp",
+      "provider_root": "product-strategy/contracts/fixtures/wu-0a-03/workspace-alpha/storage/providers"
+    }
+  },
+  {
+    "name": "non-string database path",
+    "value": {
+      "storage_root": "product-strategy/contracts/fixtures/wu-0a-03/workspace-alpha/storage",
+      "database_path": 42,
+      "evidence_root": "product-strategy/contracts/fixtures/wu-0a-03/workspace-alpha/storage/evidence",
+      "fixture_root": "product-strategy/contracts/fixtures/wu-0a-03/workspace-alpha/storage/fixtures",
+      "log_root": "product-strategy/contracts/fixtures/wu-0a-03/workspace-alpha/storage/logs",
+      "temp_root": "product-strategy/contracts/fixtures/wu-0a-03/workspace-alpha/storage/tmp"
+    }
+  }
+]

@@ -1,0 +1,62 @@
+[
+  {
+    "name": "database path outside storage root",
+    "layout": {
+      "storage_root": "product-strategy/contracts/fixtures/wu-0a-03/workspace-alpha/storage",
+      "database_path": "product-strategy/contracts/fixtures/wu-0a-03/workspace-alpha/outside/harness.sqlite",
+      "evidence_root": "product-strategy/contracts/fixtures/wu-0a-03/workspace-alpha/storage/evidence",
+      "fixture_root": "product-strategy/contracts/fixtures/wu-0a-03/workspace-alpha/storage/fixtures",
+      "log_root": "product-strategy/contracts/fixtures/wu-0a-03/workspace-alpha/storage/logs",
+      "temp_root": "product-strategy/contracts/fixtures/wu-0a-03/workspace-alpha/storage/tmp"
+    },
+    "expected_error": "DatabasePathOutsideStorageRoot"
+  },
+  {
+    "name": "evidence root outside storage root",
+    "layout": {
+      "storage_root": "product-strategy/contracts/fixtures/wu-0a-03/workspace-alpha/storage",
+      "database_path": "product-strategy/contracts/fixtures/wu-0a-03/workspace-alpha/storage/harness.sqlite",
+      "evidence_root": "product-strategy/contracts/fixtures/wu-0a-03/workspace-alpha/outside/evidence",
+      "fixture_root": "product-strategy/contracts/fixtures/wu-0a-03/workspace-alpha/storage/fixtures",
+      "log_root": "product-strategy/contracts/fixtures/wu-0a-03/workspace-alpha/storage/logs",
+      "temp_root": "product-strategy/contracts/fixtures/wu-0a-03/workspace-alpha/storage/tmp"
+    },
+    "expected_error": "EvidenceRootOutsideStorageRoot"
+  },
+  {
+    "name": "fixture root outside storage root",
+    "layout": {
+      "storage_root": "product-strategy/contracts/fixtures/wu-0a-03/workspace-alpha/storage",
+      "database_path": "product-strategy/contracts/fixtures/wu-0a-03/workspace-alpha/storage/harness.sqlite",
+      "evidence_root": "product-strategy/contracts/fixtures/wu-0a-03/workspace-alpha/storage/evidence",
+      "fixture_root": "product-strategy/contracts/fixtures/wu-0a-03/workspace-alpha/outside/fixtures",
+      "log_root": "product-strategy/contracts/fixtures/wu-0a-03/workspace-alpha/storage/logs",
+      "temp_root": "product-strategy/contracts/fixtures/wu-0a-03/workspace-alpha/storage/tmp"
+    },
+    "expected_error": "FixtureRootOutsideStorageRoot"
+  },
+  {
+    "name": "log root outside storage root",
+    "layout": {
+      "storage_root": "product-strategy/contracts/fixtures/wu-0a-03/workspace-alpha/storage",
+      "database_path": "product-strategy/contracts/fixtures/wu-0a-03/workspace-alpha/storage/harness.sqlite",
+      "evidence_root": "product-strategy/contracts/fixtures/wu-0a-03/workspace-alpha/storage/evidence",
+      "fixture_root": "product-strategy/contracts/fixtures/wu-0a-03/workspace-alpha/storage/fixtures",
+      "log_root": "product-strategy/contracts/fixtures/wu-0a-03/workspace-alpha/outside/logs",
+      "temp_root": "product-strategy/contracts/fixtures/wu-0a-03/workspace-alpha/storage/tmp"
+    },
+    "expected_error": "LogRootOutsideStorageRoot"
+  },
+  {
+    "name": "temp root outside storage root",
+    "layout": {
+      "storage_root": "product-strategy/contracts/fixtures/wu-0a-03/workspace-alpha/storage",
+      "database_path": "product-strategy/contracts/fixtures/wu-0a-03/workspace-alpha/storage/harness.sqlite",
+      "evidence_root": "product-strategy/contracts/fixtures/wu-0a-03/workspace-alpha/storage/evidence",
+      "fixture_root": "product-strategy/contracts/fixtures/wu-0a-03/workspace-alpha/storage/fixtures",
+      "log_root": "product-strategy/contracts/fixtures/wu-0a-03/workspace-alpha/storage/logs",
+      "temp_root": "product-strategy/contracts/fixtures/wu-0a-03/workspace-alpha/outside/tmp"
+    },
+    "expected_error": "TempRootOutsideStorageRoot"
+  }
+]

@@ -1,0 +1,8 @@
+[
+  "StorageRootEscapesWorkspace",
+  "DatabasePathOutsideStorageRoot",
+  "EvidenceRootOutsideStorageRoot",
+  "FixtureRootOutsideStorageRoot",
+  "LogRootOutsideStorageRoot",
+  "TempRootOutsideStorageRoot"
+]

@@ -1,3 +1,4 @@
 pub mod event_topic;
 pub mod harness_settings;
+pub mod local_storage_layout;
 pub mod trace_context;

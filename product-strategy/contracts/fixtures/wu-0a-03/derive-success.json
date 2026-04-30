@@ -1,0 +1,18 @@
+{
+  "settings": {
+    "workspace_id": "workspace-alpha",
+    "storage_root": "product-strategy/contracts/fixtures/wu-0a-03/workspace-alpha/storage",
+    "database_path": "product-strategy/contracts/fixtures/wu-0a-03/workspace-alpha/storage/harness.sqlite",
+    "agent_runner_bin": "product-strategy/contracts/fixtures/wu-0a-02/bin/fake-agents",
+    "log_level": "info",
+    "profile_name": "contract"
+  },
+  "expected": {
+    "storage_root": "product-strategy/contracts/fixtures/wu-0a-03/workspace-alpha/storage",
+    "database_path": "product-strategy/contracts/fixtures/wu-0a-03/workspace-alpha/storage/harness.sqlite",
+    "evidence_root": "product-strategy/contracts/fixtures/wu-0a-03/workspace-alpha/storage/evidence",
+    "fixture_root": "product-strategy/contracts/fixtures/wu-0a-03/workspace-alpha/storage/fixtures",
+    "log_root": "product-strategy/contracts/fixtures/wu-0a-03/workspace-alpha/storage/logs",
+    "temp_root": "product-strategy/contracts/fixtures/wu-0a-03/workspace-alpha/storage/tmp"
+  }
+}

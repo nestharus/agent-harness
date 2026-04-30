@@ -1,6 +1,7 @@
 pub mod contracts;
 pub mod events;
 pub mod settings;
+pub mod storage;
 pub mod tracing;
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]

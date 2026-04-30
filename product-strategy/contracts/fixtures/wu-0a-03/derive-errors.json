@@ -1,0 +1,24 @@
+[
+  {
+    "name": "storage root escapes workspace fixture boundary",
+    "settings": {
+      "workspace_id": "workspace-alpha",
+      "storage_root": "../outside/storage",
+      "database_path": "../outside/storage/harness.sqlite",
+      "agent_runner_bin": "product-strategy/contracts/fixtures/wu-0a-02/bin/fake-agents",
+      "log_level": "info"
+    },
+    "expected_error": "StorageRootEscapesWorkspace"
+  },
+  {
+    "name": "database path is outside storage root",
+    "settings": {
+      "workspace_id": "workspace-alpha",
+      "storage_root": "product-strategy/contracts/fixtures/wu-0a-03/workspace-alpha/storage",
+      "database_path": "product-strategy/contracts/fixtures/wu-0a-03/workspace-alpha/outside/harness.sqlite",
+      "agent_runner_bin": "product-strategy/contracts/fixtures/wu-0a-02/bin/fake-agents",
+      "log_level": "info"
+    },
+    "expected_error": "DatabasePathOutsideStorageRoot"
+  }
+]
