@@ -1,0 +1,50 @@
+{
+  "$schema": "https://turbo.build/schema.json",
+  "tasks": {
+    "frontend:dev": {
+      "cache": false,
+      "persistent": true
+    },
+    "frontend:build": {
+      "outputs": [
+        "dist/**"
+      ]
+    },
+    "tauri:build": {
+      "dependsOn": [
+        "frontend:build"
+      ],
+      "outputs": [
+        "src-tauri/target/release/**"
+      ]
+    },
+    "test:unit": {
+      "outputs": []
+    },
+    "test:e2e:run": {
+      "dependsOn": [
+        "frontend:build"
+      ],
+      "outputs": [
+        "test-results/**",
+        "playwright-report/**"
+      ]
+    },
+    "lint:eslint": {
+      "outputs": []
+    },
+    "lint:rust": {
+      "outputs": []
+    },
+    "typecheck:ts": {
+      "outputs": []
+    },
+    "typecheck:rust": {
+      "outputs": []
+    },
+    "tauri:dev:run": {
+      "cache": false,
+      "persistent": true
+    }
+  }
+}

@@ -7,9 +7,14 @@ worktrees/
 node_modules/
 dist/
 .turbo/
+coverage/
+playwright-report/
+test-results/
 
 # Tauri / Rust
 target/
+src-tauri/target/
+src-tauri/gen/
 
 # Editor / OS
 .DS_Store
