@@ -1,0 +1,24 @@
+{
+  "forbidden_source_tokens": [
+    "Command::new",
+    "std::process::Command",
+    "tokio::process",
+    "agents",
+    "provider",
+    "optimizer",
+    "recovery",
+    "tauri::command",
+    "generate_handler!",
+    "invoke_handler",
+    "CREATE TABLE"
+  ],
+  "allowed_migration_files": [
+    "0001_schema_versions.sql"
+  ],
+  "allowed_runtime_tables": [
+    "schema_versions"
+  ],
+  "phase_0a_scaffold_commands": [
+    "subscribe_workspace_events"
+  ]
+}

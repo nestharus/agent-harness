@@ -1,0 +1,10 @@
+{
+  "pool": {
+    "sqlite_url": "sqlite:///tmp/agent-harness-wu-0a-14a-empty-*/storage/harness.sqlite",
+    "migrations_applied": [1],
+    "workspace_root": "/tmp/agent-harness-wu-0a-14a-empty-*/storage"
+  },
+  "workspace_id": null,
+  "graph_version": null,
+  "created_refs": []
+}

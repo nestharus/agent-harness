@@ -1,0 +1,9 @@
+{
+  "table": "schema_versions",
+  "preserve_row_count": true,
+  "preserve_row_content": true,
+  "rerun_after_reset": {
+    "applied_versions": [],
+    "skipped_versions": [1]
+  }
+}

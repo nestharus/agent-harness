@@ -1,0 +1,12 @@
+{
+  "future_refs": [
+    {
+      "wu": "WU-0B-04",
+      "ref_type": "graph_workspace",
+      "value": "future-workspace-001",
+      "namespace": "graph_workspace"
+    }
+  ],
+  "expected_error": "UnknownRef",
+  "expected_code": "unknown_ref"
+}
