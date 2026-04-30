@@ -4,7 +4,7 @@
 
 `agent-harness` is currently a strategy-only worktree. `product-strategy/engineering-research.md` reports no harness application code: no `src-tauri/`, `src/`, `apps/`, `packages/`, `migrations/`, `tests/`, daemon, API service, or infrastructure directories exist. The only implementation-adjacent substrate is external: `/home/nes/.local/bin/agents` from `agent-runner`, plus the source and local configuration under `/home/nes/projects/agent-runner/` and `~/.config/oulipoly-agent-runner/`.
 
-The reusable substrate is meaningful but bounded. `agent-runner` already provides multi-provider invocation, balancing, `--resume`, trace trees through `OULIPOLY_INVOCATION` / `OULIPOLY_PARENT_INVOCATION`, session ingestion into `session_turns`, provider diagnostics, quota windows, and session-id capture for Claude and Codex. The research also identifies useful upstream Tauri patterns: `tauriInvoke` / `Channel` wrappers, `#[tauri::command]`, app-state guarded backend commands, and subprocess composition. Those are patterns and external services, not harness code.
+The reusable substrate is meaningful but bounded. `agent-runner` already provides multi-provider invocation, balancing, `--resume`, trace trees through `OULIPOLY_INVOCATION` / `OULIPOLY_PARENT_INVOCATION`, session ingestion into `session_turns`, provider diagnostics, quota windows, and session-id capture for Claude and Codex. Round 4 incorporates proposal-r5's `SessionOverrideContract` boundary: the harness owns graph context, repack, render, audit, and worker dispatch state; the `agents` binary owns provider routing, session porting, and per-CLI storage knowledge. The research also identifies useful upstream Tauri patterns: `tauriInvoke` / `Channel` wrappers, `#[tauri::command]`, app-state guarded backend commands, and subprocess composition. Those are patterns and external services, not harness code.
 
 The harness itself must be built from scratch around the fixed substrate in `proposal.md`: Tauri v2, Bun, Turbo, React 19, TanStack Router/Query, Tailwind v4, Vitest, Playwright, Lefthook, Changesets, Commitlint, Rust, Tokio, and SQLite. The proposal's local SQLite data model spans `GraphWorkspace`, `GraphConfiguration`, `GraphNode`, `NodeRevision`, `GraphSnapshot`, `GraphEdge`, `IdentityEvent`, `SummaryContract`, `EvidenceArtifact`, `ProvenancePointer`, `WorkingSetSnapshot`, `GraphAction`, `AgentWalkState`, `WorkerSlice`, `WorkerRun`, `OrchestratorTurn`, `QuestionArtifact`, `ToolCallProvenance`, `OptimizerRequest`, `OptimizerEdit`, `ConflictRecord`, `ProviderState`, `EntitlementSnapshot`, `CapabilityFingerprint`, `BudgetLedger`, `RecoveryAction`, `PolicySet`, and `AuditEvent`. None of those tables, migrations, repositories, commands, UI panes, or test fixtures exist yet.
 
@@ -33,6 +33,7 @@ No `engineering-surfaces.md` was written. I found no problem surface under the o
 | BudgetLedger core tables and token/cache accounting interfaces | VS-001, VS-004, VS-008, VS-009, VS-010, VS-015, VS-016, VS-019, VS-020, VS-021 | No; agent-runner quota state is provider telemetry only | M |
 | ProviderStateMonitor, `ProviderState`, `EntitlementSnapshot`, `CapabilityFingerprint`, and denial-reason taxonomy | VS-001, VS-006, VS-015, VS-016, VS-017, VS-020, VS-021 | Partial external substrate only; agent-runner has provider config, quota, resume config, diagnostics | M |
 | CLI subprocess supervisor around `/home/nes/.local/bin/agents` | VS-001, VS-003, VS-006, VS-009, VS-015, VS-016, VS-017, VS-020, VS-021 | Partial external substrate only; harness still needs process lifecycle, prompt files, env-var propagation, session-id capture, trace stitching, cancellation, and child acceptance | M |
+| `SessionOverrideContract` trait, v1 `AgentRunnerDbAdapter`, agent-runner-binding/schema-version probe, and fake-adapter fixtures | VS-010, VS-012, VS-018, VS-020, VS-021 | No harness code; agent-runner currently exposes SQLite state, session chains/turns, transcript locators, and trace, but not stable `agents session` import/export commands | M |
 | Hook/MCP/plugin injection scaffold and capability boundary abstraction | VS-001, VS-003, VS-006, VS-008, VS-009, VS-015, VS-017, VS-018 | No; research says no harness MCP or hook/plugin code exists | L |
 | Tauri IPC commands and Channel event stream layer | VS-001, VS-005, VS-006, VS-007, VS-010, VS-016, VS-017, VS-020, VS-021 | Pattern only from agent-runner `invoke` / `Channel` | M |
 | `AgentWalkState` schema and navigation state service shell | VS-001, VS-007, VS-008, VS-009, VS-012, VS-013 | No | M |
@@ -45,7 +46,7 @@ No `engineering-surfaces.md` was written. I found no problem surface under the o
 | Test harness and fixtures: temp SQLite DBs, fake `agents`, provider configs, transcript samples, UI seeds | VS-001 through VS-021 | No; research says no tests exist and `sqlite3` CLI cannot be assumed | L |
 | Logging/tracing infrastructure for backend spans, subprocess correlation, and UI event streams | VS-001, VS-003, VS-006, VS-009, VS-015, VS-017, VS-020, VS-021 | Partial external trace substrate only | M |
 
-**Total foundation effort:** XL, roughly 12-20 weeks serial equivalent. The serial sum is larger than a normal bootstrap because the worktree is empty and the value slices share storage, render, policy, IPC, and test surfaces. Best-case foundation parallelization is possible if ownership is explicit: one lane for desktop/tooling, one for SQLite schema/migrations, one for subprocess/provider fixtures, one for UI shell, and one for tests. The dependency graph is acyclic if Phase 0 is treated as substrate, not as hidden delivery of value slices.
+**Total foundation effort:** XL, roughly 12-20 weeks serial equivalent. The serial sum is larger than a normal bootstrap because the worktree is empty and the value slices share storage, render, policy, IPC, session-override, and test surfaces. Best-case foundation parallelization is possible if ownership is explicit: one lane for desktop/tooling, one for SQLite schema/migrations, one for subprocess/provider/session-override fixtures, one for UI shell, and one for tests. The dependency graph is acyclic if Phase 0 is treated as substrate, not as hidden delivery of value slices.
 
 ## Initiative Assessments
 
@@ -245,9 +246,13 @@ No `engineering-surfaces.md` was written. I found no problem surface under the o
 
 **What exists:** Proposal-defined `OptimizerRequest`, `OptimizerEdit`, optimizer cycle, and summary regeneration limitations; configured `glm` model.
 
-**What is new:** Optimizer scoping, prompt/response schema, edit validation, merge attempts, conflict-on-stale-base behavior, summary/stale UI.
+**What is new:** Optimizer scoping, prompt/response schema, edit validation, merge attempts, conflict-on-stale-base behavior, summary/stale UI, and the turn-decomposition/detail-injection router write-back path over `SessionOverrideContract`.
 
-**Foundation dependencies:** Optimizer queue/edit store, RenderEngine, SummaryContract validators, evidence/provenance, BudgetLedger, PolicyEngine, ConflictRecord base, IPC/UI shell.
+**Session override impact:** VS-010 still owns turn decomposition, detail-injection routing, stale-node detection, summary regeneration, and optimizer-owned merge attempts. The r4 change is only the session write mechanism. When the turn-decomposition service or detail-injection-router service needs to replace a packed foreground transcript, it calls `SessionOverrideContract.replace_transcript(session_ref, packed_transcript, preconditions)`; when it only needs to add synthetic handoff or continuation turns, it calls `SessionOverrideContract.append_turns(session_ref, turns, preconditions)`. It must not open, truncate, rewrite, or append per-CLI JSONL files directly. The write-back call records preimage hashes, schema probe result, provider/session location, audit event, and provenance pointers through the contract implementation.
+
+**Foundation dependencies:** Optimizer queue/edit store, RenderEngine, SummaryContract validators, evidence/provenance, BudgetLedger, PolicyEngine, ConflictRecord base, `SessionOverrideContract`, IPC/UI shell.
+
+**Phase-bind audit:** Phase 0A provides the repo/runtime shell, fake `agents`, IPC harness, and local test commands used by optimizer and override contract tests. Phase 0B provides `OptimizerRequest`, `OptimizerEdit`, graph snapshots, summary contracts, evidence, audit, and conflict schemas. Phase 0C provides RenderEngine, PolicyEngine, BudgetLedger, optimizer queue shell, agent-runner subprocess/trace contract, and the `SessionOverrideContract` trait plus v1 adapter probe. If the SessionOverrideContract work units are not already present when this slice starts, the cascade must add them as Phase 0C-r4 prerequisites before VS-010 can write back to an `agents` session. Phase 1 contributes the evidence/audit and budget primitives used by acceptance. Phase 2 owns the value behavior.
 
 **Parallelizable with:** Mostly yes with VS-008 if render invalidation boundaries are fixed. Partial with VS-009 because orchestrator turns enqueue advisory requests consumed by the optimizer.
 
@@ -305,9 +310,13 @@ No `engineering-surfaces.md` was written. I found no problem surface under the o
 
 **What exists:** Proposal-defined `GraphEdge`, `IdentityEvent`, `OptimizerEdit` edit types, and recursive unpack bounds.
 
-**What is new:** Topology edit operations, cross-reference discovery, repack planning, identity forwarding application, conflict generation, and UI inspection.
+**What is new:** Topology edit operations, cross-reference discovery, repack planning, identity forwarding application, conflict generation, UI inspection, and packed-transcript delivery through `SessionOverrideContract`.
 
-**Foundation dependencies:** GraphStore, OptimizerEdit store, Identity resolver, ConflictRecord workflow, PolicyEngine, evidence/provenance, topology invariant tests.
+**Session override impact:** VS-012 preserves the `<200K` bound axiom and the existing repack planner semantics. Its planner output is no longer described as a direct JSONL rewrite. The repack-planner service produces a bounded packed transcript plus graph mutation candidates; after topology and identity validation, any session transcript replacement flows through `SessionOverrideContract.replace_transcript(session_ref, packed_transcript, preconditions)`. The contract owns session location, schema/storage probing, idle/race refusal, atomic write protocol, audit event emission, and adapter-specific mutation. VS-012 may inspect normalized transcript evidence, but it does not encode per-CLI storage formats.
+
+**Foundation dependencies:** GraphStore, OptimizerEdit store, Identity resolver, ConflictRecord workflow, PolicyEngine, evidence/provenance, `SessionOverrideContract`, topology invariant tests.
+
+**Phase-bind audit:** Phase 0A provides the repository/runtime shell and fixture harness for topology and override tests. Phase 0B provides graph, edge, identity, evidence, audit, optimizer edit, conflict, and policy schemas. Phase 0C provides the repack-adjacent render/policy engines and `SessionOverrideContract` trait/v1 adapter. If those session-override work units are absent, they land in Phase 0C-r4 and VS-012 must treat direct transcript replacement as blocked. Phase 1/2 provide render inspection, summary validation, budget/evidence primitives, navigation, turns, and VS-010's optimizer refresh path. VS-013 remains the merge/identity prerequisite before VS-012 topology mutation.
 
 **Parallelizable with:** Not safely parallelizable with VS-013 without tight coordination. VS-012 design and fixture work may begin while VS-013 is underway, but topology mutation should not merge before the VS-013 identity resolver and conflict state machine exist. Partial with VS-011 and VS-014 due shared `OptimizerEdit`, `GraphEdge`, conflict, render traversal, and policy surfaces.
 
@@ -337,7 +346,7 @@ No `engineering-surfaces.md` was written. I found no problem surface under the o
 
 **Effort:** L.
 
-**Effort reasoning:** Research says agent-runner can invoke configured models, load balance, capture invocation UUIDs, resume sessions, and trace children. Missing harness work includes `WorkerSlice` schema, slice validator, provider preflight integration, write-scope enforcement, launch acceptance tracking, and worker evidence ingestion. This is the first full worker launch slice and spans graph, provider, budget, subprocess, evidence, and policy systems.
+**Effort reasoning:** Research says agent-runner can invoke configured models, load balance, capture invocation UUIDs, resume sessions, and trace children. Missing harness work includes `WorkerSlice` schema, slice validator, provider preflight integration, write-scope enforcement, launch acceptance tracking, and worker evidence ingestion. The worker launcher is deliberately thin: it spawns `agents -m <model> -p <project> -f <prompt>` or the equivalent configured binary path and lets `agent-runner` handle provider routing, account choice, resume/session porting, quota state, and per-CLI session storage. This is the first full worker launch slice and spans graph, provider, budget, subprocess, evidence, and policy systems.
 
 **Risk:** High.
 
@@ -345,9 +354,11 @@ No `engineering-surfaces.md` was written. I found no problem surface under the o
 
 **What exists:** agent-runner invocation/resume/trace; proposal-defined `WorkerSlice`, `WorkerRun`, and lifecycle.
 
-**What is new:** Slice validation, provider-aware route approval, prompt/render for worker slices, acceptance tracking, evidence ingestion, and launch UI/control path.
+**What is new:** Slice validation, provider-aware route approval, prompt/render for worker slices, acceptance tracking, evidence ingestion, and launch UI/control path. It does not add CLI-specific transcript path discovery, JSONL parsing, or JSONL mutation to the worker launcher.
 
 **Foundation dependencies:** WorkerSlice/WorkerRun schema, ProviderStateMonitor, BudgetLedger, CLI supervisor, hook/MCP/plugin scaffold, RenderEngine, PolicyEngine, evidence/audit, fake `agents`.
+
+**Phase-bind audit:** Phase 0A provides the running shell, fake `agents`, subprocess test harness, prompt-file fixtures, and local commands. Phase 0B provides `WorkerSlice`, `WorkerRun`, graph snapshots, evidence, audit, provider, and budget schemas. Phase 0C provides the `agents` subprocess supervisor, provider probes, render/policy engines, and fake `agents` test surface. Phase 1 provides accepted evidence/audit, budget, provider preflight, and render inspection contracts. Phase 4 owns the worker launch value behavior. Per-CLI session JSONL knowledge remains delegated to the `agents` binary and, for later reintegration write-back, to `SessionOverrideContract`.
 
 **Parallelizable with:** No same-phase pair. Cross-phase, it can consume VS-006 provider preflight and VS-004 budget ledger if those APIs are stable.
 
@@ -407,9 +418,13 @@ No `engineering-surfaces.md` was written. I found no problem surface under the o
 
 **What exists:** Proposal-defined reintegration boundaries and worker output outputs; agent-runner evidence substrate.
 
-**What is new:** Staged candidate model, parser/mappers, conflict-on-overlap logic, advisory optimizer request generation, and staging UI.
+**What is new:** Staged candidate model, parser/mappers, conflict-on-overlap logic, advisory optimizer request generation, staging UI, and reintegration write-back through `SessionOverrideContract`.
 
-**Foundation dependencies:** WorkerSlice/WorkerRun records, evidence/provenance, ConflictRecord workflow, OptimizerRequest store, PolicyEngine, audit writer, UI shell.
+**Session override impact:** VS-018 still treats worker output as evidence until deterministic gates, conflict checks, and operator/orchestrator acceptance decide what can become graph state. If accepted reintegration needs to extend or replace an `agents` session transcript, it calls `SessionOverrideContract.append_turns` or `SessionOverrideContract.replace_transcript` with explicit graph-version, worker-run, and preimage preconditions. Worker-output reintegration does not mutate raw session files directly and does not assume the worker's CLI storage layout.
+
+**Foundation dependencies:** WorkerSlice/WorkerRun records, evidence/provenance, ConflictRecord workflow, OptimizerRequest store, PolicyEngine, `SessionOverrideContract`, audit writer, UI shell.
+
+**Phase-bind audit:** Phase 0A provides the shell, fake `agents`, IPC/test harness, and worker transcript fixtures. Phase 0B provides worker, evidence, audit, optimizer request, conflict, and graph schemas. Phase 0C provides policy/optimizer shells, agent-runner trace/session contract, and the `SessionOverrideContract` trait/v1 adapter. Phase 4 provides worker launch records, while VS-016/VS-017 provide board and continuation state. If the session-override work units have not landed by Phase 5, VS-018 may stage and emit optimizer requests but must block session transcript write-back.
 
 **Parallelizable with:** Partial with VS-016 and VS-017 due shared worker state and evidence/session correlation.
 
@@ -586,10 +601,11 @@ Create migration infrastructure and the complete base GraphStore schema. Impleme
 - `AuditEvent`: append-only decision and state-change event tying actor, policy, configuration, provider state, inputs, outputs, decision, and reason code together.
 - `PolicySet`: versioned deterministic governance bundle for summary, render, identity, privilege, tool protocol, budget, reviewer, recovery, configuration, and provider rules.
 - `ConfigurationRegistry`: Phase 0 read API and provenance resolver over `GraphConfiguration` rows, with no operator-visible inspector yet.
+- `SessionOverrideRecord`: durable harness-side record for every attempted transcript override, including session ref, adapter version, schema probe result, preimage/postimage hashes, graph version, packed transcript evidence, worker/optimizer source refs, pending/committed/quarantined status, and audit event refs. It is not a copy of agent-runner's session storage schema.
 
 ### Phase 0C: Shared Engines and Integration Shells
 
-Implement RenderEngine core interfaces, PolicyEngine gate framework, BudgetLedger core service, `ConfigurationRegistry` skeleton/read API, CLI subprocess supervisor around `agents`, provider probe adapters, hook/MCP/plugin abstraction points, optimizer queue shell, identity/conflict shell, recovery-action writer, Tauri IPC commands/Channel event streams, and seeded UI panes. This phase should include golden render fixtures per CLI shape and no value-slice-specific claims such as "workers can launch" or "optimizer refreshes summaries."
+Implement RenderEngine core interfaces, PolicyEngine gate framework, BudgetLedger core service, `ConfigurationRegistry` skeleton/read API, CLI subprocess supervisor around `agents`, provider probe adapters, `SessionOverrideContract`, hook/MCP/plugin abstraction points, optimizer queue shell, identity/conflict shell, recovery-action writer, Tauri IPC commands/Channel event streams, and seeded UI panes. This phase should include golden render fixtures per CLI shape and no value-slice-specific claims such as "workers can launch" or "optimizer refreshes summaries."
 
 #### Substrate Integration Contract
 
@@ -602,6 +618,59 @@ Phase 0C owns the unified agent-runner contract the rest of the harness depends 
 - Read-only ingestion from agent-runner `session_turns`, including explicit handling of missing transcript locators and opencode gaps.
 - Awareness of `providers.toml`, `sessions.toml`, model configuration files, and agents configuration files, with redaction and no harness ownership of vendor credentials.
 - A single wrapper API for active subprocess management, passive trace/state/config reads, provider diagnostics, resume attempts, and test fakes, so VS-009, VS-015, VS-016, VS-017, VS-020, and VS-021 do not invent separate agent-runner readers.
+- A separate `SessionOverrideContract` API for any write-back that replaces, truncates, or appends to an `agents`-owned transcript. General subprocess and worker-launch code must not learn per-CLI JSONL formats.
+
+#### SessionOverrideContract foundation
+
+Phase 0C-r4 adds the versioned Rust trait that is the only harness write-back path into an `agents`-owned session transcript:
+
+```rust
+trait SessionOverrideContract {
+    fn schema_version_probe(&self) -> Result<SessionOverrideSchema, SessionOverrideError>;
+    fn locate_session(&self, session_ref: SessionRef) -> Result<SessionLocation, SessionOverrideError>;
+    fn read_transcript(&self, session_ref: SessionRef) -> Result<TranscriptSnapshot, SessionOverrideError>;
+    fn replace_transcript(
+        &self,
+        session_ref: SessionRef,
+        packed_transcript: PackedTranscript,
+        preconditions: OverridePreconditions,
+    ) -> Result<OverrideReceipt, SessionOverrideError>;
+    fn append_turns(
+        &self,
+        session_ref: SessionRef,
+        turns: Vec<TranscriptTurn>,
+        preconditions: OverridePreconditions,
+    ) -> Result<OverrideReceipt, SessionOverrideError>;
+}
+```
+
+The v1 implementation is `AgentRunnerDbAdapter`. It ships with the harness because the current local agent-runner surface exposes enough pinned state to support a narrow adapter: headless CLI mode through `/home/nes/.local/bin/agents`, persistent SQLite state at `~/.local/share/oulipoly-agent-runner/state.db`, `invocations`, `session_turns`, `session_chains`, `session_chain_segments`, configured `sessions.toml` transcript locators, and trace output through `agents trace --json`. The adapter is schema-version-pinned by installed `agents` binary identity plus exact SQLite table/column/index probes. Unknown binary identity, missing expected columns, unsupported storage kind, ambiguous session, in-flight write, or failed preimage hash returns a refusal before any transcript file mutation.
+
+The v1 adapter may read `state.db` and known transcript locator output, write a same-directory temp file, atomically replace known per-CLI JSONL files, and update the minimum agent-runner state rows required for consistency. That direct DB/JSONL access is an adapter detail, not a general harness responsibility. It must not edit `agents`, provider routing, `providers.toml`, `sessions.toml`, model TOMLs, auth stores, quota scripts, or vendor credential stores.
+
+The v2 implementation is `AgentRunnerCliAdapter`. It swaps in when upstream `agent-runner` exposes the supported session surface the harness depends on:
+
+| Feature request | Harness dependency |
+|---|---|
+| `agents session locate <id>` | Resolve provider, storage kind, active chain/segment, transcript path when exportable, mutability state, and ambiguity without direct `state.db` reads. |
+| `agents session export <id>` | Read canonical or normalized transcript material with source metadata. |
+| `agents session import-replace <id>` | Atomically replace transcript material and update runner state without harness-owned file/DB mutation. |
+| Pause or lock handshake | Prove session idle or acquire an override lease before replacement/append. |
+| Schema-version or supported-surface probe | Identify binary and state contract before any write, returning a machine-readable refusal for unsupported versions. |
+
+VS-010, VS-012, VS-018, VS-020, and VS-021 depend on this trait, not on either adapter. v1 is the shipping harness adapter now; v2 is a same-trait replacement when the feature requests land upstream.
+
+Phase binding for the SessionOverrideContract work units:
+
+| Phase | Work units |
+|---|---|
+| Phase 0A | Fake `agents`, temp filesystem/SQLite fixtures, IPC harness, local test commands, and prompt-file plumbing used by adapter tests. |
+| Phase 0B | `SessionOverrideRecord`, audit/provenance references, graph-version and preimage/postimage fields, fixture schemas. |
+| Phase 0C-r4 | `SessionOverrideContract` trait, adapter selection config, `AgentRunnerDbAdapter`, agent-runner-binding and schema-version/supported-surface probe, fake adapter, crash-recovery states, idle/refusal taxonomy, and contract tests against agent-runner DB/transcript fixtures. |
+| Phase 1 | Evidence/audit inspector support for override receipts and refusal reasons, so VS-001/VS-003 can show what was imposed or refused without teaching UI code per-CLI storage details. |
+| Future upstream / v2 | `AgentRunnerCliAdapter` after `agents session locate/export/import-replace`, pause-handshake, and schema probe land in agent-runner. |
+
+Anti-scope clarification: this roadmap does not prescribe Claude, Codex, opencode, or future CLI JSONL record formats outside the v1 adapter's pinned implementation tests. The roadmap does enumerate the supported upstream surface the harness needs from `agent-runner`: locate, export, import-replace, pause/lock handshake, and schema/supported-surface probe.
 
 #### Cross-slice contract: `OptimizerRequest` emission
 
@@ -651,7 +720,7 @@ VS-012 design and fixtures can run during VS-013, but topology mutations should 
 
 ### Phase 4: Worker Slice Dispatch
 
-Deliver VS-015 after Phase 3. Worker dispatch should consume provider fingerprints, budget gates, write-scope policy, render snapshots, and evidence/audit records rather than creating worker-specific substitutes.
+Deliver VS-015 after Phase 3. Worker dispatch should consume provider fingerprints, budget gates, write-scope policy, render snapshots, and evidence/audit records rather than creating worker-specific substitutes. The launcher remains a thin `agents -m <model> -p <project> -f <prompt>` process/state orchestration layer; it does not prescribe Claude, Codex, opencode, or other per-CLI session JSONL formats. Agent-runner owns provider routing, session porting, quota state, and storage-layout knowledge. Later worker-output reintegration uses `SessionOverrideContract` rather than adding transcript machinery to the launcher.
 
 ### Phase 5: Worker Legibility and Reintegration
 
@@ -688,13 +757,13 @@ Deliver VS-021 last. It depends on provider fingerprints, worker dispatch, and r
 | 1 | VS-004 + VS-005, VS-004 + VS-006, VS-005 + VS-006 partial | Shared `GraphConfiguration.render_policy_ref`, provider routing defaults, cost interpretation, and provider badges |
 | 2 | VS-008 + VS-010 mostly parallel | Navigation changes working-set shape; optimizer summary refresh mutates graph between turns; coordinate render invalidation |
 | 2 | VS-008 + VS-009 partial | Shared tool/turn state machine |
-| 2 | VS-009 + VS-010 partial | Shared `OptimizerRequest` lifecycle and audit events |
+| 2 | VS-009 + VS-010 partial | Shared `OptimizerRequest` lifecycle, audit events, and session refs consumed by `SessionOverrideContract` |
 | 3 | VS-011 + VS-014 mostly parallel | Both use PolicyEngine and optimizer requests; distinct feature surfaces |
 | 3 | VS-011 + VS-012, VS-011 + VS-013 partial | Shared request/edit/conflict taxonomy |
 | 3 | VS-012 + VS-013 not parallel without tight coordination | VS-012 topology edits require VS-013 identity and conflict semantics |
 | 3 | VS-012 + VS-014, VS-013 + VS-014 partial | Quarantine can block traversal and conflict with topology/identity edits |
 | 4 | None | Only VS-015 |
-| 5 | VS-016 + VS-017, VS-016 + VS-018, VS-017 + VS-018 partial | Shared `WorkerRun`, `QuestionArtifact`, blocked/needs-input transitions, and evidence ingestion |
+| 5 | VS-016 + VS-017, VS-016 + VS-018, VS-017 + VS-018 partial | Shared `WorkerRun`, `QuestionArtifact`, blocked/needs-input transitions, evidence ingestion, and session refs consumed by `SessionOverrideContract` |
 | 6 | VS-019 + VS-020 partial | Shared `PolicySet`, `BudgetLedger`, `AuditEvent`, recovery-triggered reviewer sampling, and UI flags |
 | 7 | None | Only VS-021 |
 
@@ -702,7 +771,7 @@ Deliver VS-021 last. It depends on provider fingerprints, worker dispatch, and r
 
 The longest dependency chain is:
 
-Phase 0 GraphStore / RenderEngine / PolicyEngine / Evidence / Budget / Provider / CLI supervisor / tests (XL, roughly 12-20 weeks serial equivalent) -> VS-003 provenance and VS-004 budget/cache primitives (L/M, needed before VS-001 acceptance) -> VS-001 inspect renders (L, first operator-visible target) -> VS-009 bounded orchestrator turns (L) -> VS-010 summary/stale optimizer (L) -> VS-013 identity/conflict (L) -> VS-015 worker dispatch (L) -> VS-017 NEEDS_INPUT continuations with failed-resume handoff and VS-018 reintegration staging (L/L) -> VS-020 recovery preflight (L) -> VS-021 provider-aware reroute/substitution (M).
+Phase 0 GraphStore / RenderEngine / PolicyEngine / Evidence / Budget / Provider / CLI supervisor / SessionOverrideContract / tests (XL, roughly 12-20 weeks serial equivalent) -> VS-003 provenance and VS-004 budget/cache primitives (L/M, needed before VS-001 acceptance) -> VS-001 inspect renders (L, first operator-visible target) -> VS-009 bounded orchestrator turns (L) -> VS-010 summary/stale optimizer with contract write-back (L) -> VS-013 identity/conflict (L) -> VS-015 worker dispatch (L) -> VS-017 NEEDS_INPUT continuations with failed-resume handoff and VS-018 reintegration staging with contract write-back (L/L) -> VS-020 recovery preflight (L) -> VS-021 provider-aware reroute/substitution (M).
 
 The chain is acyclic: downstream worker, question, reintegration, reviewer, and recovery slices consume graph/provenance/provider/budget/conflict contracts but do not redefine them.
 
@@ -712,7 +781,7 @@ This table uses approximate serial ranges from the T-shirt scale. Parallel effor
 
 | Phase | Initiatives | Serial effort | Parallel effort, best case |
 |---|---:|---:|---:|
-| 0 | 22 foundation items | XL, roughly 12-20 weeks serial equivalent | 6-10 weeks with 4-5 lanes |
+| 0 | 23 foundation items | XL, roughly 12-20 weeks serial equivalent | 6-10 weeks with 4-5 lanes |
 | 1 | 7 value slices | 1 L + 6 M/L mix, roughly 10-16 weeks | 5-8 weeks with backend/UI lanes and schema freeze |
 | 2 | 3 value slices | M + L + L, roughly 5-10 weeks | 4-7 weeks |
 | 3 | 4 value slices | M + L + L + L, roughly 7-14 weeks | 5-9 weeks if VS-013 owns merge semantics |
@@ -735,15 +804,15 @@ This table uses approximate serial ranges from the T-shirt scale. Parallel effor
 | VS-007 | M | Medium | Multi-workstream legibility, notification classification, shared UI shell |
 | VS-008 | M | Medium | Tool affordance integration, walk-state vs topology boundary, budget/conflict denial |
 | VS-009 | L | High | Resume/session capture, subprocess lifecycle, no-compact discipline, foreground action boundary |
-| VS-010 | L | High | Optimizer concurrency, `glm` availability/cost, summary drift, cache churn |
+| VS-010 | L | High | Optimizer concurrency, `glm` availability/cost, summary drift, cache churn, SessionOverrideContract write-back refusal |
 | VS-011 | M | Medium | Warning taxonomy, advisory-only shape repair, configuration policy integration |
-| VS-012 | L | High | Hierarchical packing novelty, topology mutation, identity forwarding, merge conflicts |
+| VS-012 | L | High | Hierarchical packing novelty, topology mutation, identity forwarding, merge conflicts, packed-transcript override atomicity |
 | VS-013 | L | High | Snapshot-walk-then-merge semantics, conflict records, identity drift, recovery linkage |
 | VS-014 | L | High | Prompt injection / graph poisoning, privilege transforms, quarantine traversal blocks |
-| VS-015 | L | High | Provider-aware worker launch, trace/acceptance capture, write-scope overlap, sub-agent cost |
+| VS-015 | L | High | Provider-aware worker launch, trace/acceptance capture, write-scope overlap, sub-agent cost, thin launcher dependence on agent-runner CLI stability |
 | VS-016 | M | Medium | Trace mapping, ambiguous acceptance, missing transcript locators, worker-state UI |
 | VS-017 | L | High | Resume acceptance, exact question correlation, failed-resume recovery, provider differences |
-| VS-018 | L | High | Worker output trust boundary, conflict-on-overlap, staged graph candidates, optimizer handoff |
+| VS-018 | L | High | Worker output trust boundary, conflict-on-overlap, staged graph candidates, optimizer handoff, SessionOverrideContract write-back refusal |
 | VS-019 | M | Medium | Reviewer fallibility, sample-rate cost, deterministic-gate precedence, provider availability |
 | VS-020 | L | High | Recovery side effects, graph/session/provider reconciliation, replay vs recording classification |
 | VS-021 | M | High | Changed execution contracts, provider reroute semantics, fresh substitution honesty, quotas |
@@ -754,17 +823,19 @@ The engineering dependency graph is:
 
 Phase 0 foundations -> Phase 1 observable context.
 
+Phase 0C-r4 SessionOverrideContract -> VS-010, VS-012, VS-018, VS-020, VS-021.
+
 VS-001, VS-002, VS-004 -> VS-008.
 
 VS-001, VS-003, VS-004, VS-006 -> VS-009.
 
-VS-002, VS-003, VS-004, VS-005 -> VS-010.
+VS-002, VS-003, VS-004, VS-005, Phase 0C-r4 SessionOverrideContract -> VS-010.
 
 VS-005, VS-010 -> VS-011.
 
 VS-009, VS-010 -> VS-013.
 
-VS-008, VS-010, VS-013 -> VS-012.
+VS-008, VS-010, VS-013, Phase 0C-r4 SessionOverrideContract -> VS-012.
 
 VS-002, VS-003, VS-010 -> VS-014.
 
@@ -774,7 +845,7 @@ VS-015 -> VS-016.
 
 VS-015, VS-006 -> VS-017.
 
-VS-015, VS-010, VS-013, VS-003 -> VS-018.
+VS-015, VS-010, VS-013, VS-003, Phase 0C-r4 SessionOverrideContract -> VS-018.
 
 VS-010, VS-018, VS-003, VS-004 -> VS-019.
 
