@@ -1,0 +1,16 @@
+{
+  "scenario_name": "nonzero-exit",
+  "argv_log_ref": "nonzero-exit/argv.json",
+  "stdin_ref": "nonzero-exit/stdin.txt",
+  "stdout_ref": "nonzero-exit/stdout.txt",
+  "stderr_ref": "nonzero-exit/stderr.txt",
+  "exit_status": 42,
+  "oulipoly_invocation": "op-nonzero",
+  "parent_invocation_id": "parent-nonzero",
+  "session_id": "session-nonzero",
+  "child_acceptance_state": "rejected",
+  "recorded_argv": ["agents", "run", "--scenario", "nonzero-exit"],
+  "stdin": "nonzero stdin transcript\n",
+  "stdout": "nonzero stdout transcript\n",
+  "stderr": "nonzero stderr transcript\n"
+}

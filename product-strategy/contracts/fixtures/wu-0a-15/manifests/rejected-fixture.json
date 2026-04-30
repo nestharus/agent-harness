@@ -1,0 +1,9 @@
+{
+  "scenario_name": "rejected-fixture",
+  "argv_log_ref": "rejected-fixture/argv.json",
+  "stderr_ref": "rejected-fixture/stderr.txt",
+  "exit_status": 1,
+  "child_acceptance_state": "rejected",
+  "recorded_argv": ["agents", "run", "--scenario", "rejected-fixture"],
+  "stderr": "child handshake rejected\n"
+}

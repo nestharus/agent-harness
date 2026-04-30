@@ -1,0 +1,13 @@
+{
+  "bin_path": "/tmp/agent-harness-wu-0a-15/fixtures/manifest-success/fake-agents-success",
+  "scenario_name": "success",
+  "argv_log_ref": "/tmp/agent-harness-wu-0a-15/fixtures/manifest-success/success/argv.json",
+  "stdin_ref": "/tmp/agent-harness-wu-0a-15/fixtures/manifest-success/success/stdin.txt",
+  "stdout_ref": "/tmp/agent-harness-wu-0a-15/fixtures/manifest-success/success/stdout.txt",
+  "stderr_ref": "/tmp/agent-harness-wu-0a-15/fixtures/manifest-success/success/stderr.txt",
+  "exit_status": 0,
+  "oulipoly_invocation": "op-success",
+  "parent_invocation_id": "parent-success",
+  "session_id": "session-success",
+  "child_acceptance_state": "accepted"
+}

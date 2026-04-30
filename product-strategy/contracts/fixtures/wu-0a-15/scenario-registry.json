@@ -1,0 +1,49 @@
+{
+  "scenarios": [
+    {
+      "scenario_name": "success",
+      "manifest_path": "manifests/success.json"
+    },
+    {
+      "scenario_name": "nonzero-exit",
+      "manifest_path": "manifests/nonzero-exit.json"
+    },
+    {
+      "scenario_name": "cancellation",
+      "manifest_path": "manifests/cancellation.json"
+    },
+    {
+      "scenario_name": "timeout",
+      "manifest_path": "manifests/timeout.json"
+    },
+    {
+      "scenario_name": "unknown-state-fixture",
+      "manifest_path": "manifests/unknown-state-fixture.json"
+    },
+    {
+      "scenario_name": "rejected-fixture",
+      "manifest_path": "manifests/rejected-fixture.json"
+    },
+    {
+      "scenario_name": "install-failure",
+      "manifest_path": "errors/error-fixture-install-failed.json"
+    },
+    {
+      "scenario_name": "missing-argv-log",
+      "manifest_path": "errors/error-argv-log-missing.json"
+    },
+    {
+      "scenario_name": "missing-transcript-ref",
+      "manifest_path": "errors/error-transcript-ref-missing.json"
+    },
+    {
+      "scenario_name": "real-agents-path",
+      "manifest_path": "errors/error-real-agents-path-rejected.json"
+    },
+    {
+      "scenario_name": "invalid-child-acceptance-state",
+      "manifest_path": "errors/error-invalid-child-acceptance-state.json"
+    }
+  ],
+  "intentionally_absent_scenarios": ["unknown"]
+}

@@ -1,0 +1,8 @@
+{
+  "scenario_name": "invalid-child-acceptance-state",
+  "argv_log_ref": "invalid-child-acceptance-state/argv.json",
+  "exit_status": 0,
+  "child_acceptance_state": "handshake_maybe",
+  "recorded_argv": ["agents", "run", "--scenario", "invalid-child-acceptance-state"],
+  "expected_error": "InvalidChildAcceptanceState"
+}

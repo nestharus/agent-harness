@@ -1,0 +1,5 @@
+{
+  "scenario_name": "real-agents-path",
+  "requested_bin_path": "/home/nes/.local/bin/agents",
+  "expected_error": "RealAgentsPathRejected"
+}

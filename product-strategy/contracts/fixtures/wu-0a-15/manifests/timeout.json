@@ -1,0 +1,11 @@
+{
+  "scenario_name": "timeout",
+  "argv_log_ref": "timeout/argv.json",
+  "stderr_ref": "timeout/stderr.txt",
+  "exit_status": 124,
+  "parent_invocation_id": "parent-timeout",
+  "session_id": "session-timeout",
+  "child_acceptance_state": "timed_out",
+  "recorded_argv": ["agents", "run", "--scenario", "timeout"],
+  "stderr": "timeout stderr transcript retained for ingestion\n"
+}

@@ -1,0 +1,9 @@
+{
+  "scenario_name": "cancellation",
+  "argv_log_ref": "cancellation/argv.json",
+  "stderr_ref": "cancellation/stderr.txt",
+  "exit_status": 130,
+  "child_acceptance_state": "ambiguous",
+  "recorded_argv": ["agents", "run", "--scenario", "cancellation"],
+  "stderr": "cancellation requested before child acceptance\n"
+}

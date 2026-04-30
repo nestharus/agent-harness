@@ -1,0 +1,7 @@
+{
+  "scenario_name": "unknown-state-fixture",
+  "argv_log_ref": "unknown-state-fixture/argv.json",
+  "exit_status": 0,
+  "child_acceptance_state": "unknown",
+  "recorded_argv": ["agents", "run", "--scenario", "unknown-state-fixture"]
+}

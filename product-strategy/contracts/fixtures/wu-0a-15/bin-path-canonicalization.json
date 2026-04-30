@@ -1,0 +1,5 @@
+{
+  "scenario_name": "success",
+  "must_be_under_temp_harness_fixture_root": true,
+  "must_not_equal": "/home/nes/.local/bin/agents"
+}

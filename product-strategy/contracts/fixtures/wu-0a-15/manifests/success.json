@@ -1,0 +1,14 @@
+{
+  "scenario_name": "success",
+  "argv_log_ref": "success/argv.json",
+  "stdout_ref": "success/stdout.txt",
+  "stderr_ref": "success/stderr.txt",
+  "exit_status": 0,
+  "oulipoly_invocation": "op-success",
+  "parent_invocation_id": "parent-success",
+  "session_id": "session-success",
+  "child_acceptance_state": "accepted",
+  "recorded_argv": ["agents", "run", "--scenario", "success"],
+  "stdout": "success stdout transcript\n",
+  "stderr": "success stderr transcript\n"
+}

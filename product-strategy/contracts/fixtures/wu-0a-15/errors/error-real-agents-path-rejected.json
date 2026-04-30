@@ -1,0 +1,9 @@
+{
+  "scenario_name": "real-agents-path",
+  "bin_path": "/home/nes/.local/bin/agents",
+  "argv_log_ref": "real-agents-path/argv.json",
+  "exit_status": 0,
+  "child_acceptance_state": "accepted",
+  "recorded_argv": ["agents", "run", "--scenario", "real-agents-path"],
+  "expected_error": "RealAgentsPathRejected"
+}

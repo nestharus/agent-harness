@@ -1,0 +1,9 @@
+{
+  "scenario_name": "install-failure",
+  "argv_log_ref": "install-failure/argv.json",
+  "exit_status": 1,
+  "child_acceptance_state": "unknown",
+  "recorded_argv": ["agents", "run", "--scenario", "install-failure"],
+  "force_install_failure": true,
+  "expected_error": "FixtureInstallFailed"
+}

@@ -1,0 +1,11 @@
+{
+  "scenario_name": "missing-transcript-ref",
+  "argv_log_ref": "missing-transcript-ref/argv.json",
+  "stdout_ref": "missing-transcript-ref/stdout.txt",
+  "stderr_ref": "missing-transcript-ref/stderr.txt",
+  "exit_status": 0,
+  "child_acceptance_state": "accepted",
+  "recorded_argv": ["agents", "run", "--scenario", "missing-transcript-ref"],
+  "skip_transcript_materialization": true,
+  "expected_error": "TranscriptRefMissing"
+}

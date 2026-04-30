@@ -1,0 +1,9 @@
+{
+  "scenario_name": "missing-argv-log",
+  "argv_log_ref": "missing-argv-log/argv.json",
+  "exit_status": 0,
+  "child_acceptance_state": "accepted",
+  "recorded_argv": ["agents", "run", "--scenario", "missing-argv-log"],
+  "skip_argv_log_materialization": true,
+  "expected_error": "ArgvLogMissing"
+}
