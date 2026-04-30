@@ -1,0 +1,7 @@
+{
+  "applied_versions": [1, 2],
+  "skipped_versions": [],
+  "failed_version": null,
+  "checksum_mismatches": [],
+  "rollback_state": "applied"
+}

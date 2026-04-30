@@ -1,0 +1,5 @@
+{
+  "expected_error": "VersionChecksumMismatch",
+  "initial_sql": "SELECT 1;\n",
+  "mutated_sql": "SELECT 2;\n"
+}

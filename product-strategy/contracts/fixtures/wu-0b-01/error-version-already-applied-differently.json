@@ -1,0 +1,7 @@
+{
+  "expected_error": "VersionAlreadyAppliedDifferently",
+  "applied_version": 1,
+  "applied_name": "schema_versions",
+  "conflicting_filename": "0001_renamed_schema_versions.sql",
+  "conflicting_sql": "SELECT 1;\n"
+}

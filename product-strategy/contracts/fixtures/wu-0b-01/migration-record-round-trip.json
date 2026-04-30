@@ -1,0 +1,9 @@
+{
+  "version": 2,
+  "migration_name": "contract_noop",
+  "applied_at": "2026-04-30T00:00:00.000Z",
+  "checksum": "abcdef0123456789abcdef0123456789abcdef0123456789abcdef0123456789",
+  "execution_ms": 7,
+  "applied_by": "agent-harness-migrator",
+  "rollback_state": "rollback_planned"
+}

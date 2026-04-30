@@ -61,7 +61,7 @@ fn workspace_manifests_match_phase_0a_contract_fixtures() {
 }
 
 #[test]
-fn cargo_manifest_declares_phase_0a_runtime_dependencies_without_migrations() {
+fn cargo_manifest_declares_phase_0a_runtime_dependencies_without_sqlx_migrate_feature() {
     // Risk: backend scaffold drift or accidental schema ownership. Level:
     // particular-integration. Source: proposal assumptions A3 and A4.
     let root = repo_root();
@@ -123,12 +123,15 @@ fn cargo_manifest_declares_phase_0a_runtime_dependencies_without_migrations() {
 
     let migrations_dir = root.join("src-tauri/migrations");
     if migrations_dir.exists() {
-        let mut entries = fs::read_dir(&migrations_dir)
+        let entries: Vec<String> = fs::read_dir(&migrations_dir)
             .expect("migrations placeholder must be readable")
-            .filter_map(Result::ok);
-        assert!(
-            entries.next().is_none(),
-            "migrations directory may only be an empty placeholder"
+            .filter_map(Result::ok)
+            .map(|entry| entry.file_name().to_string_lossy().into_owned())
+            .collect();
+        assert_eq!(
+            entries,
+            vec!["0001_schema_versions.sql"],
+            "WU-0B-01 may add only the schema_versions bootstrap migration"
         );
     }
 }

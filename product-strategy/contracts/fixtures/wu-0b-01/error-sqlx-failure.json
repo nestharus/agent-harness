@@ -1,0 +1,13 @@
+{
+  "expected_error": "SqlxFailure",
+  "migrations": [
+    {
+      "filename": "0001_schema_versions.sql",
+      "sql": "CREATE TABLE IF NOT EXISTS schema_versions (\n  version INTEGER PRIMARY KEY,\n  migration_name TEXT NOT NULL,\n  applied_at TEXT NOT NULL,\n  checksum TEXT NOT NULL,\n  execution_ms INTEGER NOT NULL,\n  applied_by TEXT NOT NULL,\n  rollback_state TEXT NOT NULL CHECK (rollback_state IN ('applied', 'rollback_unsupported', 'rollback_planned', 'rollback_failed'))\n);\n"
+    },
+    {
+      "filename": "0002_invalid_sql.sql",
+      "sql": "CREATE TABLE broken_table (\n"
+    }
+  ]
+}

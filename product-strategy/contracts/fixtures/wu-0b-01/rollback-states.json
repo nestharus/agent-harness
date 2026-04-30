@@ -1,0 +1,9 @@
+{
+  "valid": [
+    "applied",
+    "rollback_unsupported",
+    "rollback_planned",
+    "rollback_failed"
+  ],
+  "invalid": "rollback_unknown"
+}

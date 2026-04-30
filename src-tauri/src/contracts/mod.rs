@@ -1,6 +1,7 @@
 pub mod backend_span_event;
 pub mod event_topic;
 pub mod fake_agents_fixture;
+pub mod graphstore_migrations;
 pub mod harness_app_state;
 pub mod harness_command;
 pub mod harness_settings;

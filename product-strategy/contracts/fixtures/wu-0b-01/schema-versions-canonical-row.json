@@ -1,0 +1,9 @@
+{
+  "version": 1,
+  "migration_name": "schema_versions",
+  "applied_at": "2026-04-30T00:00:00.000Z",
+  "checksum": "0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef",
+  "execution_ms": 1,
+  "applied_by": "agent-harness-migrator",
+  "rollback_state": "applied"
+}

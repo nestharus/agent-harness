@@ -2,6 +2,7 @@ pub mod app_state;
 pub mod commands;
 pub mod contracts;
 pub mod events;
+pub mod graphstore;
 pub mod settings;
 pub mod storage;
 pub mod test_harness;

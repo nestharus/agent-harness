@@ -1,0 +1,30 @@
+[
+  {
+    "applied_versions": [1],
+    "skipped_versions": [],
+    "failed_version": null,
+    "checksum_mismatches": [],
+    "rollback_state": "applied"
+  },
+  {
+    "applied_versions": [],
+    "skipped_versions": [1],
+    "failed_version": null,
+    "checksum_mismatches": [],
+    "rollback_state": "rollback_unsupported"
+  },
+  {
+    "applied_versions": [],
+    "skipped_versions": [],
+    "failed_version": 2,
+    "checksum_mismatches": [2],
+    "rollback_state": "rollback_planned"
+  },
+  {
+    "applied_versions": [],
+    "skipped_versions": [1],
+    "failed_version": 3,
+    "checksum_mismatches": [],
+    "rollback_state": "rollback_failed"
+  }
+]

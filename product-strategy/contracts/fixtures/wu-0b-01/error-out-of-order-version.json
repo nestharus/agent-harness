@@ -1,0 +1,17 @@
+{
+  "expected_error": "OutOfOrderVersion",
+  "migrations": [
+    {
+      "filename": "0001_schema_versions.sql",
+      "sql": "CREATE TABLE IF NOT EXISTS schema_versions (\n  version INTEGER PRIMARY KEY,\n  migration_name TEXT NOT NULL,\n  applied_at TEXT NOT NULL,\n  checksum TEXT NOT NULL,\n  execution_ms INTEGER NOT NULL,\n  applied_by TEXT NOT NULL,\n  rollback_state TEXT NOT NULL CHECK (rollback_state IN ('applied', 'rollback_unsupported', 'rollback_planned', 'rollback_failed'))\n);\n"
+    },
+    {
+      "filename": "0001_duplicate_schema_versions.sql",
+      "sql": "SELECT 1;\n"
+    },
+    {
+      "filename": "0002_should_not_apply.sql",
+      "sql": "SELECT 2;\n"
+    }
+  ]
+}
