@@ -1,0 +1,38 @@
+{
+  "row": {
+    "budget_ledger_id": {
+      "value": "budget-ledger-canonical-v1",
+      "namespace": "workspace-alpha"
+    },
+    "workspace_id": {
+      "value": "workspace-alpha",
+      "namespace": "workspace"
+    },
+    "scope_type": "workspace",
+    "scope_id": {
+      "value": "workspace-alpha",
+      "namespace": "workspace"
+    },
+    "input_tokens": 1200,
+    "output_tokens": 340,
+    "cache_read_tokens": 256,
+    "cache_write_tokens": 64,
+    "latency_ms": 875,
+    "provider_cost_estimate": 42,
+    "provider_state_id": {
+      "value": "provider-state-soft-ref-v1",
+      "namespace": "provider-state"
+    },
+    "cache_prefix_hash": "cache-prefix-canonical",
+    "budget_state": "within",
+    "policy_action": "warn",
+    "meta": {
+      "created_at": "2026-04-30T16:05:00Z",
+      "updated_at": "2026-04-30T16:05:00Z",
+      "actor": {
+        "value": "budget-recorder"
+      },
+      "policy_version": "v1.0.0"
+    }
+  }
+}

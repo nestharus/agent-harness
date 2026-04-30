@@ -1,0 +1,5 @@
+{
+  "scope_type": "workspace_span",
+  "budget_state": "critical",
+  "policy_action": "auto_escalate"
+}

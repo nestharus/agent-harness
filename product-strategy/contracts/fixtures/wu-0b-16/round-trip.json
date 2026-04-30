@@ -1,0 +1,38 @@
+{
+  "row": {
+    "budget_ledger_id": {
+      "value": "budget-ledger-round-trip-v1",
+      "namespace": "workspace-alpha"
+    },
+    "workspace_id": {
+      "value": "workspace-alpha",
+      "namespace": "workspace"
+    },
+    "scope_type": "worker_run",
+    "scope_id": {
+      "value": "worker-run-round-trip-v1",
+      "namespace": "worker-run"
+    },
+    "input_tokens": 4096,
+    "output_tokens": 1024,
+    "cache_read_tokens": 512,
+    "cache_write_tokens": 128,
+    "latency_ms": 1530,
+    "provider_cost_estimate": 97,
+    "provider_state_id": {
+      "value": "provider-state-soft-ref-round-trip",
+      "namespace": "provider-state"
+    },
+    "cache_prefix_hash": "cache-prefix-round-trip",
+    "budget_state": "exceeded",
+    "policy_action": "require_user_approval",
+    "meta": {
+      "created_at": "2026-04-30T16:10:00Z",
+      "updated_at": "2026-04-30T16:10:00Z",
+      "actor": {
+        "value": "budget-recorder"
+      },
+      "policy_version": "v1.0.0"
+    }
+  }
+}

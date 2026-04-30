@@ -1,0 +1,11 @@
+{
+  "variants": [
+    "workspace",
+    "initiative",
+    "orchestrator_turn",
+    "worker_run",
+    "optimizer_pass",
+    "reviewer_pass",
+    "render"
+  ]
+}

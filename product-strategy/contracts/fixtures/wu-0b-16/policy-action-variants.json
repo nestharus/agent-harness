@@ -1,0 +1,9 @@
+{
+  "variants": [
+    "none",
+    "warn",
+    "narrow_scope",
+    "require_user_approval",
+    "block"
+  ]
+}

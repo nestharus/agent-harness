@@ -115,7 +115,10 @@ async fn empty_evidenceartifact_fixture() -> (SqlitePool, EvidenceArtifactRepo, 
     let fixture = create_graphstore_fixture(GraphStoreSeedPlan::default())
         .await
         .expect("empty graphstore fixture should apply migrations");
-    assert_eq!(fixture.pool.migrations_applied, vec![1, 4, 5, 6, 7, 9, 15]);
+    assert_eq!(
+        fixture.pool.migrations_applied,
+        vec![1, 4, 5, 6, 7, 9, 15, 16]
+    );
     let storage_root = fixture.pool.workspace_root.clone();
     let pool = fixture.pool.sqlite;
 
@@ -367,6 +370,7 @@ async fn evidenceartifact_wu_has_no_operator_visible_behavior_or_extra_tables() 
         sqlite_table_names(&pool).await,
         [
             "audit_events",
+            "budget_ledgers",
             "evidence_artifacts",
             "graph_configurations",
             "graph_nodes",

@@ -1,6 +1,6 @@
 {
   "phase_0a_scaffold_commands": ["subscribe_workspace_events"],
-  "allowed_runtime_tables": ["audit_events", "evidence_artifacts", "graph_configurations", "graph_nodes", "graph_workspaces", "policy_sets", "schema_versions"],
+  "allowed_runtime_tables": ["audit_events", "budget_ledgers", "evidence_artifacts", "graph_configurations", "graph_nodes", "graph_workspaces", "policy_sets", "schema_versions"],
   "forbidden_source_tokens": [
     "Command::new",
     "std::process::Command",

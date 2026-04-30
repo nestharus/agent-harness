@@ -573,11 +573,12 @@ async fn shipped_phase_0b_migrations_emit_phase_0b_tables() {
         .filter(|table| !table.starts_with("sqlite_"))
         .collect();
 
-    assert_eq!(report.applied_versions, vec![1, 4, 5, 6, 7, 9, 15]);
+    assert_eq!(report.applied_versions, vec![1, 4, 5, 6, 7, 9, 15, 16]);
     assert_eq!(
         durable_tables,
         vec![
             "audit_events".to_string(),
+            "budget_ledgers".to_string(),
             "evidence_artifacts".to_string(),
             "graph_configurations".to_string(),
             "graph_nodes".to_string(),

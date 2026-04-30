@@ -18,6 +18,7 @@
   ],
   "allowed_runtime_tables": [
     "audit_events",
+    "budget_ledgers",
     "evidence_artifacts",
     "graph_configurations",
     "graph_nodes",

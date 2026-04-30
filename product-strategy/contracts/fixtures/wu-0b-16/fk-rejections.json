@@ -1,0 +1,35 @@
+{
+  "unknown_workspace": {
+    "budget_ledger_id": {
+      "value": "budget-ledger-unknown-workspace",
+      "namespace": "workspace-alpha"
+    },
+    "workspace_id": {
+      "value": "workspace-missing",
+      "namespace": "workspace"
+    },
+    "scope_type": "workspace",
+    "scope_id": {
+      "value": "workspace-missing",
+      "namespace": "workspace"
+    },
+    "input_tokens": 1,
+    "output_tokens": 1,
+    "cache_read_tokens": 0,
+    "cache_write_tokens": 0,
+    "latency_ms": 1,
+    "provider_cost_estimate": 1,
+    "provider_state_id": null,
+    "cache_prefix_hash": null,
+    "budget_state": "within",
+    "policy_action": "none",
+    "meta": {
+      "created_at": "2026-04-30T16:30:00Z",
+      "updated_at": "2026-04-30T16:30:00Z",
+      "actor": {
+        "value": "budget-recorder"
+      },
+      "policy_version": "v1.0.0"
+    }
+  }
+}

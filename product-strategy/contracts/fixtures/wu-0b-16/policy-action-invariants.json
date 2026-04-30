@@ -1,0 +1,58 @@
+{
+  "legal": [
+    {
+      "budget_state": "within",
+      "policy_action": "none"
+    },
+    {
+      "budget_state": "within",
+      "policy_action": "warn"
+    },
+    {
+      "budget_state": "near_limit",
+      "policy_action": "warn"
+    },
+    {
+      "budget_state": "near_limit",
+      "policy_action": "narrow_scope"
+    },
+    {
+      "budget_state": "exceeded",
+      "policy_action": "require_user_approval"
+    },
+    {
+      "budget_state": "exceeded",
+      "policy_action": "block"
+    },
+    {
+      "budget_state": "exceeded",
+      "policy_action": "narrow_scope"
+    },
+    {
+      "budget_state": "blocked",
+      "policy_action": "block"
+    }
+  ],
+  "invalid": [
+    {
+      "budget_state": "blocked",
+      "policy_action": "none"
+    },
+    {
+      "budget_state": "blocked",
+      "policy_action": "warn"
+    },
+    {
+      "budget_state": "blocked",
+      "policy_action": "narrow_scope"
+    },
+    {
+      "budget_state": "blocked",
+      "policy_action": "require_user_approval"
+    },
+    {
+      "budget_state": "within",
+      "policy_action": "require_user_approval"
+    }
+  ]
+}
