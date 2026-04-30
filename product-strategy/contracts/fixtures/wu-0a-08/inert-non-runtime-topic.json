@@ -1,0 +1,6 @@
+{
+  "workspace_id": "workspace-alpha",
+  "topic": "graph",
+  "observation_window_ms": 25,
+  "expected_domain_payload_count": 0
+}

@@ -1,15 +1,19 @@
+use std::collections::HashMap;
 use std::path::Path;
+use std::sync::{Arc, Mutex};
 
 use serde_json::Value;
 use sqlx::sqlite::{SqliteConnectOptions, SqlitePoolOptions};
 use sqlx::SqlitePool;
 use tokio::sync::broadcast;
 
+use crate::contracts::event_topic::EventTopic;
 use crate::contracts::harness_app_state::BootstrapError;
 use crate::contracts::harness_settings::HarnessSettings;
 use crate::contracts::ipc_event::IpcEvent;
 use crate::contracts::local_storage_layout::LocalStorageLayout;
 use crate::contracts::trace_context::{TraceContext, TraceContextError};
+use crate::events::subscription::{Subscription, SubscriptionMetadata, WorkspaceEventChannel};
 use crate::storage::validate_local_storage_layout;
 use crate::tracing::trace_context::create_trace_context;
 
@@ -24,14 +28,18 @@ pub struct HarnessAppState {
     pub trace_context_factory: TraceContextFactory,
 }
 
-#[derive(Debug, Clone)]
+#[derive(Clone)]
 pub struct EventBusHandle {
     sender: broadcast::Sender<IpcEvent<Value>>,
+    subscriptions: Arc<Mutex<HashMap<String, Subscription>>>,
 }
 
 impl EventBusHandle {
     pub fn new(sender: broadcast::Sender<IpcEvent<Value>>) -> Self {
-        Self { sender }
+        Self {
+            sender,
+            subscriptions: Arc::new(Mutex::new(HashMap::new())),
+        }
     }
 
     pub fn subscribe(&self) -> broadcast::Receiver<IpcEvent<Value>> {
@@ -40,6 +48,49 @@ impl EventBusHandle {
 
     pub fn receiver_count(&self) -> usize {
         self.sender.receiver_count()
+    }
+
+    pub fn register_subscription(
+        &self,
+        workspace_id: String,
+        topic: EventTopic,
+        channel: WorkspaceEventChannel,
+    ) -> String {
+        let receiver = self.subscribe();
+        let subscription = Subscription::new(workspace_id, topic, channel, receiver);
+        let subscription_id = subscription.subscription_id().to_string();
+
+        self.subscriptions
+            .lock()
+            .expect("event-bus subscription registry should not be poisoned")
+            .insert(subscription_id.clone(), subscription);
+
+        subscription_id
+    }
+
+    pub fn subscription_metadata(&self, subscription_id: &str) -> Option<SubscriptionMetadata> {
+        self.subscriptions
+            .lock()
+            .expect("event-bus subscription registry should not be poisoned")
+            .get(subscription_id)
+            .map(Subscription::metadata)
+    }
+
+    pub fn subscription_count(&self) -> usize {
+        self.subscriptions
+            .lock()
+            .expect("event-bus subscription registry should not be poisoned")
+            .len()
+    }
+}
+
+impl std::fmt::Debug for EventBusHandle {
+    fn fmt(&self, formatter: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        formatter
+            .debug_struct("EventBusHandle")
+            .field("receiver_count", &self.receiver_count())
+            .field("subscription_count", &self.subscription_count())
+            .finish()
     }
 }
 

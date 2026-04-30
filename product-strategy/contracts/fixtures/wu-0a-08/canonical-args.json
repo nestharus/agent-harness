@@ -1,0 +1,5 @@
+{
+  "workspace_id": "workspace-alpha",
+  "topic": "runtime",
+  "channel": "__TAURI_CHANNEL__42"
+}

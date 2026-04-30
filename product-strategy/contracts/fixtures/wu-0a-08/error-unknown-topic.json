@@ -1,0 +1,6 @@
+{
+  "workspace_id": "workspace-alpha",
+  "topic": "not-a-topic",
+  "channel": "__TAURI_CHANNEL__1",
+  "expected_error": "UnknownTopic"
+}

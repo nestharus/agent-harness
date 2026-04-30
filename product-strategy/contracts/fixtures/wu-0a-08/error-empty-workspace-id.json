@@ -1,0 +1,6 @@
+{
+  "workspace_id": "",
+  "topic": "runtime",
+  "channel": "__TAURI_CHANNEL__1",
+  "expected_error": "EmptyWorkspaceId"
+}

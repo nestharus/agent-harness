@@ -136,7 +136,14 @@ async fn init_harness_app_state_creates_all_handles_and_preserves_paths() {
         .expect("SQLite pool should execute a simple query");
     assert_eq!(row.0, 1);
 
-    assert_eq!(agent_harness_lib::registered_command_count(), 0);
+    assert_eq!(
+        agent_harness_lib::registered_command_count(),
+        agent_harness_lib::phase_0a_scaffold_commands().len()
+    );
+    assert_eq!(
+        agent_harness_lib::phase_0a_scaffold_commands(),
+        ["subscribe_workspace_events"]
+    );
 
     fs::remove_dir_all(temp_root).expect("temp fixture directory should clean up");
 }

@@ -1,0 +1,10 @@
+[
+  { "name": "args-not-object", "parser": "args", "value": null },
+  { "name": "args-empty-workspace", "parser": "args", "value": { "workspace_id": "", "topic": "runtime", "channel": "__TAURI_CHANNEL__1" } },
+  { "name": "args-unknown-topic", "parser": "args", "value": { "workspace_id": "workspace-alpha", "topic": "not-a-topic", "channel": "__TAURI_CHANNEL__1" } },
+  { "name": "args-empty-channel", "parser": "args", "value": { "workspace_id": "workspace-alpha", "topic": "runtime", "channel": "" } },
+  { "name": "args-extra-key", "parser": "args", "value": { "workspace_id": "workspace-alpha", "topic": "runtime", "channel": "__TAURI_CHANNEL__1", "extra": true } },
+  { "name": "response-empty", "parser": "response", "value": "" },
+  { "name": "response-object", "parser": "response", "value": { "subscription_id": "sub-1" } },
+  { "name": "error-unknown", "parser": "error", "value": "OtherError" }
+]

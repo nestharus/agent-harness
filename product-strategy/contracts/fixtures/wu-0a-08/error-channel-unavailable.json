@@ -1,0 +1,6 @@
+{
+  "workspace_id": "workspace-alpha",
+  "topic": "runtime",
+  "channel_available": false,
+  "expected_error": "ChannelUnavailable"
+}

@@ -1,0 +1,12 @@
+[
+  { "workspace_id": "workspace-alpha", "topic": "graph", "expected": "ok" },
+  { "workspace_id": "workspace-alpha", "topic": "render", "expected": "ok" },
+  { "workspace_id": "workspace-alpha", "topic": "provider", "expected": "ok" },
+  { "workspace_id": "workspace-alpha", "topic": "optimizer", "expected": "ok" },
+  { "workspace_id": "workspace-alpha", "topic": "worker", "expected": "ok" },
+  { "workspace_id": "workspace-alpha", "topic": "question", "expected": "ok" },
+  { "workspace_id": "workspace-alpha", "topic": "recovery", "expected": "ok" },
+  { "workspace_id": "workspace-alpha", "topic": "budget", "expected": "ok" },
+  { "workspace_id": "workspace-alpha", "topic": "audit", "expected": "ok" },
+  { "workspace_id": "workspace-alpha", "topic": "runtime", "expected": "ok" }
+]

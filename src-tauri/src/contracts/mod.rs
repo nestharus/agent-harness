@@ -4,4 +4,5 @@ pub mod harness_command;
 pub mod harness_settings;
 pub mod ipc_event;
 pub mod local_storage_layout;
+pub mod subscribe_workspace_events;
 pub mod trace_context;

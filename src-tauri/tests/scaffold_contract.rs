@@ -1,6 +1,7 @@
 use std::fs;
 use std::path::{Path, PathBuf};
 
+use agent_harness_lib::phase_0a_scaffold_commands;
 use serde_json::Value;
 
 const CONTRACT_FIXTURE_DIR: &str = "product-strategy/contracts/fixtures/wu-0a-01";
@@ -135,7 +136,7 @@ fn cargo_manifest_declares_phase_0a_runtime_dependencies_without_migrations() {
 #[test]
 fn tauri_bootstrap_is_inert_and_command_free() {
     // Risk: value-slice command leakage. Level: particular-integration. Source:
-    // proposal assumption A4 and Tauri bootstrap contract.
+    // WU-0A-08 scaffold command allowlist and Tauri bootstrap contract.
     let root = repo_root();
     let main_rs = root.join("src-tauri/src/main.rs");
     let lib_rs = root.join("src-tauri/src/lib.rs");
@@ -158,8 +159,26 @@ fn tauri_bootstrap_is_inert_and_command_free() {
         lib_content.contains("registered_command_count() -> usize"),
         "lib.rs must expose command-count evidence for the inert scaffold"
     );
+
+    let scaffold_commands = phase_0a_scaffold_commands();
+    assert_eq!(scaffold_commands, ["subscribe_workspace_events"]);
     assert!(
-        !lib_content.contains("generate_handler!["),
-        "Phase 0A scaffold must not register value-slice Tauri commands"
+        lib_content.contains("tauri::generate_handler!["),
+        "Phase 0A must register its documented scaffold command handler"
+    );
+    assert!(
+        lib_content.contains("commands::subscribe_workspace_events::subscribe_workspace_events"),
+        "subscribe_workspace_events must be the registered scaffold command"
+    );
+
+    for forbidden_command in ["get_harness_settings", "ping_runtime"] {
+        assert!(
+            !lib_content.contains(&format!("commands::{forbidden_command}")),
+            "Phase 0A scaffold must not register value-slice command {forbidden_command}"
+        );
+    }
+    assert!(
+        !lib_content.contains("generate_handler![]"),
+        "Phase 0A scaffold command registration must not be empty"
     );
 }

@@ -1,0 +1,7 @@
+{
+  "workspace_id": "workspace-alpha",
+  "topic": "runtime",
+  "channel": "__TAURI_CHANNEL__1",
+  "app_state_available": false,
+  "expected_error": "AppStateUnavailable"
+}

@@ -1,0 +1,10 @@
+{
+  "workspace_id": "workspace-alpha",
+  "topic": "runtime",
+  "call_count": 2,
+  "subscription_id": {
+    "non_empty": true,
+    "unique": true,
+    "prefix": "sub-"
+  }
+}
