@@ -1,4 +1,5 @@
 pub mod contracts;
+pub mod events;
 pub mod settings;
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
