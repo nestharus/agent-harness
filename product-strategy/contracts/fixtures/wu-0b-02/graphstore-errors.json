@@ -1,0 +1,39 @@
+{
+  "errors": [
+    {
+      "fixture": "error-unknown-ref.json",
+      "variant": "UnknownRef",
+      "code": "unknown_ref"
+    },
+    {
+      "fixture": "error-duplicate-id.json",
+      "variant": "DuplicateId",
+      "code": "duplicate_id"
+    },
+    {
+      "fixture": "error-invalid-enum.json",
+      "variant": "InvalidEnum",
+      "code": "invalid_enum"
+    },
+    {
+      "fixture": "error-invalid-transition.json",
+      "variant": "InvalidTransition",
+      "code": "invalid_transition"
+    },
+    {
+      "fixture": "error-invariant-violation.json",
+      "variant": "InvariantViolation",
+      "code": "invariant_violation"
+    },
+    {
+      "fixture": "error-optimistic-conflict.json",
+      "variant": "OptimisticConflict",
+      "code": "optimistic_conflict"
+    },
+    {
+      "fixture": "error-sqlx-failure.json",
+      "variant": "SqlxFailure",
+      "code": "sqlx_failure"
+    }
+  ]
+}

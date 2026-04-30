@@ -1,0 +1,8 @@
+{
+  "created_at": "2026-04-30T10:15:30Z",
+  "updated_at": "2026-04-30T10:00:00Z",
+  "actor": {
+    "value": "agent:contract"
+  },
+  "policy_version": "phase-0b-contract-v1"
+}

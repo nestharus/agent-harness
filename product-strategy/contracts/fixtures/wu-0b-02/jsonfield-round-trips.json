@@ -1,0 +1,47 @@
+{
+  "cases": [
+    {
+      "name": "array",
+      "value": ["alpha", "beta", "gamma"]
+    },
+    {
+      "name": "map",
+      "value": {
+        "policy": "phase-0b",
+        "revision": 2,
+        "enabled": true
+      }
+    },
+    {
+      "name": "nested_ref",
+      "value": {
+        "subject": {
+          "ref": {
+            "namespace": "graph_node",
+            "value": "node_contract_001"
+          }
+        }
+      }
+    },
+    {
+      "name": "empty_array",
+      "value": []
+    },
+    {
+      "name": "null_optional",
+      "value": {
+        "optional_ref": null
+      }
+    },
+    {
+      "name": "enum_payload",
+      "value": {
+        "type": "transition",
+        "payload": {
+          "from": "draft",
+          "to": "accepted"
+        }
+      }
+    }
+  ]
+}
