@@ -1,0 +1,6 @@
+{
+  "cwd": ".",
+  "config_file": "product-strategy/contracts/fixtures/wu-0a-02/invalid-config.json",
+  "env_overrides": {},
+  "expected_error": "ConfigFileUnreadable"
+}

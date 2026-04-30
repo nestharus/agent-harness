@@ -1,0 +1,8 @@
+{
+  "workspace_id": "workspace-config",
+  "storage_root": "product-strategy/contracts/fixtures/wu-0a-02/config-storage",
+  "database_path": "product-strategy/contracts/fixtures/wu-0a-02/config-storage/config.sqlite",
+  "agent_runner_bin": "product-strategy/contracts/fixtures/wu-0a-02/bin/fake-agents",
+  "log_level": "warn",
+  "profile_name": "config"
+}

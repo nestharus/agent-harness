@@ -1,0 +1,12 @@
+{
+  "cwd": ".",
+  "config_file": null,
+  "env_overrides": {
+    "HARNESS_WORKSPACE_ID": "",
+    "HARNESS_STORAGE_ROOT": "product-strategy/contracts/fixtures/wu-0a-02/storage",
+    "HARNESS_DATABASE_PATH": "product-strategy/contracts/fixtures/wu-0a-02/storage/harness.sqlite",
+    "HARNESS_AGENT_RUNNER_BIN": "product-strategy/contracts/fixtures/wu-0a-02/bin/fake-agents",
+    "HARNESS_LOG_LEVEL": "info"
+  },
+  "expected_error": "EmptyWorkspaceId"
+}

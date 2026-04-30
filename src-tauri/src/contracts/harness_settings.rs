@@ -1,0 +1,42 @@
+use serde::{Deserialize, Serialize};
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(deny_unknown_fields)]
+pub struct HarnessSettings {
+    pub workspace_id: String,
+    pub storage_root: String,
+    pub database_path: String,
+    pub agent_runner_bin: String,
+    pub log_level: HarnessLogLevel,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub profile_name: Option<String>,
+}
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "lowercase")]
+pub enum HarnessLogLevel {
+    Trace,
+    Debug,
+    Info,
+    Warn,
+    Error,
+}
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
+pub enum SettingsError {
+    EmptyWorkspaceId,
+    EmptyStorageRoot,
+    EmptyDatabasePath,
+    MissingAgentRunnerBin,
+    InvalidLogLevel,
+    ConfigFileUnreadable,
+}
+
+impl std::fmt::Display for SettingsError {
+    fn fmt(&self, formatter: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let value = serde_json::to_string(self).map_err(|_| std::fmt::Error)?;
+        formatter.write_str(value.trim_matches('"'))
+    }
+}
+
+impl std::error::Error for SettingsError {}

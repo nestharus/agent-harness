@@ -1,0 +1,7 @@
+{
+  "HARNESS_WORKSPACE_ID": "workspace-env",
+  "HARNESS_STORAGE_ROOT": "product-strategy/contracts/fixtures/wu-0a-02/storage",
+  "HARNESS_DATABASE_PATH": "product-strategy/contracts/fixtures/wu-0a-02/storage/env.sqlite",
+  "HARNESS_LOG_LEVEL": "debug",
+  "HARNESS_PROFILE_NAME": "env"
+}
