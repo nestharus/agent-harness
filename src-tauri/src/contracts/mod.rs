@@ -1,5 +1,6 @@
 pub mod backend_span_event;
 pub mod event_topic;
+pub mod evidenceartifact;
 pub mod fake_agents_fixture;
 pub mod graphconfiguration;
 pub mod graphnode;

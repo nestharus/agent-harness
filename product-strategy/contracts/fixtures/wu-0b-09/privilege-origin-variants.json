@@ -1,0 +1,11 @@
+{
+  "variants": [
+    "system",
+    "user",
+    "tool",
+    "model",
+    "worker",
+    "optimizer",
+    "reviewer"
+  ]
+}

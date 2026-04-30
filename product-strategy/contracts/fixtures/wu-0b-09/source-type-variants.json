@@ -1,0 +1,15 @@
+{
+  "variants": [
+    "cli_transcript",
+    "tool_call",
+    "tool_result",
+    "file_read",
+    "file_patch",
+    "command_output",
+    "user_message",
+    "worker_output",
+    "optimizer_prompt",
+    "reviewer_output",
+    "external_document"
+  ]
+}

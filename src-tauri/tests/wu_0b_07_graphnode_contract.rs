@@ -117,7 +117,7 @@ async fn empty_graphnode_fixture() -> (SqlitePool, GraphNodeRepo) {
     let fixture = create_graphstore_fixture(GraphStoreSeedPlan::default())
         .await
         .expect("empty graphstore fixture should apply migrations");
-    assert_eq!(fixture.pool.migrations_applied, vec![1, 4, 5, 6, 7]);
+    assert_eq!(fixture.pool.migrations_applied, vec![1, 4, 5, 6, 7, 9]);
     let pool = fixture.pool.sqlite;
 
     let policy_repo = PolicySetRepo::new(pool.clone());
@@ -383,6 +383,7 @@ async fn graphnode_wu_has_no_operator_visible_behavior_or_extra_tables() {
     assert_eq!(
         sqlite_table_names(&pool).await,
         [
+            "evidence_artifacts",
             "graph_configurations",
             "graph_nodes",
             "graph_workspaces",

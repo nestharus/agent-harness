@@ -17,6 +17,7 @@
     "0b"
   ],
   "allowed_runtime_tables": [
+    "evidence_artifacts",
     "graph_configurations",
     "graph_nodes",
     "graph_workspaces",

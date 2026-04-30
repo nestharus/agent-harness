@@ -1,0 +1,5 @@
+{
+  "parent_path_blob_ref": "../outside.txt",
+  "absolute_blob_ref": "/tmp/agent-harness-outside-evidence.txt",
+  "symlink_blob_ref": "evidence/symlink-outside.txt"
+}

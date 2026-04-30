@@ -1,0 +1,30 @@
+{
+  "unknown_workspace": {
+    "evidence_id": {
+      "value": "evidence-artifact-unknown-workspace",
+      "namespace": "workspace-alpha"
+    },
+    "workspace_id": {
+      "value": "workspace-missing",
+      "namespace": "workspace"
+    },
+    "source_type": "external_document",
+    "source_uri": "https://example.invalid/doc",
+    "source_session_id": null,
+    "tool_protocol": "none",
+    "correlation_key": null,
+    "content_hash": "sha256:unknown-workspace-content",
+    "blob_ref": "evidence/unknown-workspace.txt",
+    "privilege_origin": "reviewer",
+    "capture_state": "captured",
+    "captured_at": "2026-04-30T14:20:00Z",
+    "meta": {
+      "created_at": "2026-04-30T14:20:00Z",
+      "updated_at": "2026-04-30T14:20:00Z",
+      "actor": {
+        "value": "evidence-author"
+      },
+      "policy_version": "v1.0.0"
+    }
+  }
+}
