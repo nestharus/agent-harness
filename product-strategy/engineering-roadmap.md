@@ -4,7 +4,7 @@
 
 `agent-harness` is currently a strategy-only worktree. `product-strategy/engineering-research.md` reports no harness application code: no `src-tauri/`, `src/`, `apps/`, `packages/`, `migrations/`, `tests/`, daemon, API service, or infrastructure directories exist. The only implementation-adjacent substrate is external: `/home/nes/.local/bin/agents` from `agent-runner`, plus the source and local configuration under `/home/nes/projects/agent-runner/` and `~/.config/oulipoly-agent-runner/`.
 
-The reusable substrate is meaningful but bounded. `agent-runner` already provides multi-provider invocation, balancing, `--resume`, trace trees through `OULIPOLY_INVOCATION` / `OULIPOLY_PARENT_INVOCATION`, session ingestion into `session_turns`, provider diagnostics, quota windows, and session-id capture for Claude and Codex. Round 4 incorporates proposal-r5's `SessionOverrideContract` boundary: the harness owns graph context, repack, render, audit, and worker dispatch state; the `agents` binary owns provider routing, session porting, and per-CLI storage knowledge. The research also identifies useful upstream Tauri patterns: `tauriInvoke` / `Channel` wrappers, `#[tauri::command]`, app-state guarded backend commands, and subprocess composition. Those are patterns and external services, not harness code.
+The reusable substrate is meaningful but bounded. `agent-runner` already provides multi-provider invocation, balancing, `--resume`, trace trees through `OULIPOLY_INVOCATION` / `OULIPOLY_PARENT_INVOCATION`, session ingestion into `session_turns`, provider diagnostics, quota windows, session-id capture for Claude and Codex, and the landed `agents session` locate/export/import-replace/pause-handshake/schema-probe surfaces. Round 5 incorporates proposal-r6's simplified `SessionOverrideContract` boundary: the harness owns graph context, repack, render, audit, and worker dispatch state; the `agents` binary owns provider routing, session porting, per-CLI storage knowledge, and transcript import/export mutation. The research also identifies useful upstream Tauri patterns: `tauriInvoke` / `Channel` wrappers, `#[tauri::command]`, app-state guarded backend commands, and subprocess composition. Those are patterns and external services, not harness code.
 
 The harness itself must be built from scratch around the fixed substrate in `proposal.md`: Tauri v2, Bun, Turbo, React 19, TanStack Router/Query, Tailwind v4, Vitest, Playwright, Lefthook, Changesets, Commitlint, Rust, Tokio, and SQLite. The proposal's local SQLite data model spans `GraphWorkspace`, `GraphConfiguration`, `GraphNode`, `NodeRevision`, `GraphSnapshot`, `GraphEdge`, `IdentityEvent`, `SummaryContract`, `EvidenceArtifact`, `ProvenancePointer`, `WorkingSetSnapshot`, `GraphAction`, `AgentWalkState`, `WorkerSlice`, `WorkerRun`, `OrchestratorTurn`, `QuestionArtifact`, `ToolCallProvenance`, `OptimizerRequest`, `OptimizerEdit`, `ConflictRecord`, `ProviderState`, `EntitlementSnapshot`, `CapabilityFingerprint`, `BudgetLedger`, `RecoveryAction`, `PolicySet`, and `AuditEvent`. None of those tables, migrations, repositories, commands, UI panes, or test fixtures exist yet.
 
@@ -33,7 +33,7 @@ No `engineering-surfaces.md` was written. I found no problem surface under the o
 | BudgetLedger core tables and token/cache accounting interfaces | VS-001, VS-004, VS-008, VS-009, VS-010, VS-015, VS-016, VS-019, VS-020, VS-021 | No; agent-runner quota state is provider telemetry only | M |
 | ProviderStateMonitor, `ProviderState`, `EntitlementSnapshot`, `CapabilityFingerprint`, and denial-reason taxonomy | VS-001, VS-006, VS-015, VS-016, VS-017, VS-020, VS-021 | Partial external substrate only; agent-runner has provider config, quota, resume config, diagnostics | M |
 | CLI subprocess supervisor around `/home/nes/.local/bin/agents` | VS-001, VS-003, VS-006, VS-009, VS-015, VS-016, VS-017, VS-020, VS-021 | Partial external substrate only; harness still needs process lifecycle, prompt files, env-var propagation, session-id capture, trace stitching, cancellation, and child acceptance | M |
-| `SessionOverrideContract` trait, v1 `AgentRunnerDbAdapter`, agent-runner-binding/schema-version probe, and fake-adapter fixtures | VS-010, VS-012, VS-018, VS-020, VS-021 | No harness code; agent-runner currently exposes SQLite state, session chains/turns, transcript locators, and trace, but not stable `agents session` import/export commands | M |
+| `SessionOverrideContract` trait, `AgentRunnerCliAdapter`, schema-probe/safe-import gate, and fake-adapter fixtures | VS-010, VS-012, VS-018, VS-020, VS-021 | No harness code; agent-runner now exposes stable `agents session` locate/export/import-replace/pause-handshake/schema-probe commands for the adapter to consume | M |
 | Hook/MCP/plugin injection scaffold and capability boundary abstraction | VS-001, VS-003, VS-006, VS-008, VS-009, VS-015, VS-017, VS-018 | No; research says no harness MCP or hook/plugin code exists | L |
 | Tauri IPC commands and Channel event stream layer | VS-001, VS-005, VS-006, VS-007, VS-010, VS-016, VS-017, VS-020, VS-021 | Pattern only from agent-runner `invoke` / `Channel` | M |
 | `AgentWalkState` schema and navigation state service shell | VS-001, VS-007, VS-008, VS-009, VS-012, VS-013 | No | M |
@@ -248,11 +248,11 @@ No `engineering-surfaces.md` was written. I found no problem surface under the o
 
 **What is new:** Optimizer scoping, prompt/response schema, edit validation, merge attempts, conflict-on-stale-base behavior, summary/stale UI, and the turn-decomposition/detail-injection router write-back path over `SessionOverrideContract`.
 
-**Session override impact:** VS-010 still owns turn decomposition, detail-injection routing, stale-node detection, summary regeneration, and optimizer-owned merge attempts. The r4 change is only the session write mechanism. When the turn-decomposition service or detail-injection-router service needs to replace a packed foreground transcript, it calls `SessionOverrideContract.replace_transcript(session_ref, packed_transcript, preconditions)`; when it only needs to add synthetic handoff or continuation turns, it calls `SessionOverrideContract.append_turns(session_ref, turns, preconditions)`. It must not open, truncate, rewrite, or append per-CLI JSONL files directly. The write-back call records preimage hashes, schema probe result, provider/session location, audit event, and provenance pointers through the contract implementation.
+**Session override impact:** VS-010 still owns turn decomposition, detail-injection routing, stale-node detection, summary regeneration, and optimizer-owned merge attempts. The round-5 simplification is only the session write mechanism. When the turn-decomposition service or detail-injection-router service needs to replace a packed foreground transcript, it calls `SessionOverrideContract.replace_transcript(session_ref, packed_transcript, preconditions)`; when it only needs to add synthetic handoff or continuation turns, it calls `SessionOverrideContract.append_turns(session_ref, turns, preconditions)`. It must not open, truncate, rewrite, or append per-CLI JSONL files directly. The write-back call records preimage hashes, schema probe result, provider/session location, audit event, and provenance pointers through `AgentRunnerCliAdapter`.
 
 **Foundation dependencies:** Optimizer queue/edit store, RenderEngine, SummaryContract validators, evidence/provenance, BudgetLedger, PolicyEngine, ConflictRecord base, `SessionOverrideContract`, IPC/UI shell.
 
-**Phase-bind audit:** Phase 0A provides the repo/runtime shell, fake `agents`, IPC harness, and local test commands used by optimizer and override contract tests. Phase 0B provides `OptimizerRequest`, `OptimizerEdit`, graph snapshots, summary contracts, evidence, audit, and conflict schemas. Phase 0C provides RenderEngine, PolicyEngine, BudgetLedger, optimizer queue shell, agent-runner subprocess/trace contract, and the `SessionOverrideContract` trait plus v1 adapter probe. If the SessionOverrideContract work units are not already present when this slice starts, the cascade must add them as Phase 0C-r4 prerequisites before VS-010 can write back to an `agents` session. Phase 1 contributes the evidence/audit and budget primitives used by acceptance. Phase 2 owns the value behavior.
+**Phase-bind audit:** Phase 0A provides the repo/runtime shell, fake `agents`, IPC harness, and local test commands used by optimizer and override contract tests. Phase 0B provides `OptimizerRequest`, `OptimizerEdit`, graph snapshots, summary contracts, evidence, audit, and conflict schemas. Phase 0C provides RenderEngine, PolicyEngine, BudgetLedger, optimizer queue shell, agent-runner subprocess/trace contract, and the `SessionOverrideContract` trait backed by `AgentRunnerCliAdapter`. Phase 1 contributes the evidence/audit and budget primitives used by acceptance. Phase 2 owns the value behavior.
 
 **Parallelizable with:** Mostly yes with VS-008 if render invalidation boundaries are fixed. Partial with VS-009 because orchestrator turns enqueue advisory requests consumed by the optimizer.
 
@@ -312,11 +312,11 @@ No `engineering-surfaces.md` was written. I found no problem surface under the o
 
 **What is new:** Topology edit operations, cross-reference discovery, repack planning, identity forwarding application, conflict generation, UI inspection, and packed-transcript delivery through `SessionOverrideContract`.
 
-**Session override impact:** VS-012 preserves the `<200K` bound axiom and the existing repack planner semantics. Its planner output is no longer described as a direct JSONL rewrite. The repack-planner service produces a bounded packed transcript plus graph mutation candidates; after topology and identity validation, any session transcript replacement flows through `SessionOverrideContract.replace_transcript(session_ref, packed_transcript, preconditions)`. The contract owns session location, schema/storage probing, idle/race refusal, atomic write protocol, audit event emission, and adapter-specific mutation. VS-012 may inspect normalized transcript evidence, but it does not encode per-CLI storage formats.
+**Session override impact:** VS-012 preserves the `<200K` bound axiom and the existing repack planner semantics. Its planner output is no longer described as a direct JSONL rewrite. The repack-planner service produces a bounded packed transcript plus graph mutation candidates; after topology and identity validation, any session transcript replacement flows through `SessionOverrideContract.replace_transcript(session_ref, packed_transcript, preconditions)`. `AgentRunnerCliAdapter` owns session location, schema/storage probing, idle/race refusal, import-replace handoff, and audit event emission through documented `agents session` commands. VS-012 may inspect normalized transcript evidence, but it does not encode per-CLI storage formats.
 
 **Foundation dependencies:** GraphStore, OptimizerEdit store, Identity resolver, ConflictRecord workflow, PolicyEngine, evidence/provenance, `SessionOverrideContract`, topology invariant tests.
 
-**Phase-bind audit:** Phase 0A provides the repository/runtime shell and fixture harness for topology and override tests. Phase 0B provides graph, edge, identity, evidence, audit, optimizer edit, conflict, and policy schemas. Phase 0C provides the repack-adjacent render/policy engines and `SessionOverrideContract` trait/v1 adapter. If those session-override work units are absent, they land in Phase 0C-r4 and VS-012 must treat direct transcript replacement as blocked. Phase 1/2 provide render inspection, summary validation, budget/evidence primitives, navigation, turns, and VS-010's optimizer refresh path. VS-013 remains the merge/identity prerequisite before VS-012 topology mutation.
+**Phase-bind audit:** Phase 0A provides the repository/runtime shell and fixture harness for topology and override tests. Phase 0B provides graph, edge, identity, evidence, audit, optimizer edit, conflict, and policy schemas. Phase 0C provides the repack-adjacent render/policy engines and `SessionOverrideContract` trait backed by `AgentRunnerCliAdapter`. Phase 1/2 provide render inspection, summary validation, budget/evidence primitives, navigation, turns, and VS-010's optimizer refresh path. VS-013 remains the merge/identity prerequisite before VS-012 topology mutation.
 
 **Parallelizable with:** Not safely parallelizable with VS-013 without tight coordination. VS-012 design and fixture work may begin while VS-013 is underway, but topology mutation should not merge before the VS-013 identity resolver and conflict state machine exist. Partial with VS-011 and VS-014 due shared `OptimizerEdit`, `GraphEdge`, conflict, render traversal, and policy surfaces.
 
@@ -358,7 +358,7 @@ No `engineering-surfaces.md` was written. I found no problem surface under the o
 
 **Foundation dependencies:** WorkerSlice/WorkerRun schema, ProviderStateMonitor, BudgetLedger, CLI supervisor, hook/MCP/plugin scaffold, RenderEngine, PolicyEngine, evidence/audit, fake `agents`.
 
-**Phase-bind audit:** Phase 0A provides the running shell, fake `agents`, subprocess test harness, prompt-file fixtures, and local commands. Phase 0B provides `WorkerSlice`, `WorkerRun`, graph snapshots, evidence, audit, provider, and budget schemas. Phase 0C provides the `agents` subprocess supervisor, provider probes, render/policy engines, and fake `agents` test surface. Phase 1 provides accepted evidence/audit, budget, provider preflight, and render inspection contracts. Phase 4 owns the worker launch value behavior. Per-CLI session JSONL knowledge remains delegated to the `agents` binary and, for later reintegration write-back, to `SessionOverrideContract`.
+**Phase-bind audit:** Phase 0A provides the running shell, fake `agents`, subprocess test harness, prompt-file fixtures, and local commands. Phase 0B provides `WorkerSlice`, `WorkerRun`, graph snapshots, evidence, audit, provider, and budget schemas. Phase 0C provides the `agents` subprocess supervisor, provider probes, render/policy engines, fake `agents` test surface, and `AgentRunnerCliAdapter` for later session override write-back. Phase 1 provides accepted evidence/audit, budget, provider preflight, and render inspection contracts. Phase 4 owns the worker launch value behavior. Per-CLI session JSONL knowledge remains delegated to the `agents` binary and, for later reintegration write-back, to `SessionOverrideContract`.
 
 **Parallelizable with:** No same-phase pair. Cross-phase, it can consume VS-006 provider preflight and VS-004 budget ledger if those APIs are stable.
 
@@ -424,7 +424,7 @@ No `engineering-surfaces.md` was written. I found no problem surface under the o
 
 **Foundation dependencies:** WorkerSlice/WorkerRun records, evidence/provenance, ConflictRecord workflow, OptimizerRequest store, PolicyEngine, `SessionOverrideContract`, audit writer, UI shell.
 
-**Phase-bind audit:** Phase 0A provides the shell, fake `agents`, IPC/test harness, and worker transcript fixtures. Phase 0B provides worker, evidence, audit, optimizer request, conflict, and graph schemas. Phase 0C provides policy/optimizer shells, agent-runner trace/session contract, and the `SessionOverrideContract` trait/v1 adapter. Phase 4 provides worker launch records, while VS-016/VS-017 provide board and continuation state. If the session-override work units have not landed by Phase 5, VS-018 may stage and emit optimizer requests but must block session transcript write-back.
+**Phase-bind audit:** Phase 0A provides the shell, fake `agents`, IPC/test harness, and worker transcript fixtures. Phase 0B provides worker, evidence, audit, optimizer request, conflict, and graph schemas. Phase 0C provides policy/optimizer shells, agent-runner trace/session contract, and the `SessionOverrideContract` trait backed by `AgentRunnerCliAdapter`. Phase 4 provides worker launch records, while VS-016/VS-017 provide board and continuation state.
 
 **Parallelizable with:** Partial with VS-016 and VS-017 due shared worker state and evidence/session correlation.
 
@@ -622,7 +622,7 @@ Phase 0C owns the unified agent-runner contract the rest of the harness depends 
 
 #### SessionOverrideContract foundation
 
-Phase 0C-r4 adds the versioned Rust trait that is the only harness write-back path into an `agents`-owned session transcript:
+Phase 0C-r5 keeps the versioned Rust trait as the only harness write-back path into an `agents`-owned session transcript:
 
 ```rust
 trait SessionOverrideContract {
@@ -644,21 +644,22 @@ trait SessionOverrideContract {
 }
 ```
 
-The v1 implementation is `AgentRunnerDbAdapter`. It ships with the harness because the current local agent-runner surface exposes enough pinned state to support a narrow adapter: headless CLI mode through `/home/nes/.local/bin/agents`, persistent SQLite state at `~/.local/share/oulipoly-agent-runner/state.db`, `invocations`, `session_turns`, `session_chains`, `session_chain_segments`, configured `sessions.toml` transcript locators, and trace output through `agents trace --json`. The adapter is schema-version-pinned by installed `agents` binary identity plus exact SQLite table/column/index probes. Unknown binary identity, missing expected columns, unsupported storage kind, ambiguous session, in-flight write, or failed preimage hash returns a refusal before any transcript file mutation.
+`AgentRunnerCliAdapter` is the only implementation. It shells out to `/home/nes/.local/bin/agents` or the configured `agents` binary and consumes the documented `agents session locate`, `agents session export`, `agents session import-replace`, `agents session pause-handshake`, `agents session resume-handshake`, and `agents session schema-probe` surfaces. Before each replace, truncate, or append override, the harness runs `agents session schema-probe` and requires the expected feature flags plus `safe_for_import_replace=true`; incompatible output, missing feature flags, or `safe_for_import_replace=false` returns `unsupported_schema` before mutation. If locate/export/import reports `unsupported-storage`, the harness keeps the graph update as local evidence and refuses transcript mutation gracefully.
 
-The v1 adapter may read `state.db` and known transcript locator output, write a same-directory temp file, atomically replace known per-CLI JSONL files, and update the minimum agent-runner state rows required for consistency. That direct DB/JSONL access is an adapter detail, not a general harness responsibility. It must not edit `agents`, provider routing, `providers.toml`, `sessions.toml`, model TOMLs, auth stores, quota scripts, or vendor credential stores.
+`replace_transcript` exports the current canonical JSONL, computes the preimage hash, acquires a `pause-handshake` advisory lease for mid-session writes, and calls `agents session import-replace <id> --from-file <path> --preimage-sha256 <hash>`. `append_turns` edits the exported canonical JSONL at valid turn boundaries and then uses the same import-replace path. The adapter records schema-probe result, session location, preimage/postimage hashes, pause token metadata, import receipt, audit event, and provenance pointers; it does not read or write `agent-runner` SQLite tables or provider-native transcript files directly.
 
-The v2 implementation is `AgentRunnerCliAdapter`. It swaps in when upstream `agent-runner` exposes the supported session surface the harness depends on:
+VS-010, VS-012, VS-018, VS-020, and VS-021 depend on this trait and its `AgentRunnerCliAdapter` implementation.
 
-| Feature request | Harness dependency |
-|---|---|
-| `agents session locate <id>` | Resolve provider, storage kind, active chain/segment, transcript path when exportable, mutability state, and ambiguity without direct `state.db` reads. |
-| `agents session export <id>` | Read canonical or normalized transcript material with source metadata. |
-| `agents session import-replace <id>` | Atomically replace transcript material and update runner state without harness-owned file/DB mutation. |
-| Pause or lock handshake | Prove session idle or acquire an override lease before replacement/append. |
-| Schema-version or supported-surface probe | Identify binary and state contract before any write, returning a machine-readable refusal for unsupported versions. |
+Consumed agent-runner features:
 
-VS-010, VS-012, VS-018, VS-020, and VS-021 depend on this trait, not on either adapter. v1 is the shipping harness adapter now; v2 is a same-trait replacement when the feature requests land upstream.
+| Feature | Landed CLI surface | Agent-runner commit / PR | Harness use |
+|---|---|---|---|
+| Locate | `agents session locate <id> [--json]` | `45324e4` / #14 | `locate_session` and `get_session_metadata`; refuses `unsupported-storage` instead of guessing from SQLite. |
+| Schema probe | `agents session schema-probe` | `32a1f2e` / #15 | `schema_version_probe`; verifies feature flags and `safe_for_import_replace`. |
+| Export | `agents session export <id> [--format canonical-jsonl]` | `8635dd1` / #16 | `read_transcript`; canonical JSONL with source byte ranges and SHA-256 preimages. |
+| Pause handshake | `agents session pause-handshake <id> [--ttl-ms]` and `resume-handshake` | `22fa942` / #17 | Advisory mid-session lease; paired with preimage gating for race safety. |
+| Import replace | `agents session import-replace <id> [--from-file] [--preimage-sha256]` | `941e6e8` / #18, reader unification `81b157e` / #19, lock/module fixes `5a1f204` / #21 | `replace_transcript`, `truncate_after`, and `append_turns` via edited canonical JSONL and atomic replacement. |
+| CLI docs | README session command documentation | `163fcbd` / #20 | Stable command contract for harness tests and compatibility checks. |
 
 Phase binding for the SessionOverrideContract work units:
 
@@ -666,11 +667,10 @@ Phase binding for the SessionOverrideContract work units:
 |---|---|
 | Phase 0A | Fake `agents`, temp filesystem/SQLite fixtures, IPC harness, local test commands, and prompt-file plumbing used by adapter tests. |
 | Phase 0B | `SessionOverrideRecord`, audit/provenance references, graph-version and preimage/postimage fields, fixture schemas. |
-| Phase 0C-r4 | `SessionOverrideContract` trait, adapter selection config, `AgentRunnerDbAdapter`, agent-runner-binding and schema-version/supported-surface probe, fake adapter, crash-recovery states, idle/refusal taxonomy, and contract tests against agent-runner DB/transcript fixtures. |
+| Phase 0C-r5 | `SessionOverrideContract` trait, `AgentRunnerCliAdapter`, fake adapter, schema-probe feature gating, `safe_for_import_replace` verification, crash-recovery states, idle/refusal taxonomy, and contract tests against fake and real `agents session` command fixtures. |
 | Phase 1 | Evidence/audit inspector support for override receipts and refusal reasons, so VS-001/VS-003 can show what was imposed or refused without teaching UI code per-CLI storage details. |
-| Future upstream / v2 | `AgentRunnerCliAdapter` after `agents session locate/export/import-replace`, pause-handshake, and schema probe land in agent-runner. |
 
-Anti-scope clarification: this roadmap does not prescribe Claude, Codex, opencode, or future CLI JSONL record formats outside the v1 adapter's pinned implementation tests. The roadmap does enumerate the supported upstream surface the harness needs from `agent-runner`: locate, export, import-replace, pause/lock handshake, and schema/supported-surface probe.
+Anti-scope clarification: this roadmap does not prescribe Claude, Codex, opencode, or future CLI JSONL record formats. The harness does not touch `agent-runner` `state.db` directly, does not depend on the SQLite schema as a contract, and does not bypass `pause-handshake` for mid-session writes. Stable session metadata and mutation flow only through `agents session locate`, `schema-probe`, `export`, `pause-handshake` / `resume-handshake`, and `import-replace`.
 
 #### Cross-slice contract: `OptimizerRequest` emission
 
@@ -823,19 +823,19 @@ The engineering dependency graph is:
 
 Phase 0 foundations -> Phase 1 observable context.
 
-Phase 0C-r4 SessionOverrideContract -> VS-010, VS-012, VS-018, VS-020, VS-021.
+Phase 0C-r5 SessionOverrideContract -> VS-010, VS-012, VS-018, VS-020, VS-021.
 
 VS-001, VS-002, VS-004 -> VS-008.
 
 VS-001, VS-003, VS-004, VS-006 -> VS-009.
 
-VS-002, VS-003, VS-004, VS-005, Phase 0C-r4 SessionOverrideContract -> VS-010.
+VS-002, VS-003, VS-004, VS-005, Phase 0C-r5 SessionOverrideContract -> VS-010.
 
 VS-005, VS-010 -> VS-011.
 
 VS-009, VS-010 -> VS-013.
 
-VS-008, VS-010, VS-013, Phase 0C-r4 SessionOverrideContract -> VS-012.
+VS-008, VS-010, VS-013, Phase 0C-r5 SessionOverrideContract -> VS-012.
 
 VS-002, VS-003, VS-010 -> VS-014.
 
@@ -845,7 +845,7 @@ VS-015 -> VS-016.
 
 VS-015, VS-006 -> VS-017.
 
-VS-015, VS-010, VS-013, VS-003, Phase 0C-r4 SessionOverrideContract -> VS-018.
+VS-015, VS-010, VS-013, VS-003, Phase 0C-r5 SessionOverrideContract -> VS-018.
 
 VS-010, VS-018, VS-003, VS-004 -> VS-019.
 
