@@ -1,6 +1,6 @@
-# AI — Coverage Risk Assessment (Phase 0C, round 4)
+# AI — Coverage Risk Assessment (Phase 0C, rounds 4–5)
 
-**Rating: LOW**
+**Round 4 rating: LOW** (preserved). **Round 5 rating: LOW.**
 
 ## Scope and inputs
 
@@ -252,3 +252,218 @@ The LOW rating depends on the following conditions remaining true in subsequent 
 7. The agent-runner feature-request register (5 named features) is unchanged. If the register grows or shrinks, the `Blocked-on:` clauses on WU-0C-N1..N5 and on per-VS blocks must be updated in lockstep.
 8. The Round 4 Refactor Ledger (lines 3260–3278) remains the audit trail for any future narrowing of agent-runner / session-turn WUs. Any future narrowing must record (1) the violation under repair, (2) the fix, (3) the SessionOverrideContract dependency, and (4) the kept/merged/removed disposition. No WU may be silently emptied or merged.
 9. The cross-phase outgoing edges added in r4 (Phase 1 worker launcher / output reintegration; Phase 2 turn-decomposition / detail-injection-router; Phase 3 repack-planner) are honored when those Phase 1+ AI roadmaps are produced — downstream WUs must declare incoming edges from WU-0C-N1..N5 rather than re-implementing transcript write-back.
+
+---
+
+# Round 5 entry — Coverage Risk Assessment
+
+**Round 5 rating: LOW.**
+
+## Round 5 scope and inputs
+
+- Artifact: `product-strategy/ai-roadmap-phase-0c.md` at commit `1548cf4` (round 5 brownfield, Option A).
+- Cascade: proposal-r6 + engineering-roadmap-r5 — agent-runner shipped all five SessionOverrideContract feature requests (`agents session locate`, `agents session export`, `agents session import-replace`, `agents session pause-handshake`/`resume-handshake`, `agents session schema-probe`). The v1 direct `AgentRunnerDbAdapter` is dropped; `AgentRunnerCliAdapter` is the only `SessionOverrideContract` implementation.
+- Per-WU edits in r5: WU-0C-N3 rescoped to `AgentRunnerCliAdapter` against landed `agents session …` surfaces; WU-0C-N4 dropped (replaced with a "Removed in r5" stub that redirects to WU-0C-N3 schema-probe AC); all `Blocked-on:` annotations removed across Phase 0C; WU count 77 → 76 (the WU-0C-N4 stub heading remains for diff-historical reference but contains no Contract / Test boundary / Code boundary / acceptance criteria — it is not a WU under D1 ownership and is excluded from the Parallelization Map and dependency graph). Wave sums re-derived to 23+18+13+6+5+4+2+2+2+1 = 76 (line 3388 of the artifact).
+- Convergence rule from `~/ai/conventions/audit-history.md`: r1=LOW, r2=LOW, r3=LOW, r4=LOW for Coverage in this per-phase loop. r5 is brownfield-driven by an external cascade (proposal-r6/engineering-roadmap-r5); coverage rules are re-checked against the rescoped WU-0C-N3 surface, the dropped WU-0C-N4, and the unchanged remainder of the inventory.
+
+## Round 5 diff scope (verified)
+
+The r5 commit `1548cf4d13f2159fe600d5cb0ca040a98d89a00d` makes only the following diffs to `product-strategy/ai-roadmap-phase-0c.md`:
+
+1. WU-0C-N3 contract block (lines 1739–1790) replaced: schema_object now `Rust service object implementing SessionOverrideContract` with constructor `AgentRunnerCliAdapter::new(agents_binary, evidence_writer, audit_writer, recovery_writer)`; the trait→CLI mapping enumerates `schema_version_probe → agents session schema-probe`, `locate_session → agents session locate <id> [--json]`, `read_transcript → agents session export <id> [--format canonical-jsonl]`, `replace_transcript → agents session import-replace <id> --from-file <path> [--preimage-sha256 <hex>]`, `truncate_after / append_turns → read_transcript + canonical JSONL edit + replace_transcript`, `get_session_metadata → agents session locate <id> --json mapped to the metadata subset`, plus the atomic-mid-session-override `pause-handshake` → `import-replace` → `resume-handshake` triple.
+2. WU-0C-N3 acceptance criteria replaced: 9 method-level binary criteria (line 1769–1778; see F01 below), revised single-concern PR constraint (no harness-side schema-probe wrapper WU), and a new "Revision rationale" note that classifies the change as externally driven `fix-created-family` gen 0.
+3. WU-0C-N3 dependencies and Parallelizable-with lines reduced: removes incoming `WU-0C-N4` and `WU-0C-16`; keeps `WU-0C-N1`, `WU-0C-N2`, `WU-0A-15`, `WU-0B-09`, `WU-0B-15`, `WU-0B-31`. Wave moves from 4 → 3.
+4. WU-0C-N4 contract block (formerly lines 1735–1790 in r4) replaced with a single removed-in-r5 paragraph (line 1735–1737). No Contract, Test boundary, Code boundary, acceptance criteria, dependencies, parallelization, or single-concern PR constraint remain.
+5. All `Blocked-on:` annotations across Phase 0C removed. `grep -in "blocked-on\|Blocked on\|blocked on" product-strategy/ai-roadmap-phase-0c.md` returns 0 hits; remaining `blocked` strings are domain values (`budget_state = blocked`, `blocked_refs`, "poison-quarantined … nodes are blocked unless policy explicitly permits …"), not annotations.
+6. Round 4 Refactor Ledger gains a "Round 5 update" footnote (line 3221) clarifying the WU-0C-N4 removal and WU-0C-N3 rescope; the 11 ledger rows themselves are unchanged.
+7. Dependency Graph block (lines 3275–3278) updated to the four-line N-family edge set: N2 ← 0B; N1 ← N2 + 0B; N3 ← N1, N2, 0A-15, 0B-09, 0B-15, 0B-31; N5 ← N1, N2, 0B. WU-0C-N4 row removed.
+8. Parallelization Map (lines 3392–3401) re-derived: Wave 1 (23 WUs) carries WU-0C-N2; Wave 2 (18 WUs) carries WU-0C-N1; Wave 3 (13 WUs) carries WU-0C-N3 and WU-0C-N5; remaining waves unchanged. Sum 76.
+9. Critical Path "Session override path" block (lines 3361–3366) replaced: `WU-0C-N2 → WU-0C-N1 → WU-0C-N5` and `WU-0C-N1 → WU-0C-N3` (two short paths; no WU-0C-N4 node).
+10. Stitch Notes "SessionOverrideContract WU-0C-N1/N2/N3/N5 …" lines updated across foundation row (3586), per-VS blocks for VS-010/012/018/020/021 (3610, 3612, 3618, 3620, 3621), cross-phase outgoing block (3625–3628), and explicit non-ownership notes (3637). All references switched from "WU-0C-N1..N5" to "WU-0C-N1/N2/N3/N5"; no Phase 0C consumer or cross-phase outgoing edge references the dropped WU-0C-N4.
+11. Run Report family-watch table (lines 3531, 3539, 3541, 3552) records the round-5 fix-created-family gen 0 classification and the simplification-drift watch.
+
+No other Contract, Test boundary, Code boundary, acceptance criterion, dependency, parallelization, or stitch line is changed in r5. The 70+ WUs outside the WU-0C-N1..N5 family are byte-untouched (verified by `git show 1548cf4 --stat`: only `plans/audit/ai-roadmap-phase-0c.md` and `product-strategy/ai-roadmap-phase-0c.md` change; the diff localizes to the WU-0C-N3/N4 contract blocks, the dependency-graph N-family rows, the Parallelization Map header/wave-1-3 rows, the Critical Path session-override block, the Refactor Ledger footnote, the Run Report family-watch rows, and the Stitch Notes SessionOverrideContract references).
+
+## Findings
+
+### R5-COVERAGE-F01. WU-0C-N3 carries ≥6 binary acceptance criteria covering each landed CLI surface
+
+**Severity: NONE (positive)**
+
+WU-0C-N3 acceptance criteria (`product-strategy/ai-roadmap-phase-0c.md` lines 1769–1778) total 9 binary checks. Each of the 5 named CLI surfaces from the agent-runner feature register has at least one binary criterion:
+
+| CLI surface | Owning WU-0C-N3 criterion(s) | Binary form |
+|---|---|---|
+| `agents session locate <id> [--json]` | crit 1 ("Each trait method invokes the corresponding `agents session` subcommand and maps stdout/stderr JSON into the WU-0C-N2 DTOs and `SessionOverrideError` variants"); crit 2 ("`unsupported-storage` exit/error code from locate/export/import surfaces as `SessionOverrideError::UnsupportedStorage` and performs no harness-side transcript mutation") | Trait `locate_session` and `get_session_metadata` both invoke `agents session locate`; success returns a `SessionLocation`/`SessionMetadata` DTO; named error variants `UnsupportedStorage`, `SessionNotFound`, `AmbiguousSession` reachable via the WU-0C-N1 trait fixture set. |
+| `agents session export <id> [--format canonical-jsonl]` | crit 1; crit 2 | `read_transcript` invokes `agents session export`; success returns ordered `TranscriptTurn` DTOs with source offsets and hashes; `unsupported-storage` exit maps to typed error before any harness-side mutation. |
+| `agents session import-replace <id> --from-file <path> [--preimage-sha256 <hex>]` | crit 1; crit 2; crit 3 (`session-busy` exit code 13 surfaces as `SessionOverrideError::SessionBusy`); crit 4 (`--preimage-sha256` mismatch surfaces as `SessionOverrideError::PreimageMismatch`); crit 7 (truncate/append compose `read_transcript` + canonical JSONL edit + `replace_transcript`) | `replace_transcript` invokes `agents session import-replace`; `session-busy` exit 13 maps to `SessionBusy`; preimage mismatch maps to `PreimageMismatch`; truncate/append composition reuses this surface so all three write trait methods exercise the same CLI. |
+| `agents session pause-handshake <id> [--ttl-ms <ms>]` / `resume-handshake <id> --token <token>` | crit 3 (`session-busy` from pause-handshake or import-replace); crit 5 (`pause-handshake` lease TTL is respected for atomic mid-session override, and `resume-handshake` is always called on adapter drop when a lease token is held) | Lease lifecycle bound at adapter level: TTL respected; resume-handshake always called on drop; busy returned as `SessionBusy` before any file write. |
+| `agents session schema-probe` | crit 1; crit 6 (Adapter construction calls `agents session schema-probe` and refuses operation if the output is malformed, required feature flags are absent, or `safe_for_import_replace` is false) | Construction-time gate; refusal is binary on three named conditions (malformed output, missing required feature flags, `safe_for_import_replace = false`). |
+
+Auxiliary criteria reinforce coverage without per-surface mapping: crit 8 ("fake `agents` binary fixture covers success, unsupported storage, busy lease, preimage mismatch, unsafe schema probe, malformed JSON, and missing subcommand cases"); crit 9 (records evidence/audit/recovery refs through WU-0B-09 / WU-0B-15 / WU-0B-31); crit 10 (no direct writes to `state.db`, provider transcript files, `providers.toml`, `sessions.toml`, model TOMLs, auth stores, quota scripts, provider credentials, provider routing policy, or cross-provider migration settings).
+
+The required ≥6 binary criteria are met (9 ACs total, with each CLI surface bound by at least one named-call + named-error-variant criterion). No CLI surface is left to a generic "service works" line.
+
+**Recommendation:** No action required.
+
+---
+
+### R5-COVERAGE-F02. All 7 SessionOverrideContract operations remain consumed via WU-0C-N3 only
+
+**Severity: NONE (positive)**
+
+The proposal-r6 contract surface still names exactly 7 operations (`product-strategy/proposal.md` lines 83–89, 1568–1591). Each operation is implemented by WU-0C-N3 against a landed `agents session …` surface, with binary criteria across WU-0C-N1 (trait) and WU-0C-N3 (adapter). WU-0C-N4 is no longer in the implementation chain; its r4 role (harness-owned schema probe) collapses to WU-0C-N3 crit 6.
+
+| Proposal-r6 operation | Owner WU(s) | Binary criterion |
+|---|---|---|
+| `schema_version_probe` | WU-0C-N1 crit 4 + WU-0C-N3 crits 1, 6 | "`replace_transcript`, `truncate_after`, and `append_turns` test fixtures prove `schema_version_probe()` is invoked before mutation by failing the operation when the fake probe returns `UnsupportedSchema`" (trait); "Adapter construction calls `agents session schema-probe` and refuses operation if the output is malformed, required feature flags are absent, or `safe_for_import_replace` is false" (adapter). |
+| `locate_session` | WU-0C-N1 crits 2/3 + WU-0C-N3 crits 1, 2 | trait fake-adapter success/error reachability + adapter `agents session locate` mapping with `unsupported-storage` typed error. |
+| `read_transcript` | WU-0C-N1 crits 2/6 + WU-0C-N3 crits 1, 2 | trait returns `Vec<TranscriptTurn>` without raw mutable handles + adapter `agents session export` mapping with unsupported-storage refusal. |
+| `replace_transcript` | WU-0C-N1 crits 4/5 + WU-0C-N3 crits 1, 2, 3, 4 | trait schema-probe-before-mutation + preimage/idle precondition refusal + adapter `agents session import-replace` mapping with `session-busy` exit 13 → `SessionBusy`, `--preimage-sha256` mismatch → `PreimageMismatch`. |
+| `truncate_after` | WU-0C-N1 crits 4/5 + WU-0C-N3 crits 1, 7 | trait write-method preconditions + adapter composition (`read_transcript` + canonical JSONL boundary edit + `replace_transcript`); this composition path inherits the `replace_transcript` typed-error coverage from crits 2/3/4. |
+| `append_turns` | WU-0C-N1 crits 4/5 + WU-0C-N3 crits 1, 7 | trait write-method preconditions + adapter composition; same inheritance as `truncate_after`. |
+| `get_session_metadata` | WU-0C-N1 crit 2 + WU-0C-N3 crit 1 | trait fake-adapter reachability ("each write operation using WU-0C-N2 DTO fixtures" and read methods named) + adapter `agents session locate <id> --json` mapped to the metadata subset. |
+
+Every operation has at least one binary criterion at the trait surface (WU-0C-N1) and at least one at the adapter surface (WU-0C-N3). The r4 INFO finding R4-COVERAGE-F08 (no v1-adapter-level criterion for `get_session_metadata`) is replaced in r5 by an explicit adapter-side mapping line in the WU-0C-N3 contract block ("`get_session_metadata -> agents session locate <id> --json, mapped to the metadata subset`") plus crit 1 ("Each trait method invokes the corresponding `agents session` subcommand …"), so the operation now has a named adapter-level call. The composed-write criterion (crit 7) similarly tightens R4-COVERAGE-F09 by giving `truncate_after` and `append_turns` a single, named composition path through `read_transcript` + canonical JSONL edit + `replace_transcript`.
+
+**Recommendation:** No action required.
+
+---
+
+### R5-COVERAGE-F03. WU-0C-N4 drop introduces no orphan WU and no broken edge
+
+**Severity: NONE (positive)**
+
+The r4 incoming-edge set for WU-0C-N4 was `WU-0C-N2; WU-0A-03, WU-0A-15`, and its outgoing-edge set was `WU-0C-N3; WU-0C-N1 v1-refusal tests`. In r5:
+
+- **WU-0C-N3** drops its incoming dependency on WU-0C-N4 (line 3277: `WU-0C-N3 <- WU-0C-N1, WU-0C-N2, WU-0A-15, WU-0B-09, WU-0B-15, WU-0B-31` — N4 is gone) and gains an explicit construction-time call to `agents session schema-probe` as its own crit 6 binary AC. The schema-probe-before-mutation invariant is preserved and is now bound at a single WU rather than split across two.
+- **WU-0C-N1** trait crit 4 still requires schema-probe-before-mutation through the fake adapter ("`replace_transcript`, `truncate_after`, and `append_turns` test fixtures prove `schema_version_probe()` is invoked before mutation by failing the operation when the fake probe returns `UnsupportedSchema`"). The trait test does not name WU-0C-N4 specifically; the test exercises the trait surface, so removing WU-0C-N4 does not invalidate the test.
+- **WU-0A-03** (`AgentRunnerStateDbProbe`) and **WU-0A-15** (`FakeAgentsFixture`): WU-0A-03's role as a Phase 0A read-only state.db probe remains unchanged; it had no other Phase 0C edge that depended on WU-0C-N4 specifically. WU-0A-15's outgoing edge to WU-0C-N3 (fake-binary integration tests) is preserved at line 3277. Neither Phase 0A WU becomes an orphan.
+- **WU-0C-N1's "v1-refusal tests" outgoing edge** from WU-0C-N4 was a forward-looking edge into the trait fixtures; in r5 the trait fixtures still test `UnsupportedSchema` behavior through the fake-adapter probe (crit 4), with WU-0C-N3 crit 6 supplying the real-binary refusal. No trait-level test loses its upstream fixture.
+- **No other Phase 0C WU** referenced WU-0C-N4 in r4: the r4 risk file's R4-COVERAGE-F06 owner-edge table named WU-0C-N4 only as incoming to WU-0C-N3 (now removed) and via Stitch Notes references to "WU-0C-N1..N5" (now rewritten to "WU-0C-N1/N2/N3/N5"). A grep of r5 for `WU-0C-N4` returns only the removed-in-r5 stub at line 1735, the WU-0C-N3 revision-rationale paragraph at line 1790, the Refactor Ledger update at line 3221, and family-watch / round-summary rows at 3531/3539/3552.
+
+The 76-WU graph after r5 has every WU declaring both incoming and outgoing edges. Spot-check on the four remaining N-family WUs:
+
+| WU | Incoming | Outgoing |
+|---|---|---|
+| WU-0C-N2 (DTOs) | WU-0B-09, WU-0B-15, WU-0B-21 | WU-0C-N1, WU-0C-N3, WU-0C-N5; VS-010, VS-012, VS-018, VS-020, VS-021 |
+| WU-0C-N1 (trait) | WU-0C-N2; WU-0B-09, WU-0B-15 | WU-0C-N3, WU-0C-N5; VS-010, VS-012, VS-018, VS-020, VS-021 |
+| WU-0C-N3 (adapter) | WU-0C-N1, WU-0C-N2; WU-0A-15, WU-0B-09, WU-0B-15, WU-0B-31 | VS-010, VS-012, VS-018, VS-020, VS-021 |
+| WU-0C-N5 (registry) | WU-0C-N1, WU-0C-N2; WU-0B-09, WU-0B-15, WU-0B-31 | WU-0C-31 recovery metadata; VS-001, VS-003, VS-020, VS-021 |
+
+WU-0C-N4 itself is no longer a WU in the D1 ownership table (the r5 table at lines 3453–3456 lists only `TranscriptTurn`/`SessionLocation`/`SessionMetadata` (WU-0C-N2), `SessionOverrideContract` trait (WU-0C-N1), `AgentRunnerCliAdapter` (WU-0C-N3), and `SessionOverrideStore` registry (WU-0C-N5) — no AgentRunnerSchemaProbe row). The "Removed in r5" heading at line 1735 is a diff marker, not a WU.
+
+**Recommendation:** No action required.
+
+---
+
+### R5-COVERAGE-F04. Cross-phase incoming-from-Phase-0C edges to Phase 1/2/3 still resolve
+
+**Severity: NONE (positive)**
+
+The cross-phase outgoing block at lines 3623–3628 of the r5 artifact references only existing WUs:
+
+- "SessionOverrideContract WU-0C-N1/N2/N3/N5 -> Phase 1 worker-launcher and worker-output-reintegration WUs …" (line 3625) — all four WU IDs exist in the r5 inventory.
+- "SessionOverrideContract WU-0C-N1/N2/N3/N5 -> Phase 2 turn-decomposition and detail-injection-router WUs …" (line 3626) — all four WU IDs exist.
+- "SessionOverrideContract WU-0C-N1/N2/N3/N5 -> Phase 3 repack-planner WUs …" (line 3627) — all four WU IDs exist.
+- "Downstream Phase 1/2/3 revisions should add explicit incoming-from-Phase-0C edges back to WU-0C-N1/N2/N3/N5 …" (line 3628) — same four WU IDs.
+
+No reference to WU-0C-N4 appears in the cross-phase block. Phase 1/2/3 ai-roadmaps are not yet authored, so there are no live incoming Phase-1+ → Phase-0C edges to invalidate; the prospective edges that the round-4 cross-phase block created point only to the four WUs that remain. The r5 commit message and the r5 audit-history "watch signals" row both record the simplification-drift watch on this surface ("do not recreate a harness-side DB adapter, harness-side schema wrapper WU, or per-CLI storage parser unless upstream removes the `agents session` contract").
+
+The Stitch Notes per-VS blocks for VS-010/012/018/020/021 have been rewritten from "WU-0C-N1..N5" to "WU-0C-N1/N2/N3/N5" (lines 3586, 3610, 3612, 3618, 3620, 3621), confirming WU-0C-N4 is excluded everywhere a slice consumer is enumerated.
+
+**Recommendation:** No action required.
+
+---
+
+### R5-COVERAGE-F05. Block-on annotations fully removed; no upstream-feature gating remains
+
+**Severity: NONE (positive)**
+
+`grep -in "blocked-on\|Blocked on\|blocked on" product-strategy/ai-roadmap-phase-0c.md` returns 0 hits. The remaining `blocked` strings in the artifact are domain-level values inside DTO contracts:
+
+- `budget_state: "within" | "near_limit" | "exceeded" | "blocked"` (line 454) and downstream criteria at lines 473, 625.
+- `blocked_refs: { ref_id: string, reason_code: string }[]` (line 2129) and downstream criteria at lines 2142–2178.
+- Documentary "poison-quarantined, deleted, and unresolved-conflict nodes are blocked unless policy explicitly permits a labeled evidence-only render" (line 2166).
+
+None of these is a `Blocked-on:` annotation in the r4 sense (where each of WU-0C-N1, WU-0C-N3, WU-0C-N4, WU-0C-N5 carried a "Blocked-on: …" line naming `agents session locate / export / import-replace / pause-handshake / schema-probe`, and per-VS Stitch-Notes blocks repeated the constraints). The r5 commit message records the rationale: "All Blocked-on annotations removed across Phase 0C" because upstream agent-runner features have landed.
+
+The r4 R4-COVERAGE-F05 finding ("Block-on annotations match the agent-runner feature-request register") is therefore preserved by removal: the register collapses to "all features landed", and the matching constraint becomes a binary refusal at adapter construction (WU-0C-N3 crit 6: refuse if `safe_for_import_replace` is false). Schema/feature-flag fail-closed behavior is now a runtime check at WU-0C-N3 rather than a roadmap-level annotation, which is the correct shape for a converged contract.
+
+**Recommendation:** No action required.
+
+---
+
+### R5-COVERAGE-F06. r4 closures preserved for the WUs not touched in r5
+
+**Severity: NONE (positive)**
+
+The r5 diff is localized to the WU-0C-N3/N4 contract blocks and the dependency / parallelization / stitch references that mention WU-0C-N4 or wave membership. The 11 WUs in the Round 4 Refactor Ledger (WU-0C-11a, WU-0C-13, WU-0C-13a, WU-0C-13b, WU-0C-15a, WU-0C-15b, WU-0C-15c, WU-0C-15d, WU-0C-18, WU-0C-31, WU-0C-34) and the remaining ~60 unaffected WUs (everything outside the WU-0C-N1..N5 family) carry their r4 binary acceptance criteria, code/test boundaries, and contracts byte-for-byte. Spot-check across the WUs flagged as method-bearing in the r4 risk file:
+
+- **WU-0C-13** `AgentSessionCapture` (line 1025–1058) keeps its 6 r4 ACs (success path for `agents`-reported-session, success path for trace-session, `substrate_gap` path, `MissingCaptureSource` error path, no-mutation invariant, no-WorkerRun/OrchestratorTurn/QuestionArtifact/RecoveryAction-row invariant). The r5 diff does not touch this block.
+- **WU-0C-15d** `SessionTurnsReader` (line 1290–1323) keeps its 6 r4 ACs including the SessionOverrideContract no-mutation invariant ("never calls `replace_transcript`, `truncate_after`, or `append_turns`"). Untouched.
+- **WU-0C-18** `AgentRunnerClient` Facade (line 1535–1580) keeps its 11 r4 ACs (per-method delegation criterion for each of the 8 facade methods + no-transcript-write invariant + no-provider-routing invariant + per-method fixture set). Untouched.
+- **WU-0C-31** `RecoveryActionProcessorSkeleton` (line 2795–2827) keeps its r4 binary criteria; the WU-0C-N5 metadata input edge is preserved at line 3308.
+- **WU-0C-34** `TauriIpcCommandRouter` (line 2941–2991) keeps its r4 binary criteria including the "no UI command for replace/truncate/append in Phase 0C" scope-deny check; line 3314 preserves its incoming WU-0C-N1/WU-0C-N5 edges.
+- **WU-0C-N1**, **WU-0C-N2**, **WU-0C-N5** are unchanged from r4 (verified by absence in r5 diff scope items 1–11 above). Their 8 / 7 / 8 binary acceptance criteria respectively remain in place; no criterion is weakened or removed.
+
+The r4 findings R4-COVERAGE-F01 (proposal contract operations covered), F03 (every `SessionOverrideError` variant reachable), F04 (v1 adapter invariants — now reinterpreted as v2 adapter invariants under the same coverage rule, with schema-pinning collapsed to construction-time refusal at WU-0C-N3 crit 6, refuse-rather-than-corrupt preserved at WU-0C-N3 crits 2/3/4 and WU-0C-N1 crit 5, and flock-locking superseded by the upstream `agents session pause-handshake` lease at WU-0C-N3 crits 3/5), F06 (no orphan WU), F07 (refactored WUs retain functional ACs), and F10 (round-2 INFOs unchanged) all carry forward. R4-COVERAGE-F05 is replaced by R5-COVERAGE-F05 (block-on removal). R4-COVERAGE-F08 and F09 (the two r4 INFO findings) are addressed in r5 by the explicit adapter-level mapping for `get_session_metadata` and the explicit composition path for `truncate_after` / `append_turns`, so they downgrade from INFO to closed.
+
+**Recommendation:** No action required.
+
+---
+
+### R5-COVERAGE-F07. v2-only adapter invariants each retain a binary criterion
+
+**Severity: NONE (positive)**
+
+The proposal-r6 axiom for the v2 CLI adapter requires four invariants (proposal-r6 lines 1693–1738, agent-runner feature-request register at lines 1717–1729). Each maps to a WU-0C-N3 or WU-0C-N1 binary criterion:
+
+| v2 invariant | Owner criterion | Binary form |
+|---|---|---|
+| Schema-version pinning at construction | WU-0C-N3 crit 6 | "Adapter construction calls `agents session schema-probe` and refuses operation if the output is malformed, required feature flags are absent, or `safe_for_import_replace` is false." |
+| Refuse-rather-than-corrupt on storage / busy / preimage / render | WU-0C-N3 crits 2, 3, 4; WU-0C-N1 crit 5 | All three write-trait methods return typed `SessionOverrideError` variants (`UnsupportedStorage`, `SessionBusy`, `PreimageMismatch`, plus the upstream `unsupported_append` / `invalid_turn_boundary` returned through the composition path) before any harness-side mutation; trait write methods reject missing `OverridePreconditions`. |
+| Atomic mid-session override via `pause-handshake` → `import-replace` → `resume-handshake` | WU-0C-N3 crit 5 | "`pause-handshake` lease TTL is respected for atomic mid-session override, and `resume-handshake` is always called on adapter drop when a lease token is held." |
+| No direct harness writes outside the documented `agents session …` surface | WU-0C-N3 crit 10 | "The adapter never opens or writes `agent-runner` `state.db`, provider transcript files, `providers.toml`, `sessions.toml`, model TOMLs, auth stores, quota scripts, provider credentials, provider routing policy, or cross-provider migration settings directly." |
+
+The r4 invariant "two-phase-write recovery" (file temp → atomic rename → SQLite transaction → receipt + crash-injection deterministic recovery) is now an upstream-owned invariant of `agents session import-replace`. WU-0C-N3 crit 1 binds the adapter to the upstream call's stdout/stderr JSON contract; crit 8 (fake `agents` binary fixture) covers success / unsupported storage / busy lease / preimage mismatch / unsafe schema probe / malformed JSON / missing subcommand; crit 9 (evidence/audit/recovery refs through WU-0B-09 / WU-0B-15 / WU-0B-31) covers the harness-side audit trail. WU-0C-N5's `SessionOverrideStore` registry retains its 5 lifecycle transitions (`begin_pending`, `commit pending->committed`, `rollback pending->rolled_back`, `quarantine pending|crash-recovery->quarantined_storage_conflict`, `list_by_session ordered`) at lines 1827–1836 unchanged, so the harness-visible recovery state machine is still binary at the per-WU level.
+
+The r4 watch family `session-override-boundary-family` (registered in `plans/audit/ai-roadmap-phase-0c.md` r4 entry) is reinforced rather than weakened: with the v1 DB adapter dropped, the boundary collapses to "Phase 0C never writes provider storage directly" and is enforced by WU-0C-N3 crit 10 + the explicit non-ownership note at line 3637.
+
+**Recommendation:** No action required.
+
+---
+
+## Round 5 oscillation classification
+
+Per `~/ai/conventions/audit-history.md`:
+
+- **Same-label**: 0. No prior-round Coverage finding recurs at MEDIUM or higher in r5. r4 was LOW; r3/r2 LOW; r1's only MEDIUM was closed in r2.
+- **Same-family** (`state-machine-criteria-family`, `bundling-family`, `session-override-boundary-family`): 0. No method, enum, or state-machine binding declared in any prior round has been weakened in r5. Specifically, the `OptimizerCycleStateMachine` (WU-0C-28), `ConflictRecord` workflow (WU-0C-29d), `RecoveryAction` transitions (WU-0C-30), `SessionOverrideRecord` lifecycle (WU-0C-N5 crits 3–5), and `SessionOverrideError` variant set (WU-0C-N2 lines 1645–1659; 13 variants) are byte-untouched. The two r4 INFO findings (R4-COVERAGE-F08, F09) are addressed and closed; they did not become a family.
+- **Fix-created**: gen 0. The cascade is externally driven (proposal-r6 + engineering-roadmap-r5 + landed agent-runner CLI features). No Phase 0C-internal fix in r5 created a coverage gap. WU-0C-N4 was removed because its sole responsibility (harness-side schema probe) collapsed to a one-line CLI call inside WU-0C-N3 — a structural simplification, not a fix-created orphan. The Phase 0C audit history records this as `fix-created-family` gen 0 explicitly (commit `1548cf4` audit-history line 74; risk-file Run Report line 3539 of the artifact).
+- **Two-generation / named three-generation / named four-generation**: not fired.
+- **Simplification-drift watch** (newly registered in the r5 audit history): forward-looking watch on whether future revisions recreate a harness-side DB adapter, harness-side schema wrapper WU, or per-CLI storage parser. Not a Coverage-gate firing.
+
+Coverage emits no MEDIUM or higher in r5. The two r4 INFO findings are closed. No new INFO findings are introduced.
+
+## Round 5 summary table
+
+| ID | Finding | Severity |
+|----|---------|----------|
+| R5-COVERAGE-F01 | WU-0C-N3 carries 9 binary acceptance criteria, ≥1 per landed CLI surface (locate / export / import-replace / pause-handshake / schema-probe) — exceeds the ≥6 bar | NONE (positive) |
+| R5-COVERAGE-F02 | All 7 SessionOverrideContract operations remain consumed; each has trait-level + adapter-level binary criteria via WU-0C-N1 + WU-0C-N3 only (no remaining WU-0C-N4 dependency) | NONE (positive) |
+| R5-COVERAGE-F03 | WU-0C-N4 drop introduces no orphan WU and no broken edge; the four remaining N-family WUs and the 11 r4 refactored WUs all retain incoming + outgoing edges | NONE (positive) |
+| R5-COVERAGE-F04 | Cross-phase outgoing-to-Phase-1/2/3 block reference only WU-0C-N1/N2/N3/N5; no edge to dropped WU-0C-N4; per-VS blocks for VS-010/012/018/020/021 rewritten consistently | NONE (positive) |
+| R5-COVERAGE-F05 | All `Blocked-on:` annotations removed; remaining `blocked` strings are domain values inside DTO criteria; fail-closed behavior collapses to WU-0C-N3 crit 6 construction-time refusal | NONE (positive) |
+| R5-COVERAGE-F06 | r4 closures preserved for the ~70 WUs outside the WU-0C-N1..N5 family; r4 INFO findings F08 and F09 closed by r5 explicit adapter mappings | NONE (positive) |
+| R5-COVERAGE-F07 | v2-only adapter invariants (schema pinning at construction, refuse-rather-than-corrupt, atomic pause/import-replace/resume, no direct harness writes) each have a binary AC across WU-0C-N3 / WU-0C-N1 / WU-0C-N5 | NONE (positive) |
+
+## What LOW requires (round 5 update)
+
+The round-4 conditions 1–9 carry forward unchanged, with the following round-5 amendments:
+
+10. **r5 amendment to condition 6.** The proposal-r6 SessionOverrideContract operation set is unchanged from proposal-r5 (still `schema_version_probe`, `locate_session`, `read_transcript`, `replace_transcript`, `truncate_after`, `append_turns`, `get_session_metadata` — 7 operations). If proposal-r7+ adds a new operation or a new error variant, the AI roadmap must add a corresponding criterion at both the trait (WU-0C-N1) and the adapter (WU-0C-N3) before the next coverage gate.
+11. **r5 amendment to condition 7.** The agent-runner feature-request register has collapsed from "5 named features blocked-on" to "all 5 features landed; runtime refusal at construction". If the `agents session …` CLI shape changes (renamed subcommand, new exit code, new `--flag` argument), WU-0C-N3 acceptance criteria 1–7 must be updated in lockstep, and the simplification-drift watch must explicitly classify whether a harness-side wrapper is still excluded.
+12. **r5 amendment to condition 8.** The Round 4 Refactor Ledger remains the audit trail for the 11 narrowed WUs. The round-5 update footnote at line 3221 is the audit trail for the WU-0C-N3 rescope and the WU-0C-N4 removal. Any future r6+ narrowing must extend the ledger with (1) the violation under repair, (2) the fix, (3) the SessionOverrideContract dependency, and (4) the kept/merged/removed disposition. WU-0C-N4 may not be silently restored without re-justifying a harness-owned schema-probe responsibility.
+13. **r5 amendment to condition 9.** Cross-phase outgoing edges now reference WU-0C-N1/N2/N3/N5 only. Phase 1+ ai-roadmaps must declare incoming edges from this exact set (no WU-0C-N4 reference); a Phase 1/2/3 revision that re-introduces a harness-side schema-probe WU must justify it under the simplification-drift watch.
+14. **r5 simplification-drift watch.** Coverage at LOW depends on Phase 0C not recreating, in any subsequent round, a harness-side DB adapter, harness-side schema wrapper WU, or per-CLI storage parser unless upstream `agent-runner` removes the `agents session` contract. If a future revision does so, the new WU(s) must satisfy method-level binary criteria at the trait test surface (WU-0C-N1) and at the new adapter, not implicitly through aggregation.
