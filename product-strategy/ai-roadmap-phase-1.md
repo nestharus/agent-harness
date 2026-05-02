@@ -17,7 +17,7 @@ Rules carried into this phase:
 
 Phase 1 delivers Observable Imposed Context, the first operator-visible feature phase after Phases 0A, 0B, and 0C. It consumes WU-0A shell/IPC/test substrate, WU-0B GraphStore and durable schema contracts, and WU-0C runtime engines including RenderEngine, PolicyEngine, BudgetGateService, ConfigurationRegistry runtime, ProviderStateMonitor, AgentRunnerClient facade, SessionOverrideContract, and AuditEmitPipeline. It does not redefine upstream schema tables or service engines.
 
-Round 3 integrates the proposal-r5 / engineering-roadmap-r4 / Phase 0C-r4 SessionOverrideContract cascade. Phase 1 keeps transcript and provider work read-only unless a WU explicitly owns a durable Phase 1 row. It does not open, locate, parse, rewrite, truncate, append, or migrate per-CLI session JSONL files directly; raw session reads and any future session transcript mutation flow through WU-0C-N1 and its adapters. Phase 1 also does not reimplement `agent-runner` provider routing, account selection, quota balancing, auth refresh, `--resume` composition, cross-provider session porting, or session-id capture.
+Round 4 integrates the proposal-r6 / engineering-roadmap-r5 / Phase 0C-r5 SessionOverrideContract cascade. Phase 1 keeps transcript and provider work read-only unless a WU explicitly owns a durable Phase 1 row. It does not open, locate, parse, rewrite, truncate, append, or migrate per-CLI session JSONL files directly; raw session reads and any future session transcript mutation flow through WU-0C-N1 and its adapters. Phase 1 also does not reimplement `agent-runner` provider routing, account selection, quota balancing, auth refresh, `--resume` composition, cross-provider session porting, or session-id capture.
 
 Engineering order inside Phase 1: VS-003 and VS-004 create the evidence/audit and budget/cache backbones; VS-001 accepts only after those backbones can populate real render evidence, token, prefix, provider, configuration, and audit fields; VS-002, VS-005, VS-006, and VS-007 lane in parallel where their dependencies are stable.
 
@@ -95,25 +95,25 @@ Total Phase 1 WUs: **56**.
 | WU-1-54 | NotificationClassifier | VS-007 |
 | WU-1-55 | SingleTabShellExtension | VS-007 |
 
-## Round 3 SessionOverrideContract Audit
+## Round 4 SessionOverrideContract Audit
 
-Audit result over all 56 WUs: no WU in this Phase 1 artifact owns worker launch, worker-output reintegration, orchestrator turn execution, or session transcript mutation. The affected WUs are read-only transcript/provenance/provider surfaces that needed boundary language and cross-phase SessionOverrideContract dependencies.
+Audit result over all 56 WUs: no WU in this Phase 1 artifact owns worker launch, worker-output reintegration, orchestrator turn execution, or session transcript mutation. The affected WUs remain read-only transcript/provenance/provider surfaces. Round 4 removes obsolete block-on annotations after the agent-runner feature requests landed, drops WU-0C-N4 references, and treats SessionOverrideContract as v2-only with schema-probe needs satisfied by WU-0C-N3 `schema_version_probe`.
 
 | WU | r2 risk found | r3 refactor | SessionOverrideContract dependency |
 |---|---|---|---|
 | WU-1-03 | Claude normalizer could be read as parsing Claude transcript files directly. | Consumes normalized turn/hook/trace evidence only; no JSONL or storage lookup. | WU-0C-N2 only. |
 | WU-1-04 | Codex normalizer could be read as parsing rollout/session files directly. | Consumes normalized turn/rollout/trace evidence only; no JSONL or storage lookup. | WU-0C-N2 only. |
 | WU-1-05 | Opencode normalizer could be read as parsing provider-native session rows. | Consumes normalized hook/event/trace evidence only; no storage lookup. | WU-0C-N2 only. |
-| WU-1-10 | Transcript ingestion could become a direct per-CLI transcript reader. | Reads through WU-0C-15d or WU-0C-N1 and records refusal evidence; no mutation fallback. | WU-0C-N1..WU-0C-N5; WU-0C-N3 supplies v1 adapter. |
+| WU-1-10 | Transcript ingestion could become a direct per-CLI transcript reader. | Reads through WU-0C-15d or WU-0C-N1 and records refusal evidence; no mutation fallback. | WU-0C-N1, WU-0C-N2, WU-0C-N3, WU-0C-N5; WU-0C-N3 supplies `schema_version_probe`. |
 | WU-1-12 | Audit emission could imply ownership of override lifecycle events. | Links existing override receipts/refusals only. | WU-0C-N5. |
 | WU-1-13 | Drill-down could expose raw session storage. | Displays override evidence pointers only; no raw transcript bodies or mutation controls. | WU-0C-N5. |
 | WU-1-23 | Render evidence pointers could become a second transcript locator. | Adds override-derived evidence as opaque pointers. | WU-0C-N2, WU-0C-N5. |
 | WU-1-25 | Inspector pane could become a hidden session editor. | Displays override metadata only; no import/replace/reroute/resume controls. | WU-0C-N2, WU-0C-N5. |
 | WU-1-28 | Audit subscription could expose override lifecycle controls. | Streams override metadata and acknowledges UI state only. | WU-0C-N5. |
-| WU-1-45 | Provider probe could drift into routing/quota/session-storage ownership. | Redacted observation only; no account, quota, auth, resume, or storage decisions. | WU-0C-N4, WU-0C-N5 for read-only capability/refusal evidence. |
-| WU-1-48 | Route eligibility could be mistaken for provider routing. | Returns harness policy/readiness eligibility only. | WU-0C-N4, WU-0C-N5. |
-| WU-1-49 | Denial classification could recompute upstream adapter/provider refusals. | Labels observed denial/refusal categories only. | WU-0C-N4, WU-0C-N5. |
-| WU-1-50 | Provider panel could expose routing or override controls. | Displays read-only preflight and override capability/refusal metadata. | WU-0C-N4, WU-0C-N5. |
+| WU-1-45 | Provider probe could drift into routing/quota/session-storage ownership. | Redacted observation only; no account, quota, auth, resume, or storage decisions. | WU-0C-N3, WU-0C-N5 for read-only schema/refusal evidence. |
+| WU-1-48 | Route eligibility could be mistaken for provider routing. | Returns harness policy/readiness eligibility only. | WU-0C-N3, WU-0C-N5. |
+| WU-1-49 | Denial classification could recompute upstream adapter/provider refusals. | Labels observed denial/refusal categories only. | WU-0C-N3, WU-0C-N5. |
+| WU-1-50 | Provider panel could expose routing or override controls. | Displays read-only preflight and override capability/refusal metadata. | WU-0C-N3, WU-0C-N5. |
 
 Unaffected WUs: WU-1-01/02/06/07/08/09/11/14/15/16/17/18/19/20/21/22/24/26/27/29/30/31/32/33/34/35/36/37/38/39/40/41/42/43/44/46/47/51/52/53/54/55/56 do not encode per-CLI session storage, provider routing, quota, resume, cross-provider porting, or session mutation behavior. No WU scope collapsed enough to merge into a sibling.
 
@@ -214,7 +214,7 @@ normalize_claude_tool_call(normalized_turn_ref, session_id, invocation_ref) -> T
 
 **Parallelizable with:** same topological wave after file ownership coordination: WU-1-04, WU-1-05, WU-1-17, WU-1-19, WU-1-23, WU-1-26, WU-1-27, WU-1-29, WU-1-40, WU-1-46, WU-1-52.
 
-**Revision rationale:** Round 3 narrows this WU from any implied Claude transcript parser into a provider-shape normalizer over already captured, normalized evidence. Claude-owned storage layout, JSONL record shape, session lookup, and resume behavior stay behind `agent-runner` / SessionOverrideContract boundaries.
+**Revision rationale:** Round 3 narrows this WU from any implied Claude transcript parser into a provider-shape normalizer over already captured, normalized evidence. Claude-owned storage layout, JSONL record shape, session lookup, and resume behavior stay behind `agent-runner` / SessionOverrideContract boundaries. r4 cascade: agent-runner feature requests have landed; SessionOverrideContract v2-only; block-on annotations removed.
 
 ### WU-1-04: CodexToolCallNormalizer
 
@@ -249,7 +249,7 @@ normalize_codex_tool_call(normalized_turn_ref, session_id, invocation_ref) -> To
 
 **Parallelizable with:** same topological wave after file ownership coordination: WU-1-03, WU-1-05, WU-1-17, WU-1-19, WU-1-23, WU-1-26, WU-1-27, WU-1-29, WU-1-40, WU-1-46, WU-1-52.
 
-**Revision rationale:** Round 3 removes any direct Codex rollout/session-file interpretation from this WU. It only maps normalized evidence into the Phase 1 tool-call DTO; Codex session lookup, storage compatibility, resume acceptance, and cross-account portability remain upstream.
+**Revision rationale:** Round 3 removes any direct Codex rollout/session-file interpretation from this WU. It only maps normalized evidence into the Phase 1 tool-call DTO; Codex session lookup, storage compatibility, resume acceptance, and cross-account portability remain upstream. r4 cascade: agent-runner feature requests have landed; SessionOverrideContract v2-only; block-on annotations removed.
 
 ### WU-1-05: OpencodeToolCallNormalizer
 
@@ -284,7 +284,7 @@ normalize_opencode_tool_call(normalized_event_ref, session_id, invocation_ref) -
 
 **Parallelizable with:** same topological wave after file ownership coordination: WU-1-03, WU-1-04, WU-1-17, WU-1-19, WU-1-23, WU-1-26, WU-1-27, WU-1-29, WU-1-40, WU-1-46, WU-1-52.
 
-**Revision rationale:** Round 3 keeps opencode support as evidence normalization only. Any provider-native storage interpretation or unsupported-session explanation is supplied by Phase 0C session/trace contracts, not by this normalizer.
+**Revision rationale:** Round 3 keeps opencode support as evidence normalization only. Any provider-native storage interpretation or unsupported-session explanation is supplied by Phase 0C session/trace contracts, not by this normalizer. r4 cascade: agent-runner feature requests have landed; SessionOverrideContract v2-only; block-on annotations removed.
 
 ### WU-1-06: ToolCallProvenanceWriter
 
@@ -438,15 +438,13 @@ ingest_transcript(session_id, session_read_ref?) -> Vec<ToolCallNormalizedEvent>
 
 **Dependencies:**
 - Phase 1 internal: WU-1-03, WU-1-04, WU-1-05, WU-1-07.
-- Cross-phase incoming: WU-0A-05, WU-0A-06, WU-0A-07, WU-0A-08, WU-0A-09, WU-0A-10, WU-0A-14a, WU-0A-14b, WU-0A-15, WU-0B-01, WU-0B-02, WU-0B-03, WU-0B-09, WU-0B-10, WU-0B-15, WU-0B-20, WU-0B-22, WU-0B-24, WU-0B-04, WU-0B-31, WU-0C-04, WU-0C-11a, WU-0C-11b, WU-0C-12a, WU-0C-12, WU-0C-13a, WU-0C-13b, WU-0C-13, WU-0C-14a, WU-0C-14b, WU-0C-14, WU-0C-15a, WU-0C-15b, WU-0C-15c, WU-0C-15d, WU-0C-16a, WU-0C-16b, WU-0C-16, WU-0C-17a, WU-0C-17b, WU-0C-17, WU-0C-18, WU-0C-30a, WU-0C-30, WU-0C-31a, WU-0C-31, WU-0C-32, WU-0C-33a, WU-0C-33, WU-0C-34, WU-0C-35a, WU-0C-35, WU-0C-37a, WU-0C-37, WU-0C-N1, WU-0C-N2, WU-0C-N3, WU-0C-N4, WU-0C-N5.
+- Cross-phase incoming: WU-0A-05, WU-0A-06, WU-0A-07, WU-0A-08, WU-0A-09, WU-0A-10, WU-0A-14a, WU-0A-14b, WU-0A-15, WU-0B-01, WU-0B-02, WU-0B-03, WU-0B-09, WU-0B-10, WU-0B-15, WU-0B-20, WU-0B-22, WU-0B-24, WU-0B-04, WU-0B-31, WU-0C-04, WU-0C-11a, WU-0C-11b, WU-0C-12a, WU-0C-12, WU-0C-13a, WU-0C-13b, WU-0C-13, WU-0C-14a, WU-0C-14b, WU-0C-14, WU-0C-15a, WU-0C-15b, WU-0C-15c, WU-0C-15d, WU-0C-16a, WU-0C-16b, WU-0C-16, WU-0C-17a, WU-0C-17b, WU-0C-17, WU-0C-18, WU-0C-30a, WU-0C-30, WU-0C-31a, WU-0C-31, WU-0C-32, WU-0C-33a, WU-0C-33, WU-0C-34, WU-0C-35a, WU-0C-35, WU-0C-37a, WU-0C-37, WU-0C-N1, WU-0C-N2, WU-0C-N3, WU-0C-N5.
 
 **Produces:** Session-derived evidence and normalized events.
 
 **Parallelizable with:** same topological wave after file ownership coordination: WU-1-06, WU-1-18, WU-1-24, WU-1-30, WU-1-31, WU-1-41, WU-1-47, WU-1-54.
 
-**Blocked-on:** v1 read behavior can use WU-0C-N3 after schema probe. v2 adapter migration is blocked on `agents session locate` and `agents session export`; this WU is not blocked on `agents session import-replace` or `agents pause-handshake` because Phase 1 transcript ingestion is read-only.
-
-**Revision rationale:** Round 3 makes this the central Phase 1 reader over normalized session evidence. It no longer owns transcript path discovery, per-CLI JSONL parsing fallback, session storage mutation, resume composition, or provider/session porting.
+**Revision rationale:** Round 3 makes this the central Phase 1 reader over normalized session evidence. It no longer owns transcript path discovery, per-CLI JSONL parsing fallback, session storage mutation, resume composition, or provider/session porting. r4 cascade: agent-runner feature requests have landed; SessionOverrideContract v2-only; block-on annotations removed.
 
 ### WU-1-11: ParentInvocationPropagationService
 
@@ -511,7 +509,7 @@ emit_tool_call_audit(tool_event_id, decision, reason_code) -> AuditEventId.
 
 **Parallelizable with:** same topological wave after file ownership coordination: WU-1-33, WU-1-42, WU-1-48, WU-1-55.
 
-**Revision rationale:** Round 3 allows audit surfaces to reference SessionOverrideStore refusal/receipt metadata without moving override lifecycle ownership into Phase 1 audit emission.
+**Revision rationale:** Round 3 allows audit surfaces to reference SessionOverrideStore refusal/receipt metadata without moving override lifecycle ownership into Phase 1 audit emission. r4 cascade: agent-runner feature requests have landed; SessionOverrideContract v2-only; block-on annotations removed.
 
 ### WU-1-13: ToolCallDrilldownComponent
 
@@ -547,7 +545,7 @@ ToolCallDrilldownView { tool_event_id, evidence_id, protocol, approval_state, si
 
 **Parallelizable with:** same topological wave after file ownership coordination: WU-1-21, WU-1-28, WU-1-34, WU-1-43, WU-1-44, WU-1-49.
 
-**Revision rationale:** Round 3 limits drill-down to evidence display. It may surface SessionOverrideContract receipts/refusals but does not inspect or mutate provider-owned session storage.
+**Revision rationale:** Round 3 limits drill-down to evidence display. It may surface SessionOverrideContract receipts/refusals but does not inspect or mutate provider-owned session storage. r4 cascade: agent-runner feature requests have landed; SessionOverrideContract v2-only; block-on annotations removed.
 
 ### WU-1-14: BudgetLedgerScopeWriter
 
@@ -860,7 +858,7 @@ list_render_evidence(working_set_id) -> Vec<ProvenancePointerView>; open_render_
 
 **Parallelizable with:** same topological wave after file ownership coordination: WU-1-03, WU-1-04, WU-1-05, WU-1-17, WU-1-19, WU-1-26, WU-1-27, WU-1-29, WU-1-40, WU-1-46, WU-1-52.
 
-**Revision rationale:** Round 3 adds override-derived evidence as an opaque pointer type, not as a new transcript reader. The storage lookup and adapter compatibility decisions remain in WU-0C-N1..WU-0C-N5.
+**Revision rationale:** Round 3 adds override-derived evidence as an opaque pointer type, not as a new transcript reader. The storage lookup and adapter compatibility decisions remain in WU-0C-N1/WU-0C-N3/WU-0C-N5 boundaries. r4 cascade: agent-runner feature requests have landed; SessionOverrideContract v2-only; block-on annotations removed.
 
 ### WU-1-24: RenderLabelClassifier
 
@@ -927,7 +925,7 @@ WorkingSetInspectorPane { working_set_id, graph_snapshot_id, target_cli, target_
 
 **Parallelizable with:** same topological wave after file ownership coordination: WU-1-36.
 
-**Revision rationale:** Round 3 keeps the inspector as a display surface. It consumes override metadata only through registered evidence/audit pointers and cannot become a hidden session editor.
+**Revision rationale:** Round 3 keeps the inspector as a display surface. It consumes override metadata only through registered evidence/audit pointers and cannot become a hidden session editor. r4 cascade: agent-runner feature requests have landed; SessionOverrideContract v2-only; block-on annotations removed.
 
 ### WU-1-26: TokenEstimateDisplay
 
@@ -1025,7 +1023,7 @@ subscribe_render_audit(workspace_id, working_set_id?) -> Stream<AuditEventView>;
 
 **Parallelizable with:** same topological wave after file ownership coordination: WU-1-13, WU-1-21, WU-1-34, WU-1-43, WU-1-44, WU-1-49.
 
-**Revision rationale:** Round 3 permits render audit streams to surface SessionOverrideContract metadata while preserving Phase 1 as read-only with respect to transcript override lifecycle.
+**Revision rationale:** Round 3 permits render audit streams to surface SessionOverrideContract metadata while preserving Phase 1 as read-only with respect to transcript override lifecycle. r4 cascade: agent-runner feature requests have landed; SessionOverrideContract v2-only; block-on annotations removed.
 
 ### WU-1-29: SummaryContractValidationResult DTO
 
@@ -1534,7 +1532,7 @@ run_redacted_provider_probe(provider, cli, workspace_id) -> ProviderProbeObserva
 - [ ] Secret values in CLI args, environment variables, stderr, stdout, and audit metadata are redacted before observation storage.
 - [ ] A probe attempt emits exactly one audit event carrying provider, CLI, workspace, result state, and redacted evidence references.
 - [ ] The probe does not select provider accounts, rebalance quota lanes, refresh auth, mutate provider configuration, compose `--resume`, port sessions, or infer per-CLI session storage support.
-- [ ] Any session-override compatibility shown beside provider state comes from WU-0C-N4/WU-0C-N5 evidence, not probe-owned JSONL or `state.db` inspection.
+- [ ] Any session-override compatibility shown beside provider state comes from WU-0C-N3/WU-0C-N5 evidence, not probe-owned JSONL or `state.db` inspection.
 - [ ] The WU can merge as a single-concern PR without enabling another Phase 1 value slice by accident.
 
 **Pipeline phases:** Phase 0 RCA skipped unless defect; Phase 1 research = gpt-high when implementation hookpoints are uncertain; Phase 2 synthesis = gpt-high; Phase 2.5 existing-state risk profile = gpt-high; Phase 3 proposal = gpt-high; Phase 4 risk gates = three independent claude-opus passes plus gpt-high audit reconciliation; Phase 5 hookpoints = gpt-high; Phase 6a contract handoff = orchestrator; Phase 6b tests = gpt-high with contract-only access; Phase 6c code = gpt-high with contracts plus tests; Phase 7 CodeRabbit = tool; Phase 8 PR gates = test-audit/commit-hygiene gpt-high plus multi-concern/justification claude-opus; Phase 9 draft PR; Phase 10 human promotion.
@@ -1542,13 +1540,13 @@ run_redacted_provider_probe(provider, cli, workspace_id) -> ProviderProbeObserva
 **Dependencies:**
 - Phase 1 internal: none.
 - Cross-phase incoming: WU-0A-05, WU-0A-06, WU-0A-07, WU-0A-08, WU-0A-09, WU-0A-10, WU-0A-11, WU-0A-12, WU-0A-13, WU-0A-14a, WU-0A-14b, WU-0A-15, WU-0B-01, WU-0B-02, WU-0B-03, WU-0B-17, WU-0B-18, WU-0B-19, WU-0B-28, WU-0B-29, WU-0B-31, WU-0B-16, WU-0B-04, WU-0B-15, WU-0C-04, WU-0C-21, WU-0C-22a, WU-0C-22, WU-0C-23a, WU-0C-23b, WU-0C-23, WU-0C-24a, WU-0C-24, WU-0C-25a, WU-0C-25, WU-0C-26a, WU-0C-26, WU-0C-11a, WU-0C-11b, WU-0C-12a, WU-0C-12, WU-0C-13a, WU-0C-13b, WU-0C-13, WU-0C-14a, WU-0C-14b, WU-0C-14, WU-0C-15a, WU-0C-15b, WU-0C-15c, WU-0C-15d, WU-0C-16a, WU-0C-16b, WU-0C-16, WU-0C-17a, WU-0C-17b, WU-0C-17, WU-0C-18, WU-0C-19, WU-0C-20a, WU-0C-20, WU-0C-30a, WU-0C-30, WU-0C-31a, WU-0C-31, WU-0C-32, WU-0C-33a, WU-0C-33, WU-0C-34, WU-0C-35a, WU-0C-35, WU-0C-36a, WU-0C-36, WU-0C-37a, WU-0C-37.
-- Cross-phase incoming (SessionOverrideContract): WU-0C-N4, WU-0C-N5.
+- Cross-phase incoming (SessionOverrideContract): WU-0C-N3, WU-0C-N5.
 
 **Produces:** Runtime provider probe service that stores no secret material.
 
 **Parallelizable with:** same topological wave after file ownership coordination: WU-1-01, WU-1-02, WU-1-07, WU-1-08, WU-1-09, WU-1-11, WU-1-14, WU-1-15, WU-1-16, WU-1-20, WU-1-32, WU-1-37, WU-1-38, WU-1-39, WU-1-51, WU-1-53, WU-1-56.
 
-**Revision rationale:** Round 3 keeps provider probing observational. The probe can report redacted readiness but cannot become a replacement for `agent-runner` routing, quota, resume, or session storage ownership.
+**Revision rationale:** Round 3 keeps provider probing observational. The probe can report redacted readiness but cannot become a replacement for `agent-runner` routing, quota, resume, or session storage ownership. r4 cascade: agent-runner feature requests have landed; SessionOverrideContract v2-only; block-on annotations removed.
 
 ### WU-1-56: FakeProviderProbeFixture
 
@@ -1661,7 +1659,7 @@ resolve_route_eligibility(workload_requirements, capability_fingerprint_id) -> R
 - [ ] Every documented invalid transition or denied state is rejected without mutating unrelated graph, provider, budget, or audit records.
 - [ ] `resolve_route_eligibility` has a binary fixture assertion covering its valid path and its documented invalid or denied path.
 - [ ] Route eligibility returns harness policy/readiness decisions only; it never chooses concrete provider accounts, quota windows, auth profiles, resume strategies, session ports, or per-CLI storage adapters.
-- [ ] Workload requirements may include a need for session override capability by opaque WU-0C-N4/WU-0C-N5 evidence refs, but the resolver does not probe or mutate sessions directly.
+- [ ] Workload requirements may include a need for session override capability by opaque WU-0C-N3/WU-0C-N5 evidence refs, but the resolver does not probe or mutate sessions directly.
 - [ ] The WU can merge as a single-concern PR without enabling another Phase 1 value slice by accident.
 
 **Pipeline phases:** Phase 0 RCA skipped unless defect; Phase 1 research = gpt-high when implementation hookpoints are uncertain; Phase 2 synthesis = gpt-high; Phase 2.5 existing-state risk profile = gpt-high; Phase 3 proposal = gpt-high; Phase 4 risk gates = three independent claude-opus passes plus gpt-high audit reconciliation; Phase 5 hookpoints = gpt-high; Phase 6a contract handoff = orchestrator; Phase 6b tests = gpt-high with contract-only access; Phase 6c code = gpt-high with contracts plus tests; Phase 7 CodeRabbit = tool; Phase 8 PR gates = test-audit/commit-hygiene gpt-high plus multi-concern/justification claude-opus; Phase 9 draft PR; Phase 10 human promotion.
@@ -1669,13 +1667,13 @@ resolve_route_eligibility(workload_requirements, capability_fingerprint_id) -> R
 **Dependencies:**
 - Phase 1 internal: WU-1-47.
 - Cross-phase incoming: WU-0A-05, WU-0A-06, WU-0A-07, WU-0A-08, WU-0A-09, WU-0A-10, WU-0A-11, WU-0A-12, WU-0A-13, WU-0A-14a, WU-0A-14b, WU-0A-15, WU-0B-01, WU-0B-02, WU-0B-03, WU-0B-17, WU-0B-18, WU-0B-19, WU-0B-28, WU-0B-29, WU-0B-31, WU-0B-16, WU-0B-04, WU-0B-15, WU-0C-04, WU-0C-21, WU-0C-22a, WU-0C-22, WU-0C-23a, WU-0C-23b, WU-0C-23, WU-0C-24a, WU-0C-24, WU-0C-25a, WU-0C-25, WU-0C-26a, WU-0C-26, WU-0C-11a, WU-0C-11b, WU-0C-12a, WU-0C-12, WU-0C-13a, WU-0C-13b, WU-0C-13, WU-0C-14a, WU-0C-14b, WU-0C-14, WU-0C-15a, WU-0C-15b, WU-0C-15c, WU-0C-15d, WU-0C-16a, WU-0C-16b, WU-0C-16, WU-0C-17a, WU-0C-17b, WU-0C-17, WU-0C-18, WU-0C-19, WU-0C-20a, WU-0C-20, WU-0C-30a, WU-0C-30, WU-0C-31a, WU-0C-31, WU-0C-32, WU-0C-33a, WU-0C-33, WU-0C-34, WU-0C-35a, WU-0C-35, WU-0C-36a, WU-0C-36, WU-0C-37a, WU-0C-37.
-- Cross-phase incoming (SessionOverrideContract): WU-0C-N4, WU-0C-N5.
+- Cross-phase incoming (SessionOverrideContract): WU-0C-N3, WU-0C-N5.
 
 **Produces:** Workload-specific provider route eligibility decisions.
 
 **Parallelizable with:** same topological wave after file ownership coordination: WU-1-12, WU-1-33, WU-1-42, WU-1-55.
 
-**Revision rationale:** Round 3 clarifies that this WU gates provider readiness for UI/future launches without owning provider routing. `agent-runner` still performs actual routing, balancing, resume composition, and session portability.
+**Revision rationale:** Round 3 clarifies that this WU gates provider readiness for UI/future launches without owning provider routing. `agent-runner` still performs actual routing, balancing, resume composition, and session portability. r4 cascade: agent-runner feature requests have landed; SessionOverrideContract v2-only; block-on annotations removed.
 
 ### WU-1-49: RouteDenialReasonClassifier
 
@@ -1704,13 +1702,13 @@ classify_route_denial(route_eligibility, provider_probe_observation) -> Vec<Rout
 **Dependencies:**
 - Phase 1 internal: WU-1-45, WU-1-48.
 - Cross-phase incoming: WU-0A-05, WU-0A-06, WU-0A-07, WU-0A-08, WU-0A-09, WU-0A-10, WU-0A-11, WU-0A-12, WU-0A-13, WU-0A-14a, WU-0A-14b, WU-0A-15, WU-0B-01, WU-0B-02, WU-0B-03, WU-0B-17, WU-0B-18, WU-0B-19, WU-0B-28, WU-0B-29, WU-0B-31, WU-0B-16, WU-0B-04, WU-0B-15, WU-0C-04, WU-0C-21, WU-0C-22a, WU-0C-22, WU-0C-23a, WU-0C-23b, WU-0C-23, WU-0C-24a, WU-0C-24, WU-0C-25a, WU-0C-25, WU-0C-26a, WU-0C-26, WU-0C-11a, WU-0C-11b, WU-0C-12a, WU-0C-12, WU-0C-13a, WU-0C-13b, WU-0C-13, WU-0C-14a, WU-0C-14b, WU-0C-14, WU-0C-15a, WU-0C-15b, WU-0C-15c, WU-0C-15d, WU-0C-16a, WU-0C-16b, WU-0C-16, WU-0C-17a, WU-0C-17b, WU-0C-17, WU-0C-18, WU-0C-19, WU-0C-20a, WU-0C-20, WU-0C-30a, WU-0C-30, WU-0C-31a, WU-0C-31, WU-0C-32, WU-0C-33a, WU-0C-33, WU-0C-34, WU-0C-35a, WU-0C-35, WU-0C-36a, WU-0C-36, WU-0C-37a, WU-0C-37.
-- Cross-phase incoming (SessionOverrideContract): WU-0C-N4, WU-0C-N5.
+- Cross-phase incoming (SessionOverrideContract): WU-0C-N3, WU-0C-N5.
 
 **Produces:** Explicit denial reasons for provider panel and future launch gates.
 
 **Parallelizable with:** same topological wave after file ownership coordination: WU-1-13, WU-1-21, WU-1-28, WU-1-34, WU-1-43, WU-1-44.
 
-**Revision rationale:** Round 3 prevents denial classification from absorbing session override or provider routing internals. It labels observed refusal categories while leaving source-of-truth decisions in Phase 0C services and `agent-runner`.
+**Revision rationale:** Round 3 prevents denial classification from absorbing session override or provider routing internals. It labels observed refusal categories while leaving source-of-truth decisions in Phase 0C services and `agent-runner`. r4 cascade: agent-runner feature requests have landed; SessionOverrideContract v2-only; block-on annotations removed.
 
 ### WU-1-50: ProviderPreflightPane
 
@@ -1731,7 +1729,7 @@ ProviderPreflightPane { provider_state_id, entitlement_snapshot_ids, capability_
 - [ ] A fixture payload with an unknown state or missing required ID is rejected before rendering misleading UI.
 - [ ] `render provider states` has a binary fixture assertion covering its valid path and its documented invalid or denied path.
 - [ ] `reject unknown state` has a binary fixture assertion covering its valid path and its documented invalid or denied path.
-- [ ] The pane can display session-override capability/refusal metadata from WU-0C-N4/WU-0C-N5 as read-only evidence and never exposes raw transcript paths, provider-native JSONL, or adapter temp files.
+- [ ] The pane can display session-override capability/refusal metadata from WU-0C-N3/WU-0C-N5 as read-only evidence and never exposes raw transcript paths, provider-native JSONL, or adapter temp files.
 - [ ] The pane offers no account picker, quota-balancing control, auth refresh control, resume/import control, provider reroute command, or SessionOverrideContract mutation command.
 - [ ] The WU can merge as a single-concern PR without enabling another Phase 1 value slice by accident.
 
@@ -1740,13 +1738,13 @@ ProviderPreflightPane { provider_state_id, entitlement_snapshot_ids, capability_
 **Dependencies:**
 - Phase 1 internal: WU-1-45, WU-1-46, WU-1-47, WU-1-48, WU-1-49.
 - Cross-phase incoming: WU-0A-05, WU-0A-06, WU-0A-07, WU-0A-08, WU-0A-09, WU-0A-10, WU-0A-11, WU-0A-12, WU-0A-13, WU-0A-14a, WU-0A-14b, WU-0A-15, WU-0B-01, WU-0B-02, WU-0B-03, WU-0B-17, WU-0B-18, WU-0B-19, WU-0B-28, WU-0B-29, WU-0B-31, WU-0B-16, WU-0B-04, WU-0B-15, WU-0C-04, WU-0C-21, WU-0C-22a, WU-0C-22, WU-0C-23a, WU-0C-23b, WU-0C-23, WU-0C-24a, WU-0C-24, WU-0C-25a, WU-0C-25, WU-0C-26a, WU-0C-26, WU-0C-11a, WU-0C-11b, WU-0C-12a, WU-0C-12, WU-0C-13a, WU-0C-13b, WU-0C-13, WU-0C-14a, WU-0C-14b, WU-0C-14, WU-0C-15a, WU-0C-15b, WU-0C-15c, WU-0C-15d, WU-0C-16a, WU-0C-16b, WU-0C-16, WU-0C-17a, WU-0C-17b, WU-0C-17, WU-0C-18, WU-0C-19, WU-0C-20a, WU-0C-20, WU-0C-30a, WU-0C-30, WU-0C-31a, WU-0C-31, WU-0C-32, WU-0C-33a, WU-0C-33, WU-0C-34, WU-0C-35a, WU-0C-35, WU-0C-36a, WU-0C-36, WU-0C-37a, WU-0C-37.
-- Cross-phase incoming (SessionOverrideContract): WU-0C-N4, WU-0C-N5.
+- Cross-phase incoming (SessionOverrideContract): WU-0C-N3, WU-0C-N5.
 
 **Produces:** Operator-visible provider and capability preflight panel.
 
 **Parallelizable with:** same topological wave after file ownership coordination: WU-1-22, WU-1-35.
 
-**Revision rationale:** Round 3 keeps the provider panel as read-only preflight. It may explain when future worker/orchestrator actions are blocked on `agent-runner` session features, but it does not implement those features.
+**Revision rationale:** Round 3 keeps the provider panel as read-only preflight. It may display landed `agent-runner` session capability evidence, but it does not implement those features. r4 cascade: agent-runner feature requests have landed; SessionOverrideContract v2-only; block-on annotations removed.
 
 ### WU-1-51: InitiativeRootService
 
@@ -2420,17 +2418,17 @@ Cross-phase incoming graph by value slice:
 - WU-0C-37a -> VS-007
 - WU-0C-37 -> VS-007
 
-### Round 3 SessionOverrideContract incoming overlay
+### Round 4 SessionOverrideContract incoming overlay
 
-The Phase 0C-r4 outgoing declarations add WU-0C-N1..WU-0C-N5 as prerequisites for downstream session read/write consumers. Phase 1 has no worker-launcher or worker-output-reintegration WU in this artifact; those remain downstream VS-015/VS-018 work. The relevant Phase 1-local edges are:
+The Phase 0C-r5 outgoing declarations keep SessionOverrideContract as a v2-only prerequisite for downstream session read/write consumers, drop WU-0C-N4, and satisfy schema-probe needs through WU-0C-N3 `schema_version_probe`. Phase 1 has no worker-launcher or worker-output-reintegration WU in this artifact; those remain downstream VS-015/VS-018 work. The relevant Phase 1-local edges are:
 
 - WU-0C-N2 -> WU-1-03, WU-1-04, WU-1-05 for canonical `TranscriptTurn` / session metadata fixture shapes used by provider-shape normalizers.
-- WU-0C-N1, WU-0C-N2, WU-0C-N3, WU-0C-N4, WU-0C-N5 -> WU-1-10 for read-only transcript ingestion through `read_transcript` / metadata and v1 adapter refusal evidence.
+- WU-0C-N1, WU-0C-N2, WU-0C-N3, WU-0C-N5 -> WU-1-10 for read-only transcript ingestion through `read_transcript`, metadata, schema probing, and refusal evidence.
 - WU-0C-N5 -> WU-1-12, WU-1-13, WU-1-28 for audit stream and drill-down references to override receipts/refusals.
 - WU-0C-N2, WU-0C-N5 -> WU-1-23, WU-1-25 for imposed-context evidence pointers and inspector display of override-derived metadata.
-- WU-0C-N4, WU-0C-N5 -> WU-1-45, WU-1-48, WU-1-49, WU-1-50 for read-only provider preflight display of adapter capability/refusal evidence.
+- WU-0C-N3, WU-0C-N5 -> WU-1-45, WU-1-48, WU-1-49, WU-1-50 for read-only provider preflight display of schema/refusal evidence.
 
-Bidirectional check against Phase 0C r4: WU-0C-N5 explicitly feeds VS-001 evidence inspectors and VS-003 audit surfaces; WU-0C-N1..WU-0C-N5 explicitly feed Phase 1 worker-launcher / worker-output-reintegration successors. This Phase 1 r3 artifact wires the VS-001/VS-003/VS-006 read-only portions now and leaves VS-015/VS-018 mutation dependencies to their owning future phase artifacts.
+Bidirectional check against Phase 0C r5: WU-0C-N5 explicitly feeds VS-001 evidence inspectors and VS-003 audit surfaces; the v2-only SessionOverrideContract edges explicitly feed Phase 1 worker-launcher / worker-output-reintegration successors. This Phase 1 r4 artifact wires the VS-001/VS-003/VS-006 read-only portions now and leaves VS-015/VS-018 mutation dependencies to their owning future phase artifacts.
 
 ## Critical Path
 
@@ -2444,7 +2442,9 @@ This path runs from normalized CLI tool evidence through provenance/audit, budge
 
 Round 2 re-check: WU-1-56 is a Wave 1 contract-only fixture pack for VS-006 tests and does not add a runtime edge to the VS-001 acceptance path, so the critical path is unchanged.
 
-Round 3 re-check: SessionOverrideContract adds cross-phase prerequisites to WU-1-10 and read-only evidence/audit/display WUs, but no new Phase 1-local dependency edge. The Phase 1-local critical path remains unchanged; upstream readiness now additionally requires WU-0C-N1..WU-0C-N5 before transcript-ingestion and override-derived evidence display are accepted.
+Round 3 re-check: SessionOverrideContract added cross-phase prerequisites to WU-1-10 and read-only evidence/audit/display WUs, but no new Phase 1-local dependency edge. Round 4 removes WU-0C-N4 from that prerequisite set, so upstream readiness now requires WU-0C-N1/WU-0C-N2/WU-0C-N3/WU-0C-N5 before transcript-ingestion and override-derived evidence display are accepted.
+
+Round 4 re-check: Phase 0C-r5 removes WU-0C-N4 and makes SessionOverrideContract v2-only; the Phase 1-local critical path remains unchanged.
 
 Phase 0 critical incoming gates for this path: WU-0B-09, WU-0B-10, WU-0B-15, WU-0B-16, WU-0B-17, WU-0B-19, WU-0B-20, WU-0B-21, WU-0C-04, WU-0C-05..WU-0C-07, WU-0C-21..WU-0C-26, WU-0C-34..WU-0C-37, and the Phase 0A IPC/UI/test substrate WU-0A-05..WU-0A-15.
 
@@ -2453,6 +2453,8 @@ Phase 0 critical incoming gates for this path: WU-0B-09, WU-0B-10, WU-0B-15, WU-
 Topological-level partition: every dependency of a WU in wave N has a wave number lower than N. File ownership still needs per-PR coordination, but there are no intra-wave dependency edges.
 
 Round 3 re-derive: the topological waves remain 18+12+9+5+7+3+2 because SessionOverrideContract edges are cross-phase incoming gates, not new Phase 1-local edges. Wave reshuffling is therefore external: WU-1-10, WU-1-12, WU-1-13, WU-1-23, WU-1-25, WU-1-28, WU-1-45, WU-1-48, WU-1-49, and WU-1-50 now wait for the named WU-0C-N* prerequisites before their tests can be accepted, but their relative Phase 1 ordering is unchanged.
+
+Round 4 re-derive: removing WU-0C-N4 and former block-on annotations adds no Phase 1-local edge; waves remain 18+12+9+5+7+3+2 = 56.
 
 | Wave | Work units | Count |
 |---:|---|---:|
@@ -2470,8 +2472,8 @@ Round 3 re-derive: the topological waves remain 18+12+9+5+7+3+2 because SessionO
 |---|---|---|
 | D1 per-object granularity | Applied | 56 WUs; service objects, DTOs, enum taxonomies, adapters, UI components, and fixture packs are separate rather than bundled per VS. WU-1-45 now owns only the runtime service and WU-1-56 owns FakeProviderProbeFixture. |
 | D2 binary criteria | Applied | Each WU has method, enum, state-machine, or fixture-state criteria plus binary fixture assertions generated from its Contract. |
-| D3 regression check | Performed for this draft only | I checked WU count, internal dependency IDs, topological wave acyclicity, SessionOverrideContract cross-phase overlay, and explicit blocked-on annotations by text scan. I did not run external reviewer tools or implementation tests because this is a roadmap artifact. |
-| D4 watch-signal compliance | Covered with residual review risk | bundling-family remains closed by the WU-1-45/WU-1-56 split; state-machine-criteria-family remains addressed by per-method criteria; dependency-encoding-family is updated for WU-0C-N1..WU-0C-N5 incoming edges; fix-created-family reopens at generation 0 for this externally-driven Round 3 cascade from proposal-r5 / engineering-roadmap-r4 / Phase 0C-r4. |
+| D3 regression check | Performed for this draft only | I checked WU count, internal dependency IDs, topological wave acyclicity, SessionOverrideContract cross-phase overlay, and removal of former block-on annotations by text scan. I did not run external reviewer tools or implementation tests because this is a roadmap artifact. |
+| D4 watch-signal compliance | Covered with residual review risk | bundling-family remains closed by the WU-1-45/WU-1-56 split; state-machine-criteria-family remains addressed by per-method criteria; dependency-encoding-family is updated for WU-0C-N1/WU-0C-N2/WU-0C-N3/WU-0C-N5 incoming edges; fix-created-family remains generation 0 for this externally-driven Round 4 cascade from proposal-r6 / engineering-roadmap-r5 / Phase 0C-r5. |
 
 ### Rule D1 - Per-Schema-Object and Per-Service Granularity
 
@@ -2547,6 +2549,7 @@ D1 audit count: 56 rows = 56 WUs in the inventory.
 
 - Round 2 brownfield: split WU-1-45 RedactedProviderProbeService from WU-1-56 FakeProviderProbeFixture, moved the canonical D1 ownership audit into Run Report, placed WU-1-56 in Wave 1, and left downstream Stitch Notes unchanged because fixture WUs do not become Phase 2+ foundation edges.
 - Round 3 brownfield: classification `fix-created-family` gen 0, externally driven by proposal-r5 / engineering-roadmap-r4 / Phase 0C-r4. No WU was removed or merged. Phase 1 r2 contains no worker-launcher, worker-output-reintegration, or orchestrator-bridge mutation WU, so the refactor narrows read-only transcript/provenance/provider surfaces and records downstream blockers instead of collapsing WUs.
+- Round 4 brownfield: classification `fix-created-family` gen 0, externally driven by proposal-r6 / engineering-roadmap-r5 / Phase 0C-r5. No WU was removed or merged. Agent-runner SessionOverrideContract feature requests have landed, WU-0C-N4 is dropped, schema-probe references move to WU-0C-N3 `schema_version_probe`, and former block-on annotations are removed.
 
 ## Stitch Notes
 
@@ -2969,17 +2972,17 @@ D1 audit count: 56 rows = 56 WUs in the inventory.
 - (WU-0C-37a, VS-007)
 - (WU-0C-37, VS-007)
 
-Round 3 SessionOverrideContract incoming edges, matching Phase 0C-r4 outgoing declarations:
+Round 4 SessionOverrideContract incoming edges, matching Phase 0C-r5 outgoing declarations:
 
 - (WU-0C-N2, WU-1-03) canonical transcript DTO shapes for Claude tool-call normalization; no raw JSONL parsing.
 - (WU-0C-N2, WU-1-04) canonical transcript DTO shapes for Codex tool-call normalization; no raw JSONL parsing.
 - (WU-0C-N2, WU-1-05) canonical transcript DTO shapes for opencode tool-call normalization; no raw session storage parsing.
-- (WU-0C-N1, WU-1-10), (WU-0C-N2, WU-1-10), (WU-0C-N3, WU-1-10), (WU-0C-N4, WU-1-10), (WU-0C-N5, WU-1-10) read-only transcript ingestion through SessionOverrideContract and v1 adapter/refusal evidence.
+- (WU-0C-N1, WU-1-10), (WU-0C-N2, WU-1-10), (WU-0C-N3, WU-1-10), (WU-0C-N5, WU-1-10) read-only transcript ingestion through SessionOverrideContract v2, schema probing, and refusal evidence.
 - (WU-0C-N5, WU-1-12), (WU-0C-N5, WU-1-13), (WU-0C-N5, WU-1-28) override receipt/refusal audit and drill-down display.
 - (WU-0C-N2, WU-1-23), (WU-0C-N5, WU-1-23), (WU-0C-N2, WU-1-25), (WU-0C-N5, WU-1-25) override-derived evidence pointer and inspector display.
-- (WU-0C-N4, WU-1-45), (WU-0C-N5, WU-1-45), (WU-0C-N4, WU-1-48), (WU-0C-N5, WU-1-48), (WU-0C-N4, WU-1-49), (WU-0C-N5, WU-1-49), (WU-0C-N4, WU-1-50), (WU-0C-N5, WU-1-50) read-only provider preflight display of adapter capability/refusal evidence.
+- (WU-0C-N3, WU-1-45), (WU-0C-N5, WU-1-45), (WU-0C-N3, WU-1-48), (WU-0C-N5, WU-1-48), (WU-0C-N3, WU-1-49), (WU-0C-N5, WU-1-49), (WU-0C-N3, WU-1-50), (WU-0C-N5, WU-1-50) read-only provider preflight display of schema/refusal evidence.
 
-Bidirectional consistency note: Phase 0C-r4 names WU-0C-N5 as feeding VS-001 evidence inspectors and VS-003 audit surfaces, and names WU-0C-N1..WU-0C-N5 as feeding Phase 1 worker-launcher / worker-output-reintegration successors. Phase 1 r3 wires the existing VS-001/VS-003/VS-006 read-only surfaces. The worker-launcher and worker-output-reintegration edges are intentionally carried forward as outgoing/downstream blockers because those WUs are not present in this 56-WU Phase 1 artifact.
+Bidirectional consistency note: Phase 0C-r5 names WU-0C-N5 as feeding VS-001 evidence inspectors and VS-003 audit surfaces, and names v2-only SessionOverrideContract edges as feeding Phase 1 worker-launcher / worker-output-reintegration successors. Phase 1 r4 wires the existing VS-001/VS-003/VS-006 read-only surfaces. The worker-launcher and worker-output-reintegration edges are intentionally carried forward as outgoing/downstream edges because those WUs are not present in this 56-WU Phase 1 artifact.
 
 ### Outgoing To Phase 2+
 
@@ -2991,7 +2994,7 @@ Bidirectional consistency note: Phase 0C-r4 names WU-0C-N5 as feeding VS-001 evi
 - (VS-003, VS-009) consumes Phase 1 foundations: WU-1-02, WU-1-03, WU-1-04, WU-1-05, WU-1-06, WU-1-07, WU-1-08, WU-1-09, WU-1-10, WU-1-11, WU-1-12, WU-1-13
 - (VS-003, VS-010) consumes Phase 1 foundations: WU-1-02, WU-1-03, WU-1-04, WU-1-05, WU-1-06, WU-1-07, WU-1-08, WU-1-09, WU-1-10, WU-1-11, WU-1-12, WU-1-13
 - (VS-003, VS-014) consumes Phase 1 foundations: WU-1-02, WU-1-03, WU-1-04, WU-1-05, WU-1-06, WU-1-07, WU-1-08, WU-1-09, WU-1-10, WU-1-11, WU-1-12, WU-1-13
-- (VS-003, VS-018) consumes Phase 1 foundations: WU-1-02, WU-1-03, WU-1-04, WU-1-05, WU-1-06, WU-1-07, WU-1-08, WU-1-09, WU-1-10, WU-1-11, WU-1-12, WU-1-13. **Blocked-on:** accepted worker-output session write-back must consume WU-0C-N1..WU-0C-N5; v2 adapter migration needs `agents session locate / export / import-replace`; atomic mid-session reintegration needs `agents pause-handshake`.
+- (VS-003, VS-018) consumes Phase 1 foundations: WU-1-02, WU-1-03, WU-1-04, WU-1-05, WU-1-06, WU-1-07, WU-1-08, WU-1-09, WU-1-10, WU-1-11, WU-1-12, WU-1-13.
 - (VS-003, VS-019) consumes Phase 1 foundations: WU-1-02, WU-1-03, WU-1-04, WU-1-05, WU-1-06, WU-1-07, WU-1-08, WU-1-09, WU-1-10, WU-1-11, WU-1-12, WU-1-13
 - (VS-003, VS-020) consumes Phase 1 foundations: WU-1-02, WU-1-03, WU-1-04, WU-1-05, WU-1-06, WU-1-07, WU-1-08, WU-1-09, WU-1-10, WU-1-11, WU-1-12, WU-1-13
 - (VS-004, VS-008) consumes Phase 1 foundations: WU-1-14, WU-1-15, WU-1-16, WU-1-17, WU-1-18, WU-1-19
@@ -3002,7 +3005,7 @@ Bidirectional consistency note: Phase 0C-r4 names WU-0C-N5 as feeding VS-001 evi
 - (VS-005, VS-010) consumes Phase 1 foundations: WU-1-37, WU-1-38, WU-1-39, WU-1-40, WU-1-41, WU-1-42, WU-1-43, WU-1-44
 - (VS-005, VS-011) consumes Phase 1 foundations: WU-1-37, WU-1-38, WU-1-39, WU-1-40, WU-1-41, WU-1-42, WU-1-43, WU-1-44
 - (VS-006, VS-009) consumes Phase 1 foundations: WU-1-45, WU-1-46, WU-1-47, WU-1-48, WU-1-49, WU-1-50
-- (VS-006, VS-015) consumes Phase 1 foundations: WU-1-45, WU-1-46, WU-1-47, WU-1-48, WU-1-49, WU-1-50. **Blocked-on:** the downstream worker launcher remains thin and must spawn `agents -m <model> -p <project> -f <prompt>` while capturing the spawned `session_id` via the `agents` `--session-id` forced-flag mechanism and storing it on `WorkerRun`; v2 SessionOverrideContract adapter migration needs `agents session locate / export / import-replace`.
+- (VS-006, VS-015) consumes Phase 1 foundations: WU-1-45, WU-1-46, WU-1-47, WU-1-48, WU-1-49, WU-1-50.
 - (VS-006, VS-017) consumes Phase 1 foundations: WU-1-45, WU-1-46, WU-1-47, WU-1-48, WU-1-49, WU-1-50
 - (VS-006, VS-020) consumes Phase 1 foundations: WU-1-45, WU-1-46, WU-1-47, WU-1-48, WU-1-49, WU-1-50
 - (VS-006, VS-021) consumes Phase 1 foundations: WU-1-45, WU-1-46, WU-1-47, WU-1-48, WU-1-49, WU-1-50
