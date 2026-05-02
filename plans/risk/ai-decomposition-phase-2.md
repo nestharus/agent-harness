@@ -196,3 +196,165 @@ Oscillation classification: r4 is a `fix-created-family` round at generation 0, 
 - Stitch Notes Incoming-From-Phase-0C block gains five new `(WU-0C-N1..N5, VS-010)` rows matching the four touched VS-010 WUs with new dependencies. Outgoing-to-Phase-3+ block gains three rows: `(WU-2-43 SummaryRefreshFixturePack, VS-012)`, `(WU-2-43 SummaryRefreshFixturePack, VS-018)`, `(WU-2-46 TurnDecompositionService, VS-012)`. The two existing per-CLI adapter rows are relabeled to "AgentRunnerClient-mediated provider capability adapters". Engineering-roadmap dependency-rows prose adds four bullets capturing the SessionOverrideContract write-back semantics. No outgoing edge is removed.
 - The Run Report's Rule D4 watch-signal table self-classifies r4 as fix-created-family generation 0, externally driven by proposal-r5 / engineering-roadmap-r4 / Phase 0C-r4; `dependency-encoding-family` LOW after targeted WU-0C-N* edge pass; `parallelization-map-family` LOW with unchanged 11-wave topology; `bundling-family` LOW; `state-machine-criteria-family` LOW (WU-2-14 unchanged); `session-override-boundary-family` LOW given explicit boundary acceptance criteria on every touched WU.
 - `grep "Per-CLI adapter\|launch_or_resume\|per-CLI turn adapter" product-strategy/ai-roadmap-phase-2.md` returns zero hits; the AgentRunnerClient refactor leaves no stale terminology.
+
+---
+
+# AI — Decomposition Risk Assessment (Phase 2, Round 5, Option A brownfield edit-pass)
+
+**Rating: LOW**
+
+Phase 2 r5 is an externally-driven Option A edit-pass triggered by proposal-r6 / engineering-roadmap-r5 / Phase 0C-r5 after the agent-runner team shipped all five SessionOverrideContract feature requests. The audit at `plans/audit/ai-roadmap-phase-2.md` round-5 entry (lines 120–126) prescribes targeted annotation and dependency cleanup only: remove `Blocked-on` annotations from the 8 r4-affected WUs (WU-2-22, WU-2-23, WU-2-24, WU-2-26, WU-2-43, WU-2-45, WU-2-46, WU-2-47), retire the dropped Phase 0C-r4 schema-probe split (WU-0C-N4) so VS-010 schema-probe coverage now flows through WU-0C-N3, and stamp each touched WU with an r5 cascade note that confirms the r4 SessionOverrideContract criteria are retained. The proposer landed commit `ee68f91` with a 32-insertion / 31-deletion diff (63 lines changed) against `product-strategy/ai-roadmap-phase-2.md`. WU count remains 50; the 11-wave Parallelization Map (13+8+5+5+5+4+4+2+2+1+1 = 50) is byte-identical to r4; the D1 ownership table at lines 2426–2477 still contains 50 single-object rows; no Phase 2 internal edges were added or removed; the only Stitch-Notes edge change is the deletion of `(WU-0C-N4, VS-010)` plus the prose update describing the new WU-0C-N1/N2/N3/N5 set. r4 closures hold by construction for the 8 r4-affected WUs (their r4 contract / test boundary / acceptance criteria / cross-phase incoming bodies survive byte-for-byte except for the targeted N4→N3 swap and the appended cascade note); r1/r2/r3 closures hold by construction for the 42 r5-unaffected WUs (zero diff hits inside their bodies).
+
+## Findings
+
+### R5-DECOMP-F01. WU count = 50 preserved; D1 ownership table unchanged; 11-wave Parallelization Map byte-identical to r4
+
+**Severity: NONE (regression-only confirmed)**
+
+`grep -c '^### WU-2-' product-strategy/ai-roadmap-phase-2.md` returns 50, matching r4 exactly (Wave 1 leaf DTOs/enums/guards/adapters: WU-2-01..06, WU-2-13, WU-2-20, WU-2-21, WU-2-28, WU-2-29, WU-2-33, WU-2-45 = 13; Wave 2 first validators/adapters: WU-2-08, WU-2-14, WU-2-22, WU-2-23, WU-2-24, WU-2-27, WU-2-30, WU-2-39 = 8; through Wave 11 WU-2-43 = 1; sum = 50). The D1 ownership table at lines 2426–2477 still has 50 rows, each naming a single object owner (DTOs, services, validators, state machines, fixture packs, UI components, audit emitters, capability adapters); zero rows were added, removed, or reclassified in r5. No bundling, no splits.
+
+The wave-table at lines 2400–2411 and the Parallelization Map preface are byte-identical to r4 — `git diff 335a161..ee68f91 -- product-strategy/ai-roadmap-phase-2.md` shows no diff hunks against the wave block. r5 added zero Phase 2 internal edges and removed only a single cross-phase incoming edge (`WU-0C-N4`) on WU-2-43, WU-2-46, and WU-2-47, plus the matching `(WU-0C-N4, VS-010)` row from the Stitch-Notes Incoming-From-Phase-0C list. The topological-from-leaf+1 partition is unchanged. `parallelization-map-family` does not re-fire.
+
+**Recommendation:** No action required.
+
+---
+
+### R5-DECOMP-F02. Per-schema-object ownership preserved; no blob WUs introduced
+
+**Severity: NONE**
+
+Every one of the 50 D1 rows still owns exactly one schema object or service method:
+
+- DTOs (12): WU-2-01..06, WU-2-13 (enum), WU-2-29, WU-2-31, WU-2-32, WU-2-33, WU-2-45 — each owns exactly one schema with field/enum positive and negative fixtures.
+- Method-bearing services (24): WU-2-07, WU-2-09, WU-2-10, WU-2-11, WU-2-15, WU-2-16, WU-2-17, WU-2-18, WU-2-19, WU-2-20, WU-2-21, WU-2-25, WU-2-27, WU-2-28, WU-2-30, WU-2-34, WU-2-35, WU-2-36, WU-2-37, WU-2-39, WU-2-44, WU-2-46, WU-2-47, WU-2-48, WU-2-49, WU-2-50 — each owns one method.
+- State-machine validators (3): WU-2-08, WU-2-14, WU-2-38 — each owns one transition table with explicit invalid-transition rejections.
+- UI components / surfaces (4): WU-2-25, WU-2-40, WU-2-41, WU-2-42 — each owns one surface with loading/empty/happy/blocked/failed/stale states.
+- Provider capability adapters (3): WU-2-22 ClaudeTurnAdapter, WU-2-23 CodexTurnAdapter, WU-2-24 OpencodeTurnAdapter — each owns one method `request_turn(prepared_turn, agent_runner_session_evidence) -> CliAcceptedSession` over WU-0C-18 AgentRunnerClient.
+- Fixture packs (3): WU-2-12 NavigationFixturePack, WU-2-26 OrchestratorTurnFixturePack, WU-2-43 SummaryRefreshFixturePack — each owns one VS-scoped fixture surface.
+
+No WU was merged, collapsed, or otherwise reshaped to bundle multiple objects in r5. No new WU was added, so no new bundling vector exists. The D1 ownership classification cells (column 3 of lines 2428–2477) are byte-identical to r4 — including the r4 "Provider capability adapter over AgentRunnerClient" classification on WU-2-22/23/24 and the "Fixture pack" classification on WU-2-26/43. `bundling-family` does not re-fire.
+
+**Recommendation:** No action required.
+
+---
+
+### R5-DECOMP-F03. r4 closures preserved on the 8 r4-affected WUs (WU-2-22, WU-2-23, WU-2-24, WU-2-26, WU-2-43, WU-2-45, WU-2-46, WU-2-47)
+
+**Severity: NONE**
+
+For each of the 8 r4-affected WUs, the r5 edit-pass retains the r4 contract block, test boundary, and acceptance criteria byte-for-byte except for the targeted dropped-N4→retained-N3 dependency adjustment, the WU-0C-N3 phrase narrowing, and an appended single-line `Revision rationale:` stamp.
+
+| WU | r4 closure that must hold | r5 evidence |
+|---|---|---|
+| WU-2-22 ClaudeTurnAdapter | R4-DECOMP-F02 single-method `request_turn` per-Claude capability surface; AgentRunnerClient acceptance; direct `claude` execution / Claude session storage forbidden by acceptance criterion. | r5 diff touches only the inserted `**Revision rationale:**` line at 1076; contract block / test boundary / acceptance criteria / cross-phase incoming are byte-identical to r4. |
+| WU-2-23 CodexTurnAdapter | R4-DECOMP-F02 single-method per-Codex capability surface; direct `codex` / thread-storage forbidden. | r5 diff touches only the inserted `**Revision rationale:**` line at 1123; rest byte-identical. |
+| WU-2-24 OpencodeTurnAdapter | R4-DECOMP-F02 single-method per-Opencode capability surface; direct `opencode` / session-row forbidden. | r5 diff touches only the inserted `**Revision rationale:**` line at 1170; rest byte-identical. |
+| WU-2-26 OrchestratorTurnFixturePack | R4-DECOMP-F03 single fixture pack with AgentRunnerClient routing assertions and forbidden direct provider CLI/JSONL fixtures. | r5 diff touches only the inserted `**Revision rationale:**` line at 1260; contract clauses, fixture surface, and acceptance criteria are byte-identical to r4. |
+| WU-2-43 SummaryRefreshFixturePack | R4-DECOMP-F04 single fixture pack with SessionOverrideContract coverage of WU-0C-N1 fake adapter success/refusal, WU-0C-N3, WU-0C-N5 receipt propagation, and forbidden direct JSONL mutation fixtures outside WU-0C-N3. | r5 narrows the WU-0C-N3 phrase from "v1 idle-only write-back" to "schema-probe/safe-import gating" (lines 1980 contract, 2000 acceptance criterion); drops `WU-0C-N4` from cross-phase incoming (line 2008); appends `**Revision rationale:**` at line 2011. The N1/N3/N5 coverage closure, the forbidden-direct-JSONL closure, and the single-fixture-pack closure all hold. |
+| WU-2-45 DetailRecordSchemaDto | R4-DECOMP-F05 single DTO; canonical TranscriptTurn binding via WU-0C-N2; provider-native JSONL/file-descriptor/SQLite-handle/parser-object inputs rejected. | r5 updates Source basis to "Phase 0C r5 WU-0C-N2" and Round 6 / r5 attribution (line 2073); cross-phase incoming gains no new ID and removes none (WU-0C-N2 stays; no WU-0C-N4 was ever on this WU); appends `**Revision rationale:**` at line 2101. The DTO field set, the three enums, and the rejection-fixture acceptance criteria are byte-identical to r4. |
+| WU-2-46 TurnDecompositionService | R4-DECOMP-F06 single-method `decompose_turn_bundle`; canonical WU-0C-N1 write-back; WU-0C-N5 receipts propagated; direct provider JSONL operations forbidden. | r5 widens Source basis to include WU-0C-N3 alongside N1/N2/N5 (line 2118); drops `WU-0C-N4` from cross-phase incoming (line 2142); appends `**Revision rationale:**` at line 2147. The single-method contract, the conditional WU-0C-N1 delegation, and the WU-0C-N5 propagation closure all hold. No second method was introduced. |
+| WU-2-47 DetailInjectionRouterService | R4-DECOMP-F07 single-method `route_details`; optional session-visible output via WU-0C-N1; WU-0C-N5 receipts/refusals returned; graph mutation remains proposal-only. | r5 widens Source basis to include WU-0C-N3 alongside N1/N2/N5 (line 2166); drops `WU-0C-N4` from cross-phase incoming (line 2190); appends `**Revision rationale:**` at line 2195. The single-method contract, the optional-write-back delegation, the WU-0C-N5 propagation closure, and the InjectionPlan action enum are byte-identical to r4. |
+
+The D1 row for each touched WU keeps its r4 classification cell verbatim (Provider capability adapter, Fixture pack, DTO, Method-bearing service). No closure regression is possible without changing those cells, and the r5 diff does not change them.
+
+**Recommendation:** No action required.
+
+---
+
+### R5-DECOMP-F04. r1/r2/r3/r4 closures preserved on the 42 r5-unaffected WUs
+
+**Severity: NONE**
+
+The audit r5 entry restricts r5 scope to the 8 r4-affected WUs plus Stitch Notes / Run Report references (`plans/audit/ai-roadmap-phase-2.md` lines 120–126). The 42 r5-unaffected WUs are: WU-2-01, WU-2-02, WU-2-03, WU-2-04, WU-2-05, WU-2-06, WU-2-07, WU-2-08, WU-2-09, WU-2-10, WU-2-11, WU-2-12, WU-2-13, WU-2-14, WU-2-15, WU-2-16, WU-2-17, WU-2-18, WU-2-19, WU-2-20, WU-2-21, WU-2-25, WU-2-27, WU-2-28, WU-2-29, WU-2-30, WU-2-31, WU-2-32, WU-2-33, WU-2-34, WU-2-35, WU-2-36, WU-2-37, WU-2-38, WU-2-39, WU-2-40, WU-2-41, WU-2-42, WU-2-44, WU-2-48, WU-2-49, WU-2-50.
+
+Inspecting `git diff 335a161..ee68f91 -- product-strategy/ai-roadmap-phase-2.md` line by line, these 42 WUs receive zero hits in their `Contract:` / `Test boundary:` / `Code boundary:` / `Acceptance criteria:` / `Dependencies:` / `Produces:` / `Parallelizable with:` blocks. The only non-touched-WU diff hits are: (a) the file-scope boundary line at line 34 ("Included:" scope text) which was updated to reference proposal-r6 / engineering-roadmap-r5 / Phase 0C r5 WU-0C-N1..WU-0C-N3 plus WU-0C-N5 instead of r4 attribution; (b) the Run Report rows for D1/D3/D4 (lines 2417–2420), the D2-evidence bullet at line 2488, the round-suffix bullet at line 2489, and the Rule D3 / D4 prose at lines 2495–2498, 2507–2509, 2513 — each updated only to swap "Round 4" → "Round 5" and "WU-0C-N1..WU-0C-N5" → "WU-0C-N1..WU-0C-N3 plus WU-0C-N5"; (c) one Stitch-Notes prose line at 2623 (Incoming-From-Phase-0C narrative) re-stating the dependency set; (d) the deletion of `(WU-0C-N4, VS-010)` from the Stitch-Notes incoming list at line 2766 of the r4 file. None of these touch a WU body.
+
+This means r1's leaf-DTO/enum closures (WU-2-01..06, WU-2-13), r2's wave-rederive preservation (state-machine WU-2-08, WU-2-14, WU-2-38), r3's six VS-010 WUs (WU-2-45..50 — five of which are r5-unaffected: WU-2-48/49/50 plus WU-2-45 stays single-DTO, only with a non-body Source-basis-text refresh), and r4's 42-CLEAN closure (R4-DECOMP-F09) all survive r5 verbatim. WU-2-13's r3 cross-CLI routing INFO placement deviation is byte-identical in r5. WU-2-14's 12-state lifecycle / 11-valid / 6-invalid transition closure (state-machine-criteria-family LOW-MEDIUM) is byte-identical in r5. WU-2-08 and WU-2-38 transition criteria are intact.
+
+`bundling-family`, `state-machine-criteria-family`, and `dependency-encoding-family` do not re-fire on the 42 unaffected WUs because their bodies are unchanged.
+
+**Recommendation:** No action required.
+
+---
+
+### R5-DECOMP-F05. Blocked-on annotations fully removed; no residual blocking syntax
+
+**Severity: NONE**
+
+`grep -E "Blocked-on|Blocked on" product-strategy/ai-roadmap-phase-2.md` returns zero hits across the entire file (`output_mode: count` = 0). The r5 commit message and audit r5 entry both attest the removal, and the diff confirms it: every line that previously carried a "Blocked-on:" annotation has been replaced with a blank line or a `**Revision rationale:**` stamp recording the removal context. The 8 r4-affected WUs each carry one such stamp:
+
+> **Revision rationale:** r4 SessionOverrideContract refactor criteria retained; r5 cascade: agent-runner feature requests have landed; v2-only; block-on annotations removed.
+
+No WU body, Stitch-Notes block, Parallelization-Map note, or Run-Report row retains a "Blocked-on" or "Blocked on" string. The Outgoing-to-Phase-3+ Stitch-Notes block at the bottom of the file (lines preceding 2956) carries no block-on annotations on its (WU-2-43 → VS-012), (WU-2-43 → VS-018), (WU-2-46 → VS-012), (WU-2-47 → VS-012), or (WU-2-46/47 → VS-018) edges. The annotation removal is observable as a clean, non-destructive cleanup: it removes only the temporary block markers that were valid while the upstream agent-runner cascade was open and that the audit r5 entry explicitly authorizes removing now that the cascade has shipped.
+
+`session-override-boundary-family` (the watch signal flagged in r4) stays LOW: every touched WU's contract or acceptance criteria still explicitly forbid direct provider CLI command, resume composition, session-id capture, session-row mapping, thread storage, or JSONL mutation; all such operations are still routed through WU-0C-18 (AgentRunnerClient) for VS-009 launch/resume and through WU-0C-N1 / N2 / N3 / N5 (SessionOverrideContract) for VS-010 transcript write-back. The removal of block-on syntax is purely annotational and changes no boundary.
+
+**Recommendation:** No action required.
+
+---
+
+### R5-DECOMP-F06. WU-0C-N4 references absent from Phase 2 r5; schema-probe coverage routes through WU-0C-N3
+
+**Severity: NONE**
+
+`grep "WU-0C-N4" product-strategy/ai-roadmap-phase-2.md` returns zero hits across the entire file (`output_mode: count` = 0). The r5 commit removes WU-0C-N4 from four locations: (1) WU-2-43 cross-phase incoming list at line 2008; (2) WU-2-46 cross-phase incoming list at line 2142; (3) WU-2-47 cross-phase incoming list at line 2190; (4) Stitch-Notes Incoming-From-Phase-0C row `(WU-0C-N4, VS-010)`. No other references remained. The Phase 0C r5 cascade dropped WU-0C-N4 (the original schema-probe split WU) and rolled its scope into WU-0C-N3; the Phase 2 r5 edit-pass faithfully follows that retirement.
+
+Schema-probe coverage for VS-010 is now satisfied through WU-0C-N3 only:
+
+- WU-2-43 contract block (line 1980): "WU-0C-N3 schema-probe/safe-import gating" replaces the prior "WU-0C-N3 v1 idle-only write-back" phrasing — a narrowing that aligns the fixture pack to the consolidated WU-0C-N3 surface.
+- WU-2-43 acceptance criterion (line 2000): mirrors the contract phrasing exactly; fixture coverage explicitly enumerates WU-0C-N1 fake adapter success/refusal, WU-0C-N3 schema-probe/safe-import gating, preimage mismatch, session busy, unsupported storage, and WU-0C-N5 override receipt propagation.
+- WU-2-46 / WU-2-47 Source basis: "Phase 0C r5 WU-0C-N1, WU-0C-N2, WU-0C-N3, and WU-0C-N5" — N3 is now an explicit upstream alongside N1/N2/N5 (whereas r4 had only N1/N2/N5 with N3 implicit through WU-2-43).
+
+D1 single-object granularity is unaffected: the dropped N4 was a Phase 0C-internal split, never a Phase 2-internal split. No Phase 2 D1 row referenced WU-0C-N4, so its retirement causes no Phase 2 ownership-table change. No Phase 2 internal edge depended on WU-0C-N4. `dependency-encoding-family` stays LOW — the targeted four-location removal plus the N3-narrowing prose update are exactly the prescribed scope and nothing more.
+
+**Recommendation:** No action required.
+
+---
+
+### R5-DECOMP-F07. fix-created-family classification is generation 0; no spurious WU additions or removals
+
+**Severity: NONE**
+
+Round 5 is `fix-created-family` generation 0 in the Phase 2 local loop, externally driven by the proposal-r6 / engineering-roadmap-r5 / Phase 0C-r5 cascade — the same shape as r4's cascade-driven brownfield (which was also fix-created-family gen 0 from the Phase 0C-r4 SessionOverrideContract introduction cascade). The Run Report self-classifies r5 as "externally-driven minor edit-pass" at line 2513. The Phase 2 audit history at lines 120–126 explicitly frames r5 this way: "Phase 2 r5 is externally driven by proposal-r6 / engineering-roadmap-r5 / Phase 0C-r5 after the agent-runner session feature requests landed."
+
+Generation-counter check: r4 closed clean (R4-DECOMP-F01..F10 were all NONE; r4 self-attested no same-family reviewer-finding chain). r5 is not continuing an r4 finding-chain — it is responding to a *different* downstream event (the agent-runner team shipping the five feature requests, which cleared the block-on annotations and consolidated WU-0C-N4 into WU-0C-N3). Per the watch posture, generation-counter advancement requires a same-family reviewer-flagged r2 → r3 → r4 → r5 chain; that chain doesn't exist for any Phase 2-internal family.
+
+**No spurious additions or removals.** The touched-WU set (WU-2-22, WU-2-23, WU-2-24, WU-2-26, WU-2-43, WU-2-45, WU-2-46, WU-2-47) matches the audit r5 entry scope exactly. Zero WUs were created or deleted in r5 (count stays at 50 vs. r4's 50). Each touched WU's r5 edit traces to a specific audit-r5-entry instruction — block-on removal, WU-0C-N4 retirement, cascade note — and to specific upstream artifacts (proposal-r6, engineering-roadmap-r5, Phase 0C-r5). The N3-narrowing on WU-2-43 contract / acceptance criterion traces to the Phase 0C r5 consolidation of N4 into N3.
+
+`session-override-boundary-family` is observable on the surface as LOW: no touched WU language re-introduces direct CLI launch/resume, JSONL mutation, or session-id capture; every such concern is still explicitly forbidden by the r4 acceptance criteria preserved verbatim in r5 (F03, F05).
+
+**Recommendation:** No action required.
+
+---
+
+## Summary table
+
+| ID | Finding | Severity |
+|----|---------|----------|
+| R5-DECOMP-F01 | WU count = 50 unchanged; D1 ownership table 50 rows byte-identical; 11-wave Parallelization Map (13+8+5+5+5+4+4+2+2+1+1) byte-identical to r4. | NONE |
+| R5-DECOMP-F02 | Per-schema-object ownership preserved on every D1 row; no blob WUs; bundling-family LOW. | NONE |
+| R5-DECOMP-F03 | r4 closures (R4-DECOMP-F02..F08) preserved on the 8 r4-affected WUs (WU-2-22/23/24/26/43/45/46/47); contract / test boundary / acceptance criteria byte-identical except for targeted N4→N3 swap and appended cascade note. | NONE |
+| R5-DECOMP-F04 | r1/r2/r3/r4 closures preserved on the 42 r5-unaffected WUs (WU-2-01..21, WU-2-25, WU-2-27..42, WU-2-44, WU-2-48..50); bodies receive zero diff hits. | NONE |
+| R5-DECOMP-F05 | `Blocked-on` / `Blocked on` annotations fully removed; `grep` returns zero hits; SessionOverrideContract boundary acceptance criteria preserved. | NONE |
+| R5-DECOMP-F06 | `WU-0C-N4` references absent across the entire file; schema-probe coverage routes through WU-0C-N3 (narrowed phrase "schema-probe/safe-import gating" on WU-2-43; N3 added to Source basis on WU-2-46/47). | NONE |
+| R5-DECOMP-F07 | r5 is fix-created-family gen 0 in the Phase 2 local loop, externally driven; touched-WU set matches audit r5 scope exactly; no spurious WU additions or removals. | NONE |
+
+Oscillation classification: r5 is a `fix-created-family` round at generation 0, externally driven by the Phase 0C-r5 / proposal-r6 / engineering-roadmap-r5 cascade (agent-runner shipped). No same-family reviewer chain advances. `bundling-family`, `state-machine-criteria-family`, `dependency-encoding-family`, and `parallelization-map-family` all remain LOW. `session-override-boundary-family` remains LOW: every touched WU's r4 boundary acceptance criterion (no direct provider CLI command, resume composition, session-id capture, session-row mapping, thread storage, or JSONL mutation; all such operations routed through WU-0C-18 for VS-009 and through WU-0C-N1/N2/N3/N5 for VS-010) is preserved verbatim in r5.
+
+## What LOW requires
+
+- WU count is 50, unchanged from r4 (`### WU-2-` count = 50). VS-008 = 12, VS-009 = 16, VS-010 = 22. No WU added; no WU removed.
+- D1 ownership table at lines 2426–2477 contains 50 single-object rows, byte-identical to r4 — Pack/Unpack/Focus/Pin/Unpin command DTOs, NavigationToolResultDto, AgentWalkStateMutationService, WalkStateTransitionValidator, RenderInvalidationService, NavigationToolCallAuditEmitter, NavigationToolAffordanceAdapter, NavigationFixturePack, TurnLifecycleEventEnum, OrchestratorTurnStateMachine, TurnRenderPreparationService, OrchestratorBridgeService, TurnCaptureCommitTransactionService, AdvisoryOptimizerRequestEmitter, GraphActionTransactionService, CompactDetectionAvoidanceGuard, ParentInvocationPropagator, ClaudeTurnAdapter, CodexTurnAdapter, OpencodeTurnAdapter, TurnUIPaneSurface, OrchestratorTurnFixturePack, TurnLifecycleAuditEmitter, TurnProviderPreflightAdapter, OptimizerScopingRequestDto, OptimizerScopingService, OptimizerPromptSchemaDto, OptimizerResponseSchemaDto, SummaryRefreshRequestDto, OptimizerModelInvocationAdapter, DeterministicOptimizerEditValidator, OptimizerEditMergeService, ConflictOnStaleBaseClassifier, SummaryNodeStaleStateTransitionHandler, BackendStaleSignalEmitter, SummaryRegenerationUIComponent, StaleMarkerUIComponent, OptimizerLogUI, SummaryRefreshFixturePack, OptimizerEditAuditEmitter, DetailRecordSchemaDto, TurnDecompositionService, DetailInjectionRouterService, IncrementalSummaryUpdateService, FullSummaryRegenerationService, StaleMarkDetectionService.
+- WU-2-22 ClaudeTurnAdapter, WU-2-23 CodexTurnAdapter, WU-2-24 OpencodeTurnAdapter retain the r4 single-method `request_turn(prepared_turn, agent_runner_session_evidence) -> CliAcceptedSession` contract over WU-0C-18 AgentRunnerClient; bodies are byte-identical to r4 except for one inserted `**Revision rationale:**` line per WU.
+- WU-2-26 OrchestratorTurnFixturePack retains the r4 fixture surface (happy path, tool path, blocked render, compact detected, failed capture, recovered turn, optimizer request) plus AgentRunnerClient routing assertions; body byte-identical to r4 except one inserted `**Revision rationale:**` line.
+- WU-2-43 SummaryRefreshFixturePack retains the r4 SessionOverrideContract coverage with the WU-0C-N3 phrase narrowed from "v1 idle-only write-back" to "schema-probe/safe-import gating" (contract block and matching acceptance criterion); cross-phase incoming drops `WU-0C-N4` while keeping `WU-0C-N1, WU-0C-N2, WU-0C-N3, WU-0C-N5`; one inserted `**Revision rationale:**` line.
+- WU-2-45 DetailRecordSchemaDto retains the single-DTO surface; Source basis updated to "proposal.md Round 6 §1; engineering-roadmap.md r5 VS-010; Phase 0C r5 WU-0C-N2"; cross-phase incoming unchanged (WU-0C-N4 was never present); one inserted `**Revision rationale:**` line.
+- WU-2-46 TurnDecompositionService retains the single-method `decompose_turn_bundle(...)` contract; Source basis adds WU-0C-N3 alongside N1/N2/N5; cross-phase incoming drops `WU-0C-N4`; one inserted `**Revision rationale:**` line.
+- WU-2-47 DetailInjectionRouterService retains the single-method `route_details(...)` contract; Source basis adds WU-0C-N3 alongside N1/N2/N5; cross-phase incoming drops `WU-0C-N4`; one inserted `**Revision rationale:**` line.
+- WU-2-01..21, WU-2-25, WU-2-27..42, WU-2-44, WU-2-48, WU-2-49, WU-2-50 (42 WUs) remain byte-for-byte identical to the r4 baseline in their `Contract:`, `Test boundary:`, `Code boundary:`, `Acceptance criteria:`, `Dependencies:`, `Produces:`, and `Parallelizable with:` blocks.
+- The 11-wave Parallelization Map (Wave 1: 13 WUs through Wave 11: 1 WU; sum = 50) is byte-identical to r4; no Phase 2 internal edges added or removed.
+- Stitch Notes Incoming-From-Phase-0C block drops one row (`(WU-0C-N4, VS-010)`); the prose line at 2623 is updated to "Round 5 keeps WU-0C-N1, WU-0C-N2, WU-0C-N3, and WU-0C-N5 only where SessionOverrideContract write-back, DTO evidence, schema-probe gating, fixtures, receipts, or refusals are consumed: WU-2-43, WU-2-45, WU-2-46, and WU-2-47. WU-2-48, WU-2-49, and WU-2-50 remain clean." Outgoing-to-Phase-3+ block is byte-identical to r4 (no edge added or removed).
+- The Run Report's Rule D4 watch-signal table self-classifies r5 as fix-created-family generation 0, externally driven by proposal-r6 / engineering-roadmap-r5 / Phase 0C-r5; `dependency-encoding-family` LOW after the targeted WU-0C-N4 retirement; `parallelization-map-family` LOW with unchanged 11-wave topology; `bundling-family` LOW; `state-machine-criteria-family` LOW (WU-2-14 unchanged); `session-override-boundary-family` LOW given preserved boundary acceptance criteria on every touched WU.
+- `grep -E "Blocked-on|Blocked on" product-strategy/ai-roadmap-phase-2.md` returns zero hits.
+- `grep "WU-0C-N4" product-strategy/ai-roadmap-phase-2.md` returns zero hits.
+- `grep "Per-CLI adapter\|launch_or_resume\|per-CLI turn adapter" product-strategy/ai-roadmap-phase-2.md` continues to return zero hits (r4 closure preserved).
