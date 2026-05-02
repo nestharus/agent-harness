@@ -31,7 +31,7 @@ Engineering order from `engineering-roadmap.md` lines 631-639:
 3. VS-010 context-management pipeline, summary refresh, and stale markers.
 
 Phase 2 scope boundaries:
-- Included: pack, unpack, focus, pin, unpin command schemas; walk-state transition validation; next-turn render invalidation; navigation tool audit; durable orchestrator turn lifecycle; `AgentRunnerClient`-mediated provider turn capability adapters; capture/commit transactions; advisory OptimizerRequest emission; compact detection; VS-010 turn decomposition, DetailRecord schema, detail injection routing, incremental summary update, full summary regeneration, stale-mark detection, per-task optimizer model dispatch, deterministic edit validation, merge and stale-base conflict classification, summary/stale UI, optimizer log UI, and first-class fixture packs per VS. VS-010 expansion is sourced from `proposal.md` Round 5 §1 Context-Management Model Assignment, `engineering-roadmap.md` r4 VS-010, `research/16-transcript-turn-decomposition.md`, `research/17-v4-per-task-model-assignment.md`, and Phase 0C r4 `SessionOverrideContract` WU-0C-N1..WU-0C-N5.
+- Included: pack, unpack, focus, pin, unpin command schemas; walk-state transition validation; next-turn render invalidation; navigation tool audit; durable orchestrator turn lifecycle; `AgentRunnerClient`-mediated provider turn capability adapters; capture/commit transactions; advisory OptimizerRequest emission; compact detection; VS-010 turn decomposition, DetailRecord schema, detail injection routing, incremental summary update, full summary regeneration, stale-mark detection, per-task optimizer model dispatch, deterministic edit validation, merge and stale-base conflict classification, summary/stale UI, optimizer log UI, and first-class fixture packs per VS. VS-010 expansion is sourced from `proposal.md` Round 6 §1 Context-Management Model Assignment, `engineering-roadmap.md` r5 VS-010, `research/16-transcript-turn-decomposition.md`, `research/17-v4-per-task-model-assignment.md`, and Phase 0C r5 `SessionOverrideContract` WU-0C-N1..WU-0C-N3 and WU-0C-N5.
 - Excluded: topology mutation, splits, merges, re-parenting, cross-reference creation, repack edits, worker dispatch, NEEDS_INPUT routing, reviewer sampling policy beyond existing deterministic hooks, recovery execution UI, and provider reroute/substitution. Those remain Phase 3+ work.
 - Foreground OrchestratorBridge writes are bounded to GraphAction rows, evidence/provenance/audit rows, and advisory OptimizerRequest records. They never create or mutate GraphNode, GraphEdge, NodeRevision, SummaryContract, IdentityEvent, or OptimizerEdit graph truth.
 - Optimizer behavior in this phase is limited to summary_regeneration and stale_mark drafts plus deterministic merge handling. Higher-consequence edit types are only represented by upstream schemas and remain disabled.
@@ -1073,7 +1073,7 @@ No direct `claude` command execution, Claude session storage assumption, provide
 - Cross-phase incoming from Phase 1: WU-1-02, WU-1-03, WU-1-04, WU-1-05, WU-1-06, WU-1-07, WU-1-08, WU-1-09, WU-1-10, WU-1-11, WU-1-12, WU-1-13, WU-1-14, WU-1-15, WU-1-16, WU-1-17, WU-1-18, WU-1-19, WU-1-20, WU-1-21, WU-1-22, WU-1-23, WU-1-24, WU-1-25, WU-1-26, WU-1-27, WU-1-28, WU-1-45, WU-1-46, WU-1-47, WU-1-48, WU-1-49, WU-1-50, WU-1-56.
 
 **Produces:** ClaudeTurnAdapter capability contract and tests over AgentRunnerClient evidence; no unlisted downstream behavior.
-
+**Revision rationale:** r4 SessionOverrideContract refactor criteria retained; r5 cascade: agent-runner feature requests have landed; v2-only; block-on annotations removed.
 **Parallelizable with:** topological peers that do not share files; primary candidates in the same slice are WU-2-13, WU-2-20, WU-2-21, WU-2-28.
 
 ### WU-2-23: CodexTurnAdapter
@@ -1120,7 +1120,7 @@ No direct `codex` command execution, thread storage assumption, provider/account
 - Cross-phase incoming from Phase 1: WU-1-02, WU-1-03, WU-1-04, WU-1-05, WU-1-06, WU-1-07, WU-1-08, WU-1-09, WU-1-10, WU-1-11, WU-1-12, WU-1-13, WU-1-14, WU-1-15, WU-1-16, WU-1-17, WU-1-18, WU-1-19, WU-1-20, WU-1-21, WU-1-22, WU-1-23, WU-1-24, WU-1-25, WU-1-26, WU-1-27, WU-1-28, WU-1-45, WU-1-46, WU-1-47, WU-1-48, WU-1-49, WU-1-50, WU-1-56.
 
 **Produces:** CodexTurnAdapter capability contract and tests over AgentRunnerClient evidence; no unlisted downstream behavior.
-
+**Revision rationale:** r4 SessionOverrideContract refactor criteria retained; r5 cascade: agent-runner feature requests have landed; v2-only; block-on annotations removed.
 **Parallelizable with:** topological peers that do not share files; primary candidates in the same slice are WU-2-13, WU-2-20, WU-2-21, WU-2-28.
 
 ### WU-2-24: OpencodeTurnAdapter
@@ -1167,7 +1167,7 @@ No direct `opencode` command execution, session-row mapping, provider/account ro
 - Cross-phase incoming from Phase 1: WU-1-02, WU-1-03, WU-1-04, WU-1-05, WU-1-06, WU-1-07, WU-1-08, WU-1-09, WU-1-10, WU-1-11, WU-1-12, WU-1-13, WU-1-14, WU-1-15, WU-1-16, WU-1-17, WU-1-18, WU-1-19, WU-1-20, WU-1-21, WU-1-22, WU-1-23, WU-1-24, WU-1-25, WU-1-26, WU-1-27, WU-1-28, WU-1-45, WU-1-46, WU-1-47, WU-1-48, WU-1-49, WU-1-50, WU-1-56.
 
 **Produces:** OpencodeTurnAdapter capability contract and tests over AgentRunnerClient evidence; no unlisted downstream behavior.
-
+**Revision rationale:** r4 SessionOverrideContract refactor criteria retained; r5 cascade: agent-runner feature requests have landed; v2-only; block-on annotations removed.
 **Parallelizable with:** topological peers that do not share files; primary candidates in the same slice are WU-2-13, WU-2-20, WU-2-21, WU-2-28.
 
 ### WU-2-25: TurnUIPaneSurface
@@ -1257,7 +1257,7 @@ Direct provider CLI command, resume, session-row, thread-storage, or JSONL-stora
 - Cross-phase incoming from Phase 1: WU-1-02, WU-1-03, WU-1-04, WU-1-05, WU-1-06, WU-1-07, WU-1-08, WU-1-09, WU-1-10, WU-1-11, WU-1-12, WU-1-13, WU-1-14, WU-1-15, WU-1-16, WU-1-17, WU-1-18, WU-1-19, WU-1-20, WU-1-21, WU-1-22, WU-1-23, WU-1-24, WU-1-25, WU-1-26, WU-1-27, WU-1-28, WU-1-45, WU-1-46, WU-1-47, WU-1-48, WU-1-49, WU-1-50, WU-1-56.
 
 **Produces:** OrchestratorTurnFixturePack contract and tests; no unlisted downstream behavior.
-
+**Revision rationale:** r4 SessionOverrideContract refactor criteria retained; r5 cascade: agent-runner feature requests have landed; v2-only; block-on annotations removed.
 **Parallelizable with:** topological peers that do not share files; primary candidates in the same slice are WU-2-13, WU-2-20, WU-2-21, WU-2-28.
 
 ### WU-2-27: TurnLifecycleAuditEmitter
@@ -1977,7 +1977,7 @@ Consumes queued OptimizerRequest and immutable GraphSnapshot data.
 Creates optimizer-owned summary_regeneration or stale_mark OptimizerEdit drafts only.
 Merge outcomes are merged, conflicted, rejected, or deferred; current orchestrator turn is never mutated.
 SummaryRefreshFixturePack includes queued request, scoped snapshot, turn decomposition, DetailRecord validation, detail injection routing, incremental summary update, requires_full_regen, full regeneration, stale detection, valid summary regeneration, stale mark, validation failure, stale-base conflict, reviewer-sampled hold, and merge-success fixtures.
-SessionOverrideContract coverage includes WU-0C-N1 fake adapter success/refusal, WU-0C-N3 v1 idle-only write-back, preimage mismatch, session busy, unsupported storage, and WU-0C-N5 override receipt propagation.
+SessionOverrideContract coverage includes WU-0C-N1 fake adapter success/refusal, WU-0C-N3 schema-probe/safe-import gating, preimage mismatch, session busy, unsupported storage, and WU-0C-N5 override receipt propagation.
 Direct JSONL mutation fixtures are forbidden outside WU-0C-N3 adapter fixtures.
 ```
 
@@ -1997,7 +1997,7 @@ Direct JSONL mutation fixtures are forbidden outside WU-0C-N3 adapter fixtures.
 - [ ] Every fixture named in the Contract is present as a stable file or fixture builder with one positive and one negative contract assertion, using Phase 0A temp harness/fake agents and Phase 0B/0C/1 contracts without alternate schemas.
 - [ ] Fixture coverage includes the full turn-decomposition -> DetailRecord validation -> detail injection routing -> incremental summary update -> full regeneration or stale-mark-detection pipeline, including one no-fit new-node creation request and one ambiguous parked detail.
 - [ ] Fixture coverage asserts WU-2-34 per-task model routing for MiniMax-M2.7 routine tasks, Claude Opus 4.7 conflict arbitration, Claude Sonnet 4.6 lead routing, GPT-5.5 reviewer sampling, and excluded-provider failures for GLM/Gemini/Qwen/Mistral/DeepSeek.
-- [ ] Fixture coverage includes WU-0C-N1 fake adapter success/refusal, WU-0C-N3 v1 idle-only write-back, preimage mismatch, session busy, unsupported storage, and WU-0C-N5 override receipt propagation, with no direct provider JSONL open/truncate/rewrite/append/locate fixture outside WU-0C-N3.
+- [ ] Fixture coverage includes WU-0C-N1 fake adapter success/refusal, WU-0C-N3 schema-probe/safe-import gating, preimage mismatch, session busy, unsupported storage, and WU-0C-N5 override receipt propagation, with no direct provider JSONL open/truncate/rewrite/append/locate fixture outside WU-0C-N3.
 
 **Pipeline phases:** Phase 0 RCA skipped unless defect; Phase 1 research = gpt-high; Phase 2 synthesis = gpt-high; Phase 2.5 existing-state risk profile = gpt-high; Phase 3 proposal = gpt-high; Phase 4 risk gates = three independent claude-opus passes plus gpt-high audit reconciliation; Phase 5 hookpoints = gpt-high; Phase 6a contract handoff = orchestrator; Phase 6b tests = separate gpt-high with contract-only access; Phase 6c code = separate gpt-high with contracts plus tests; Phase 7 CodeRabbit; Phase 8 PR review; Phase 9 draft PR; Phase 10 human promotion.
 
@@ -2005,11 +2005,11 @@ Direct JSONL mutation fixtures are forbidden outside WU-0C-N3 adapter fixtures.
 - Phase 2 internal: WU-2-29, WU-2-30, WU-2-31, WU-2-32, WU-2-33, WU-2-34, WU-2-35, WU-2-36, WU-2-37, WU-2-38, WU-2-39, WU-2-40, WU-2-41, WU-2-42, WU-2-44, WU-2-45, WU-2-46, WU-2-47, WU-2-48, WU-2-49, WU-2-50.
 - Cross-phase incoming from Phase 0A: WU-0A-01, WU-0A-03, WU-0A-04, WU-0A-05, WU-0A-06, WU-0A-07, WU-0A-08, WU-0A-09, WU-0A-10, WU-0A-11, WU-0A-12, WU-0A-13, WU-0A-14a, WU-0A-14b.
 - Cross-phase incoming from Phase 0B: WU-0B-01, WU-0B-02, WU-0B-03, WU-0B-04, WU-0B-05, WU-0B-07, WU-0B-08, WU-0B-09, WU-0B-10, WU-0B-11, WU-0B-12, WU-0B-13, WU-0B-14, WU-0B-15, WU-0B-16, WU-0B-21, WU-0B-25, WU-0B-26, WU-0B-27, WU-0B-32.
-- Cross-phase incoming from Phase 0C: WU-0C-04, WU-0C-05, WU-0C-06a, WU-0C-06, WU-0C-07a, WU-0C-07, WU-0C-08, WU-0C-09a, WU-0C-09, WU-0C-10, WU-0C-21, WU-0C-22a, WU-0C-22, WU-0C-23a, WU-0C-23b, WU-0C-23, WU-0C-24a, WU-0C-24, WU-0C-25a, WU-0C-25, WU-0C-26a, WU-0C-26, WU-0C-27, WU-0C-28, WU-0C-29a, WU-0C-29b, WU-0C-29, WU-0C-29d, WU-0C-34, WU-0C-35a, WU-0C-35, WU-0C-36a, WU-0C-36, WU-0C-37a, WU-0C-37, WU-0C-N1, WU-0C-N2, WU-0C-N3, WU-0C-N4, WU-0C-N5.
+- Cross-phase incoming from Phase 0C: WU-0C-04, WU-0C-05, WU-0C-06a, WU-0C-06, WU-0C-07a, WU-0C-07, WU-0C-08, WU-0C-09a, WU-0C-09, WU-0C-10, WU-0C-21, WU-0C-22a, WU-0C-22, WU-0C-23a, WU-0C-23b, WU-0C-23, WU-0C-24a, WU-0C-24, WU-0C-25a, WU-0C-25, WU-0C-26a, WU-0C-26, WU-0C-27, WU-0C-28, WU-0C-29a, WU-0C-29b, WU-0C-29, WU-0C-29d, WU-0C-34, WU-0C-35a, WU-0C-35, WU-0C-36a, WU-0C-36, WU-0C-37a, WU-0C-37, WU-0C-N1, WU-0C-N2, WU-0C-N3, WU-0C-N5.
 - Cross-phase incoming from Phase 1: WU-1-02, WU-1-03, WU-1-04, WU-1-05, WU-1-06, WU-1-07, WU-1-08, WU-1-09, WU-1-10, WU-1-11, WU-1-12, WU-1-13, WU-1-14, WU-1-15, WU-1-16, WU-1-17, WU-1-18, WU-1-19, WU-1-20, WU-1-21, WU-1-24, WU-1-29, WU-1-30, WU-1-31, WU-1-32, WU-1-33, WU-1-34, WU-1-35, WU-1-36, WU-1-37, WU-1-38, WU-1-39, WU-1-40, WU-1-41, WU-1-42, WU-1-43, WU-1-44.
 
 **Produces:** SummaryRefreshFixturePack contract and tests; no unlisted downstream behavior.
-
+**Revision rationale:** r4 SessionOverrideContract refactor criteria retained; r5 cascade: agent-runner feature requests have landed; v2-only; block-on annotations removed.
 **Parallelizable with:** topological peers that do not share files; primary candidates in the same slice are WU-2-29, WU-2-33.
 
 ### WU-2-44: OptimizerEditAuditEmitter
@@ -2070,7 +2070,7 @@ raw_span_refs and turn refs are canonical TranscriptTurn/source-offset reference
 detail_type enum: observation, decision, constraint, tool_event, artifact, blocker, question, action_item, summary_delta, conflict_signal, entity_fact, relationship_fact.
 scope enum: user, assistant, tool, system, optimizer, worker.
 source_fidelity enum: verbatim, paraphrase, inference, proposal.
-Source basis: proposal.md Round 5 §1 Context-Management Model Assignment; engineering-roadmap.md r4 VS-010; Phase 0C r4 WU-0C-N2; research/16-transcript-turn-decomposition.md §1.3; research/17-v4-per-task-model-assignment.md §7.
+Source basis: proposal.md Round 6 §1 Context-Management Model Assignment; engineering-roadmap.md r5 VS-010; Phase 0C r5 WU-0C-N2; research/16-transcript-turn-decomposition.md §1.3; research/17-v4-per-task-model-assignment.md §7.
 ```
 
 **Test boundary:** product-strategy/contracts/wu-2-45-detailrecordschemadto.md; src-tauri/src/contracts/wu_2_45.rs; src/contracts/wu_2_45.ts when TypeScript DTOs are present; product-strategy/contracts/fixtures/wu-2-45/
@@ -2097,7 +2097,7 @@ Source basis: proposal.md Round 5 §1 Context-Management Model Assignment; engin
 - Cross-phase incoming from Phase 1: WU-1-02, WU-1-03, WU-1-04, WU-1-05, WU-1-06, WU-1-07, WU-1-08, WU-1-09, WU-1-10, WU-1-11, WU-1-12, WU-1-13, WU-1-14, WU-1-15, WU-1-16, WU-1-17, WU-1-18, WU-1-19, WU-1-20, WU-1-21, WU-1-24, WU-1-29, WU-1-30, WU-1-31, WU-1-32, WU-1-33, WU-1-34, WU-1-35, WU-1-36, WU-1-37, WU-1-38, WU-1-39, WU-1-40, WU-1-41, WU-1-42, WU-1-43, WU-1-44.
 
 **Produces:** DetailRecordSchemaDto contract and tests; no unlisted downstream behavior.
-
+**Revision rationale:** r4 SessionOverrideContract refactor criteria retained; r5 cascade: agent-runner feature requests have landed; v2-only; block-on annotations removed.
 **Parallelizable with:** topological peers that do not share files; primary candidates in the same slice are WU-2-29, WU-2-33.
 
 ### WU-2-46: TurnDecompositionService
@@ -2113,7 +2113,7 @@ Creates DetailRecord[] candidates only; no graph node, edge, summary, or optimiz
 TurnDecompositionService.decompose_turn_bundle(bundle_ref, max_adjacent_turns, base_graph_snapshot_id) -> DetailRecord[].
 If decomposition emits canonical synthetic turns or packed transcript deltas for session visibility, session write-back must call WU-0C-N1 `append_turns`, `truncate_after`, or `replace_transcript` with WU-0C-N2 preconditions and propagate WU-0C-N5 receipts/refusals.
 The service never opens, parses, truncates, rewrites, appends, or locates provider-native JSONL directly.
-Source basis: proposal.md Round 5 §1 Context-Management Model Assignment; engineering-roadmap.md r4 VS-010; Phase 0C r4 WU-0C-N1, WU-0C-N2, and WU-0C-N5; research/16-transcript-turn-decomposition.md §§1 and 7.7; research/17-v4-per-task-model-assignment.md §7.
+Source basis: proposal.md Round 6 §1 Context-Management Model Assignment; engineering-roadmap.md r5 VS-010; Phase 0C r5 WU-0C-N1, WU-0C-N2, WU-0C-N3, and WU-0C-N5; research/16-transcript-turn-decomposition.md §§1 and 7.7; research/17-v4-per-task-model-assignment.md §7.
 ```
 
 **Test boundary:** product-strategy/contracts/wu-2-46-turndecompositionservice.md; src-tauri/src/contracts/wu_2_46.rs; src/contracts/wu_2_46.ts when TypeScript DTOs are present; product-strategy/contracts/fixtures/wu-2-46/
@@ -2139,11 +2139,11 @@ Source basis: proposal.md Round 5 §1 Context-Management Model Assignment; engin
 - Phase 2 internal: WU-2-34, WU-2-45.
 - Cross-phase incoming from Phase 0A: WU-0A-01, WU-0A-03, WU-0A-04, WU-0A-05, WU-0A-06, WU-0A-07, WU-0A-08, WU-0A-09, WU-0A-10, WU-0A-11, WU-0A-12, WU-0A-13, WU-0A-14a, WU-0A-14b.
 - Cross-phase incoming from Phase 0B: WU-0B-01, WU-0B-02, WU-0B-03, WU-0B-04, WU-0B-05, WU-0B-07, WU-0B-08, WU-0B-09, WU-0B-10, WU-0B-11, WU-0B-12, WU-0B-13, WU-0B-14, WU-0B-15, WU-0B-16, WU-0B-21, WU-0B-25, WU-0B-26, WU-0B-27, WU-0B-32.
-- Cross-phase incoming from Phase 0C: WU-0C-04, WU-0C-05, WU-0C-06a, WU-0C-06, WU-0C-07a, WU-0C-07, WU-0C-08, WU-0C-09a, WU-0C-09, WU-0C-10, WU-0C-21, WU-0C-22a, WU-0C-22, WU-0C-23a, WU-0C-23b, WU-0C-23, WU-0C-24a, WU-0C-24, WU-0C-25a, WU-0C-25, WU-0C-26a, WU-0C-26, WU-0C-27, WU-0C-28, WU-0C-29a, WU-0C-29b, WU-0C-29, WU-0C-29d, WU-0C-34, WU-0C-35a, WU-0C-35, WU-0C-36a, WU-0C-36, WU-0C-37a, WU-0C-37, WU-0C-N1, WU-0C-N2, WU-0C-N3, WU-0C-N4, WU-0C-N5.
+- Cross-phase incoming from Phase 0C: WU-0C-04, WU-0C-05, WU-0C-06a, WU-0C-06, WU-0C-07a, WU-0C-07, WU-0C-08, WU-0C-09a, WU-0C-09, WU-0C-10, WU-0C-21, WU-0C-22a, WU-0C-22, WU-0C-23a, WU-0C-23b, WU-0C-23, WU-0C-24a, WU-0C-24, WU-0C-25a, WU-0C-25, WU-0C-26a, WU-0C-26, WU-0C-27, WU-0C-28, WU-0C-29a, WU-0C-29b, WU-0C-29, WU-0C-29d, WU-0C-34, WU-0C-35a, WU-0C-35, WU-0C-36a, WU-0C-36, WU-0C-37a, WU-0C-37, WU-0C-N1, WU-0C-N2, WU-0C-N3, WU-0C-N5.
 - Cross-phase incoming from Phase 1: WU-1-02, WU-1-03, WU-1-04, WU-1-05, WU-1-06, WU-1-07, WU-1-08, WU-1-09, WU-1-10, WU-1-11, WU-1-12, WU-1-13, WU-1-14, WU-1-15, WU-1-16, WU-1-17, WU-1-18, WU-1-19, WU-1-20, WU-1-21, WU-1-24, WU-1-29, WU-1-30, WU-1-31, WU-1-32, WU-1-33, WU-1-34, WU-1-35, WU-1-36, WU-1-37, WU-1-38, WU-1-39, WU-1-40, WU-1-41, WU-1-42, WU-1-43, WU-1-44.
 
 **Produces:** TurnDecompositionService contract and tests; no unlisted downstream behavior.
-
+**Revision rationale:** r4 SessionOverrideContract refactor criteria retained; r5 cascade: agent-runner feature requests have landed; v2-only; block-on annotations removed.
 **Parallelizable with:** topological peers that do not share files; primary candidates in the same slice are WU-2-35, WU-2-50.
 
 ### WU-2-47: DetailInjectionRouterService
@@ -2161,7 +2161,7 @@ Optional session-visible output path emits canonical turns or a packed transcrip
 The router never opens, truncates, rewrites, appends, or locates per-CLI JSONL directly.
 InjectionPlan { base_graph_snapshot_id, detail_id, action, target_node_id?, target_revision_id?, new_node_template?, edge_candidate?, rationale, evidence_ids, expected_invariants }.
 action enum: append_to_node, create_node, create_edge_candidate, park, defer, quarantine, drop.
-Source basis: proposal.md Round 5 §1 Context-Management Model Assignment; engineering-roadmap.md r4 VS-010; Phase 0C r4 WU-0C-N1, WU-0C-N2, and WU-0C-N5; research/16-transcript-turn-decomposition.md §§2.1-2.7; research/17-v4-per-task-model-assignment.md §7.
+Source basis: proposal.md Round 6 §1 Context-Management Model Assignment; engineering-roadmap.md r5 VS-010; Phase 0C r5 WU-0C-N1, WU-0C-N2, WU-0C-N3, and WU-0C-N5; research/16-transcript-turn-decomposition.md §§2.1-2.7; research/17-v4-per-task-model-assignment.md §7.
 ```
 
 **Test boundary:** product-strategy/contracts/wu-2-47-detailinjectionrouterservice.md; src-tauri/src/contracts/wu_2_47.rs; src/contracts/wu_2_47.ts when TypeScript DTOs are present; product-strategy/contracts/fixtures/wu-2-47/
@@ -2187,11 +2187,11 @@ Source basis: proposal.md Round 5 §1 Context-Management Model Assignment; engin
 - Phase 2 internal: WU-2-30, WU-2-34, WU-2-45, WU-2-46.
 - Cross-phase incoming from Phase 0A: WU-0A-01, WU-0A-03, WU-0A-04, WU-0A-05, WU-0A-06, WU-0A-07, WU-0A-08, WU-0A-09, WU-0A-10, WU-0A-11, WU-0A-12, WU-0A-13, WU-0A-14a, WU-0A-14b.
 - Cross-phase incoming from Phase 0B: WU-0B-01, WU-0B-02, WU-0B-03, WU-0B-04, WU-0B-05, WU-0B-07, WU-0B-08, WU-0B-09, WU-0B-10, WU-0B-11, WU-0B-12, WU-0B-13, WU-0B-14, WU-0B-15, WU-0B-16, WU-0B-21, WU-0B-25, WU-0B-26, WU-0B-27, WU-0B-32.
-- Cross-phase incoming from Phase 0C: WU-0C-04, WU-0C-05, WU-0C-06a, WU-0C-06, WU-0C-07a, WU-0C-07, WU-0C-08, WU-0C-09a, WU-0C-09, WU-0C-10, WU-0C-21, WU-0C-22a, WU-0C-22, WU-0C-23a, WU-0C-23b, WU-0C-23, WU-0C-24a, WU-0C-24, WU-0C-25a, WU-0C-25, WU-0C-26a, WU-0C-26, WU-0C-27, WU-0C-28, WU-0C-29a, WU-0C-29b, WU-0C-29, WU-0C-29d, WU-0C-34, WU-0C-35a, WU-0C-35, WU-0C-36a, WU-0C-36, WU-0C-37a, WU-0C-37, WU-0C-N1, WU-0C-N2, WU-0C-N3, WU-0C-N4, WU-0C-N5.
+- Cross-phase incoming from Phase 0C: WU-0C-04, WU-0C-05, WU-0C-06a, WU-0C-06, WU-0C-07a, WU-0C-07, WU-0C-08, WU-0C-09a, WU-0C-09, WU-0C-10, WU-0C-21, WU-0C-22a, WU-0C-22, WU-0C-23a, WU-0C-23b, WU-0C-23, WU-0C-24a, WU-0C-24, WU-0C-25a, WU-0C-25, WU-0C-26a, WU-0C-26, WU-0C-27, WU-0C-28, WU-0C-29a, WU-0C-29b, WU-0C-29, WU-0C-29d, WU-0C-34, WU-0C-35a, WU-0C-35, WU-0C-36a, WU-0C-36, WU-0C-37a, WU-0C-37, WU-0C-N1, WU-0C-N2, WU-0C-N3, WU-0C-N5.
 - Cross-phase incoming from Phase 1: WU-1-02, WU-1-03, WU-1-04, WU-1-05, WU-1-06, WU-1-07, WU-1-08, WU-1-09, WU-1-10, WU-1-11, WU-1-12, WU-1-13, WU-1-14, WU-1-15, WU-1-16, WU-1-17, WU-1-18, WU-1-19, WU-1-20, WU-1-21, WU-1-24, WU-1-29, WU-1-30, WU-1-31, WU-1-32, WU-1-33, WU-1-34, WU-1-35, WU-1-36, WU-1-37, WU-1-38, WU-1-39, WU-1-40, WU-1-41, WU-1-42, WU-1-43, WU-1-44.
 
 **Produces:** DetailInjectionRouterService contract and tests; no unlisted downstream behavior.
-
+**Revision rationale:** r4 SessionOverrideContract refactor criteria retained; r5 cascade: agent-runner feature requests have landed; v2-only; block-on annotations removed.
 **Parallelizable with:** topological peers that do not share files; primary candidates in the same slice are WU-2-37, WU-2-38.
 
 ### WU-2-48: IncrementalSummaryUpdateService
@@ -2414,10 +2414,10 @@ Optimizer branch critical path: WU-2-29 -> WU-2-30 -> WU-2-31 -> WU-2-34 -> WU-2
 
 | Check | Result | Evidence |
 |---|---|---|
-| D1 per-object granularity | PASS in proposer draft | 50 WUs preserved; WU-2-22..24 remain separate provider capability adapters but now route launch/resume through WU-0C-18 AgentRunnerClient. No new WUs were added for round 4. |
+| D1 per-object granularity | PASS in proposer draft | 50 WUs preserved; WU-2-22..24 remain separate provider capability adapters routing launch/resume through WU-0C-18 AgentRunnerClient. No new WUs were added for round 5. |
 | D2 binary criteria | PASS in proposer draft | Affected WUs carry 8-12 binary criteria each. WU-2-26 and WU-2-43 fixture criteria now assert AgentRunnerClient and SessionOverrideContract boundaries without direct provider CLI or JSONL mutation fixtures. |
-| D3 regression check | PASS in proposer draft | Read Phase 2 r3, Phase 2 r4 audit report, proposal r5, engineering-roadmap r4, and Phase 0C r4 WU-0C-N1..WU-0C-N5. Re-derived the Parallelization Map as unchanged because round 4 adds only cross-phase incoming edges and scope text, not Phase 2 internal dependency edges. |
-| D4 watch-signal compliance | HONEST LOW | Round 4 is a minor externally-driven fix-created-family gen 0 edit-pass from the proposal-r5 / engineering-roadmap-r4 / Phase 0C-r4 SessionOverrideContract cascade. `dependency-encoding-family` remains LOW after adding targeted WU-0C-N* edges; `parallelization-map-family` remains LOW with unchanged 11-wave topology. |
+| D3 regression check | PASS in proposer draft | Read Phase 2 r4, Phase 2 r5 audit instructions, proposal r6, engineering-roadmap r5, and Phase 0C r5 WU-0C-N1..WU-0C-N3 plus WU-0C-N5. Re-derived the Parallelization Map as unchanged because round 5 removes stale block-on annotations and the dropped schema-probe split edge, adding no Phase 2 internal dependency edges. |
+| D4 watch-signal compliance | HONEST LOW | Round 5 is a minor externally-driven fix-created-family gen 0 edit-pass from the proposal-r6 / engineering-roadmap-r5 / Phase 0C-r5 SessionOverrideContract cascade. `dependency-encoding-family` remains LOW after removing the dropped schema-probe split edge; `parallelization-map-family` remains LOW with unchanged 11-wave topology. |
 
 ### Rule D1
 
@@ -2485,17 +2485,17 @@ D1 audit count: 50 rows = 50 WUs.
 - WU-2-38 declares SummaryNode stale-state transition criteria and invalid transition rejections.
 - WU-2-34 declares exact per-task dispatch criteria and excluded-provider failures for GLM, Gemini, Qwen, Mistral, and DeepSeek.
 - WU-2-45 declares every DetailRecord field and enum variant with positive and negative fixtures, and rejects provider-native JSONL bodies or mutable transcript handles as input.
-- WU-2-46 and WU-2-47 declare canonical TranscriptTurn/session-write-back boundaries through WU-0C-N1/N2/N5 and forbid direct per-CLI JSONL operations.
-- WU-2-48, WU-2-49, and WU-2-50 declare binary model-routing, deterministic-prefilter, failure, and no-out-of-scope-mutation criteria and remain clean in round 4.
+- WU-2-46 and WU-2-47 declare canonical TranscriptTurn/session-write-back boundaries through WU-0C-N1/N2/N3/N5 and forbid direct per-CLI JSONL operations.
+- WU-2-48, WU-2-49, and WU-2-50 declare binary model-routing, deterministic-prefilter, failure, and no-out-of-scope-mutation criteria and remain clean in round 5.
 - UI WUs declare loading, empty, happy, denied/blocked, failed, and stale-data states.
 
 ### Rule D3
 
 - Checked line-count and inventory existence for Phase 0A, Phase 0B, Phase 0C, Phase 1, proposal, engineering roadmap, and audit histories.
-- Checked Phase 2 r3 roadmap and Phase 2 r4 audit report for the required minor edit-pass scope.
-- Checked proposal r5, engineering-roadmap r4, and Phase 0C r4 WU-0C-N1..WU-0C-N5 for SessionOverrideContract dependency and write-back boundaries.
+- Checked Phase 2 r4 roadmap and Phase 2 r5 audit instructions for the required minor edit-pass scope.
+- Checked proposal r6, engineering-roadmap r5, and Phase 0C r5 WU-0C-N1..WU-0C-N3 plus WU-0C-N5 for SessionOverrideContract dependency and write-back boundaries.
 - Re-derived the 11-wave Parallelization Map as unchanged because no Phase 2 internal edges changed.
-- Checked Phase 0C Stitch Notes outgoing to Phase 2+ for WU-0C-N1..WU-0C-N5 -> Phase 2 turn-decomposition/detail-injection expectations.
+- Checked Phase 0C Stitch Notes outgoing to Phase 2+ for WU-0C-N1..WU-0C-N3 plus WU-0C-N5 -> Phase 2 turn-decomposition/detail-injection expectations.
 - Did not dispatch the 3-gate risk loop; that is explicitly separate after proposer lands.
 
 ### Rule D4
@@ -2504,13 +2504,13 @@ D1 audit count: 50 rows = 50 WUs.
 |---|---|---|
 | bundling-family | Five navigation command schemas are five WUs; provider capability adapters remain three WUs; optimizer prompt/response/request DTOs are split; DetailRecordSchemaDto and each VS-010 pipeline service are separate WUs; fixture packs are WU-2-12, WU-2-26, WU-2-43. | LOW if reviewers agree no DTO/service pair remains bundled. |
 | state-machine-criteria-family | WU-2-08, WU-2-14, and WU-2-38 have explicit transition criteria and invalid-transition rejections. | LOW-MEDIUM because WU-2-14 is deep and should receive reviewer attention. |
-| dependency-encoding-family | Every WU has explicit WU-0A/WU-0B/WU-0C/WU-1 IDs; Stitch Notes enumerate incoming pairs. Round 4 adds WU-0C-N* edges only to WU-2-43/45/46/47 as directed and leaves WU-2-48/49/50 clean. | LOW after targeted SessionOverrideContract edge pass. |
-| parallelization-map-family | Parallelization Map re-derived as unchanged 11-wave topology because round 4 adds no Phase 2 internal edges. | LOW. |
-| fix-created-family | Round 4 is fix-created-family gen 0, externally driven by proposal-r5 / engineering-roadmap-r4 / Phase 0C-r4 SessionOverrideContract. This pass narrows old boundaries and does not add speculative WUs. | LOW-MEDIUM until risk gates confirm no WU-0C-N* edge omissions. |
+| dependency-encoding-family | Every WU has explicit WU-0A/WU-0B/WU-0C/WU-1 IDs; Stitch Notes enumerate incoming pairs. Round 5 removes the dropped schema-probe split edge and keeps WU-0C-N1/N2/N3/N5 only on WU-2-43/45/46/47 as directed; WU-2-48/49/50 remain clean. | LOW after targeted SessionOverrideContract edge pass. |
+| parallelization-map-family | Parallelization Map re-derived as unchanged 11-wave topology because round 5 adds no Phase 2 internal edges. | LOW. |
+| fix-created-family | Round 5 is fix-created-family gen 0, externally driven by proposal-r6 / engineering-roadmap-r5 / Phase 0C-r5 SessionOverrideContract. This pass drops stale block-on annotations and the obsolete schema-probe split edge without adding speculative WUs. | LOW. |
 
 ### Self-classification
 
-- Round 4 externally-driven minor edit-pass: preserved 50 WUs and the 11-wave map; narrowed WU-2-22..24 through AgentRunnerClient; added SessionOverrideContract scope/dependencies to WU-2-43, WU-2-45, WU-2-46, and WU-2-47.
+- Round 5 externally-driven minor edit-pass: preserved 50 WUs and the 11-wave map; retained the r4 SessionOverrideContract criteria for WU-2-22/23/24/26/43/45/46/47; removed stale block-on annotations and the dropped schema-probe split edge after agent-runner feature requests landed.
 
 ## Stitch Notes
 
@@ -2620,7 +2620,7 @@ D1 audit count: 50 rows = 50 WUs.
 
 ### Incoming From Phase 0C
 
-VS-009 provider capability adapters WU-2-22..24 preserve incoming WU-0C-11a..18 through WU-0C-18 AgentRunnerClient; they do not add WU-0C-N* edges. VS-010 pipeline WUs retain reliance on WU-0C-27 OptimizerQueueService, WU-0C-28 OptimizerCycleStateMachine, and WU-0C-29 OptimizerScheduler for queued cycle execution. Round 4 adds WU-0C-N1..N5 only where SessionOverrideContract write-back, DTO evidence, fixtures, receipts, or refusals are consumed: WU-2-43, WU-2-45, WU-2-46, and WU-2-47. WU-2-48, WU-2-49, and WU-2-50 remain clean.
+VS-009 provider capability adapters WU-2-22..24 preserve incoming WU-0C-11a..18 through WU-0C-18 AgentRunnerClient; they do not add WU-0C-N* edges. VS-010 pipeline WUs retain reliance on WU-0C-27 OptimizerQueueService, WU-0C-28 OptimizerCycleStateMachine, and WU-0C-29 OptimizerScheduler for queued cycle execution. Round 5 keeps WU-0C-N1, WU-0C-N2, WU-0C-N3, and WU-0C-N5 only where SessionOverrideContract write-back, DTO evidence, schema-probe gating, fixtures, receipts, or refusals are consumed: WU-2-43, WU-2-45, WU-2-46, and WU-2-47. WU-2-48, WU-2-49, and WU-2-50 remain clean.
 
 - (WU-0C-04, VS-008)
 - (WU-0C-05, VS-008)
@@ -2763,7 +2763,6 @@ VS-009 provider capability adapters WU-2-22..24 preserve incoming WU-0C-11a..18 
 - (WU-0C-N1, VS-010)
 - (WU-0C-N2, VS-010)
 - (WU-0C-N3, VS-010)
-- (WU-0C-N4, VS-010)
 - (WU-0C-N5, VS-010)
 
 ### Incoming From Phase 1

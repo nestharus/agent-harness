@@ -116,3 +116,11 @@ If r3 ships clean (Decomp LOW / Coverage LOW / Dep LOW), Phase 2 is re-converged
 - **D2 assessment: LOW.** Affected WUs carry 8-12 binary criteria after edit. New criteria cover `agents` / `AgentRunnerClient` fixture assertions, canonical WU-0C-N2 `TranscriptTurn` evidence, WU-0C-N1 write-back methods, WU-0C-N5 receipts/refusals, and direct JSONL mutation prohibitions.
 - **D3 assessment: LOW-MEDIUM until risk gates.** The proposer pass reads the audit report and upstream SessionOverrideContract WUs and applies the requested scope changes, but the 3-gate risk loop is intentionally separate after proposer lands. The main residual D3 risk is a missed cross-phase edge or outgoing Stitch Note wording mismatch, not decomposition.
 - **Watch signals.** `fix-created-family` is generation 0 in the Phase 2-local loop, externally driven from the upstream SessionOverrideContract cascade. `dependency-encoding-family` is active only for targeted WU-0C-N* edge additions. `parallelization-map-family` should remain closed unless a reviewer finds a hidden Phase 2 internal edge. `session-override-boundary-family` should be watched for accidental direct provider CLI launch/resume or JSONL mutation language.
+
+### Round 5 (brownfield Option A, 50 WUs preserved)
+
+**Verdict entering proposer: targeted annotation and dependency cleanup only.**
+
+- **Round summary.** Phase 2 r5 is externally driven by proposal-r6 / engineering-roadmap-r5 / Phase 0C-r5 after the agent-runner session feature requests landed. Scope is limited to WU-2-22, WU-2-23, WU-2-24, WU-2-26, WU-2-43, WU-2-45, WU-2-46, and WU-2-47 plus Stitch Notes / Run Report references. WU count stays 50; the 11-wave Parallelization Map remains unchanged.
+- **D1/D2 assessment: LOW.** No new object family or criterion family is created. The eight affected WUs keep the r4 SessionOverrideContract criteria and gain only the r5 cascade note that agent-runner feature requests have landed, v2-only is in force, and block-on annotations are removed.
+- **D3/D4 assessment: LOW.** The obsolete schema-probe split references are removed from Phase 2 dependencies and incoming Stitch Notes; schema-probe coverage is satisfied through WU-0C-N3. `fix-created-family` remains generation 0 and externally driven; `parallelization-map-family` remains closed because no Phase 2 internal edge changed.
