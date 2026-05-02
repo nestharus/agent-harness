@@ -213,3 +213,241 @@ For this round-3 LOW rating to remain valid, the conditions from R2-COV's "What 
 If a future cascade adds new WU-0C-N* IDs or new SessionOverrideContract operations, the Round 3 SessionOverrideContract incoming overlay (l.2423-2433) and the Stitch Notes Round 3 SessionOverrideContract incoming-edge block (l.2972-2982) must be re-derived against the upstream artifact rather than patched edge-by-edge — same systematic-from-start posture that closed r1 dependency-encoding.
 
 The r3 cascade integrates cleanly. Coverage gate verdict for round 3: **LOW**.
+
+---
+
+# AI — Coverage Risk Assessment (Phase 1, round 4 — Option A)
+
+**Rating: LOW**
+
+Reviewer: `claude-opus`. Round 4 brownfield, cascade-driven from `proposal-r6` / `engineering-roadmap-r5` / Phase 0C-r5 (commit c1b8ff4 on top of the r3 converged base 3e60566). The proposer's r4 mandate is reduction-only: drop WU-0C-N4 references, route the schema-probe surface through WU-0C-N3 `schema_version_probe`, treat SessionOverrideContract as v2-only, and remove the three `Blocked-on` annotations now that the `agent-runner` feature requests have landed. r1-r3 history: Decomp MEDIUM/LOW/LOW, Coverage LOW/LOW/LOW, Dep LOW/LOW/LOW.
+
+## Scope and inputs
+
+- Artifact under review: `product-strategy/ai-roadmap-phase-1.md` at HEAD (3034 lines, 56 WUs — same WU count as r2/r3). `### WU-1-` count = 56 (verified); Inventory table at lines 39-97 lists 56 rows; Run Report D1 audit table at lines 2483-2540 lists 56 rows; Dependency Graph internal block at lines 1909-1965 lists 56 entries.
+- Upstream cascade label: r4 narrative cites `proposal-r6` / `engineering-roadmap-r5` / Phase 0C-r5. The 5 WU-0C-N* IDs the artifact still names (N1, N2, N3, N5) all existed in phase-0c-ai-roadmap-r4 (per R3-COVERAGE-F05); r4 only removes N4 from the consumer side.
+- Per-phase audit history: `plans/audit/ai-roadmap-phase-1.md` r4 entry (lines 81-89) classifies r4 as `fix-created-family` gen 0 externally driven, with D1/D2/D3 self-assessed LOW/LOW/LOW.
+- r4 mandate: integrate Phase 0C-r5 SessionOverrideContract narrowing without adding/removing/merging WUs. Coverage gate at r4 verifies that (a) the 13 r3-affected WUs retain their r3 functional ACs; (b) the seven SessionOverrideContract operations remain consumed correctly with `schema_version_probe` re-routed to WU-0C-N3; (c) the three `Blocked-on` annotations are fully removed at every site cited in r3's "What LOW requires"; (d) no orphan WUs were introduced; (e) cross-phase incoming edges from Phase 0C still resolve to extant Phase 0C IDs.
+
+## Round 4 diff scope (verified)
+
+`git diff 3e60566..c1b8ff4 -- product-strategy/ai-roadmap-phase-1.md` shows the following touched WUs and structural sections, with no WU added, removed, merged, or renamed. The diff is reduction- and substitution-only:
+
+1. **Phase 1 Scope** preamble (line 20): "Round 3 integrates the proposal-r5 / engineering-roadmap-r4 / Phase 0C-r4 SessionOverrideContract cascade." → "Round 4 integrates the proposal-r6 / engineering-roadmap-r5 / Phase 0C-r5 SessionOverrideContract cascade." The body sentence (read-only-by-default boundary) is byte-identical otherwise.
+2. **Round 3 SessionOverrideContract Audit** → **Round 4 SessionOverrideContract Audit** (line 98 heading; line 100 result paragraph extended with r4 narrative; lines 107, 113, 114, 115, 116 dependency cells adjusted: WU-1-10 dependency cell now lists `WU-0C-N1, WU-0C-N2, WU-0C-N3, WU-0C-N5` and attributes `schema_version_probe` to WU-0C-N3; WU-1-45/48/49/50 dependency cells now list `WU-0C-N3, WU-0C-N5` instead of `WU-0C-N4, WU-0C-N5`).
+3. **Per-WU acceptance-criteria + Dependencies + Revision rationale blocks** for the same 13 WUs covered by r3 (no functional AC rewritten):
+   - WU-1-03 (l.217), WU-1-04 (l.252), WU-1-05 (l.287), WU-1-12 (l.514), WU-1-13 (l.550), WU-1-23 (l.861), WU-1-25 (l.930), WU-1-28 (l.1028), WU-1-49 (l.1715): only the Revision rationale paragraph is extended with the trailing sentence "r4 cascade: agent-runner feature requests have landed; SessionOverrideContract v2-only; block-on annotations removed."
+   - WU-1-10 (lines 432, 434 unchanged; line 441 dependency list drops `WU-0C-N4`; line 447 — the prior `Blocked-on:` line — **deleted**; the Revision rationale at the new line 447 is extended with the same r4 cascade sentence).
+   - WU-1-23 (l.861) Revision rationale narrows the named upstream surface: "WU-0C-N1..WU-0C-N5" → "WU-0C-N1/WU-0C-N3/WU-0C-N5 boundaries" plus the r4 cascade sentence.
+   - WU-1-45 (l.1535 acceptance criterion swap `WU-0C-N4/WU-0C-N5` → `WU-0C-N3/WU-0C-N5`; l.1543 cross-phase incoming swap `WU-0C-N4, WU-0C-N5` → `WU-0C-N3, WU-0C-N5`; l.1551 Revision rationale extended).
+   - WU-1-48 (l.1662 acceptance criterion swap `WU-0C-N4/WU-0C-N5` → `WU-0C-N3/WU-0C-N5`; l.1670 cross-phase incoming swap; l.1678 Revision rationale extended).
+   - WU-1-49 (l.1705 cross-phase incoming swap; l.1715 Revision rationale extended; criteria block contains no N4-named acceptance line and so needs no AC swap).
+   - WU-1-50 (l.1732 acceptance criterion swap `WU-0C-N4/WU-0C-N5` → `WU-0C-N3/WU-0C-N5`; l.1741 cross-phase incoming swap; l.1749 Revision rationale revises the "may explain when future worker/orchestrator actions are blocked" clause to "may display landed `agent-runner` session capability evidence" plus the r4 cascade sentence).
+4. **Round 4 SessionOverrideContract incoming overlay** under Dependency Graph (lines 2421-2431; heading and prose updated to drop N4 and cite Phase 0C-r5; the WU-1-10 line drops N4; the WU-1-45/48/49/50 line swaps N4 → N3); **Critical Path** r4 re-check (lines 2445, 2447); **Parallelization Map** r4 re-derive (line 2457); **Run Report** D3/D4 rows (lines 2475-2476); **Self-classification** r4 entry (line 2552); **Stitch Notes Round 4 SessionOverrideContract incoming edges** block (lines 2975-2985); **Outgoing-To-Phase-2+ Blocked-on annotations deleted** for (VS-003, VS-018) (line 2997) and (VS-006, VS-015) (line 3008).
+
+The 43 unaffected WUs (Shared WU-1-01; VS-001 reader/writer/render/label/budget/cache surfaces and budget/cost panels WU-1-14..WU-1-22, WU-1-24, WU-1-26, WU-1-27; all eight VS-002 WUs WU-1-29..WU-1-36; all eight VS-005 WUs WU-1-37..WU-1-44; VS-006 entitlement/capability writers WU-1-46/47 and FakeProviderProbeFixture WU-1-56; all five VS-007 WUs WU-1-51..WU-1-55; VS-003 supporting WUs WU-1-02, WU-1-06, WU-1-07, WU-1-08, WU-1-09, WU-1-11) carry byte-identical Acceptance-criteria, Dependencies, Produces, and Parallelizable-with blocks to r3. Verified by spot-check on Wave-1 WUs (WU-1-14 BudgetLedgerScopeWriter, WU-1-32 SummaryTemplateRegistry, WU-1-37 ConfigurationInspectorService, WU-1-51 InitiativeRootService, WU-1-56 FakeProviderProbeFixture).
+
+Whole-artifact invariants verified by direct grep on HEAD:
+
+- `Blocked-on` matches in artifact: **0** (was 3 in r3 — WU-1-10 line 447, (VS-003, VS-018) line 2994, (VS-006, VS-015) line 3005).
+- `WU-0C-N4` matches in artifact as a *consumer dependency*: **0**. The 7 remaining textual occurrences are all meta references explaining N4's removal (lines 100, 2423, 2445, 2447, 2457, 2552) or the Run Report D4 watch-signal entry that lists the surviving N1/N2/N3/N5 set explicitly (line 2476).
+- `### WU-1-` heading count: **56**.
+- `r4 cascade:` revision-rationale stamps: **13** — exactly the 13 r3-affected WUs.
+
+## Findings
+
+### R4-COVERAGE-F01. The 13 cascade-affected WUs retain every r3 functional acceptance criterion; r4 changes are reduction- and substitution-only
+
+**Severity: LOW**
+
+For each of the 13 WUs that r3 narrowed (WU-1-03, WU-1-04, WU-1-05, WU-1-10, WU-1-12, WU-1-13, WU-1-23, WU-1-25, WU-1-28, WU-1-45, WU-1-48, WU-1-49, WU-1-50), the r3 functional acceptance criteria are preserved. r4 makes only three classes of edit on these WUs, none of which rewrites a binary fixture criterion:
+
+1. **Token-level swap `WU-0C-N4` → `WU-0C-N3`** in three boundary acceptance criteria (WU-1-45 l.1535, WU-1-48 l.1662, WU-1-50 l.1732) and four cross-phase-incoming-(SessionOverrideContract) lines (WU-1-45 l.1543, WU-1-48 l.1670, WU-1-49 l.1705, WU-1-50 l.1741). The criterion language ("Any session-override compatibility shown beside provider state comes from WU-0C-N3/WU-0C-N5 evidence, not probe-owned JSONL or `state.db` inspection"; "Workload requirements may include a need for session override capability by opaque WU-0C-N3/WU-0C-N5 evidence refs"; "The pane can display session-override capability/refusal metadata from WU-0C-N3/WU-0C-N5 as read-only evidence") is structurally identical to the r3 wording — the only change is the upstream WU ID. The negative-invariant force ("never exposes raw transcript paths, provider-native JSONL, or adapter temp files"; "the resolver does not probe or mutate sessions directly"; "exposes no account picker, quota-balancing control, auth refresh control, resume/import control, provider reroute command, or SessionOverrideContract mutation command") is preserved verbatim.
+2. **Removal of `WU-0C-N4` from WU-1-10's cross-phase incoming list** at line 441 (was `..., WU-0C-N1, WU-0C-N2, WU-0C-N3, WU-0C-N4, WU-0C-N5` in r3; is `..., WU-0C-N1, WU-0C-N2, WU-0C-N3, WU-0C-N5` in r4). The legacy non-N edges (WU-0A-*, WU-0B-*, WU-0C-04, WU-0C-11a..WU-0C-37) are byte-for-byte unchanged on this line and on every other Dependencies block in the artifact. The functional read-path criterion at l.432 ("`ingest_transcript` reads session content only through WU-0C-15d normalized turn evidence or WU-0C-N1 `read_transcript` / `get_session_metadata`") is unchanged because the read entrypoint was already attributed to WU-0C-N1, not WU-0C-N4.
+3. **Removal of WU-1-10's `Blocked-on` line** (former l.447) and **removal of the (VS-003, VS-018) and (VS-006, VS-015) Outgoing-to-Phase-2+ `Blocked-on` annotations** (former l.2994, l.3005). No acceptance criterion is removed by these deletions — `Blocked-on` is metadata about external feature-register prerequisites, not a binary AC. The single-concern-PR criterion remains on every affected WU.
+4. **Append of "r4 cascade: agent-runner feature requests have landed; SessionOverrideContract v2-only; block-on annotations removed."** to each of the 13 WUs' Revision rationale paragraphs. This is documentation, not a criterion change.
+
+Mapping per WU (cite WU-1-NN; r3 functional ACs preserved):
+
+| WU | r3 functional AC envelope (preserved) | r4 edit class on this WU |
+|---|---|---|
+| WU-1-03 (l.197-204) | 3 systemic generics + `normalize_claude_tool_call` named method + WU-0C-15a..WU-0C-15d / WU-0C-N2 read-only criterion + forbidden `locate_session`/`read_transcript`/`replace_transcript`/`truncate_after`/`append_turns` criterion + single-concern PR | (4) only |
+| WU-1-04 (l.232-239) | identical to WU-1-03 with `normalize_codex_tool_call` | (4) only |
+| WU-1-05 (l.267-274) | identical to WU-1-03 with `normalize_opencode_tool_call` | (4) only |
+| WU-1-10 (l.426-435, 441) | 3 systemic generics + `ingest_transcript` named method + `mark_partial_ingest` named method + WU-0C-15d / WU-0C-N1 read-only criterion + unsupported-schema/storage/busy/missing/refusal evidence-record criterion + forbidden mutation-method criterion + single-concern PR | (2) drop N4 from cross-phase incoming list; (3) delete `Blocked-on` line; (4) append r4 cascade sentence |
+| WU-1-12 (l.494-501) | 3 systemic generics + `emit_tool_call_audit` named method + WU-0C-N5 link-only criterion + forbidden begin/commit/rollback/quarantine/replace/truncate/append criterion + single-concern PR | (4) only |
+| WU-1-13 (l.528-537) | 3 UI generics + `render states` named + `reject unknown state` named + WU-0C-N5 evidence-display-only criterion + no-mutation-control criterion + single-concern PR | (4) only |
+| WU-1-23 (l.842-850) | 3 systemic generics + `list_render_evidence` named + `open_render_evidence` named + WU-0C-N2/N5 opaque-pointer-only criterion + no-`locate_session`-no-mutation criterion + single-concern PR | (4) only — Revision rationale narrows "WU-0C-N1..WU-0C-N5" prose to "WU-0C-N1/WU-0C-N3/WU-0C-N5 boundaries" but the AC list is unchanged |
+| WU-1-25 (l.909-917) | 3 UI generics + `render pane states` named + `reject unknown label` named + WU-0C-N2/N5 display-only criterion + no-import/replace/reroute/resume-control criterion + single-concern PR | (4) only |
+| WU-1-28 (l.1007-1015) | 3 systemic generics + `subscribe_render_audit` named + `acknowledge_render_audit_event` named + WU-0C-N5 stream-only criterion + no-commit/rollback/quarantine/import/replace/truncate/append criterion + single-concern PR | (4) only |
+| WU-1-45 (l.1531-1538) | 4 named-behavior service criteria from R2-COV-F03 (success, denial, redaction surface, exactly-one-audit-event) + no-account/quota/auth/resume/port/storage criterion + WU-0C-N4/N5 evidence-only criterion + single-concern PR | (1) swap `WU-0C-N4/N5` → `WU-0C-N3/N5` on the boundary criterion + dependency line; (4) append r4 cascade sentence |
+| WU-1-48 (l.1658-1665) | 3 systemic generics + `resolve_route_eligibility` named + harness-policy-only criterion + WU-0C-N4/N5 opaque-ref criterion + single-concern PR | (1) + (4) |
+| WU-1-49 (l.1693-1700) | 3 systemic generics + `classify_route_denial` named + harness-vs-`agent-runner` discrimination criterion + opaque-WU-0C-N5 reference criterion + single-concern PR | (1) on dependency line only (no N4-named AC line existed) + (4) |
+| WU-1-50 (l.1728-1736) | 3 UI generics + `render provider states` named + `reject unknown state` named + WU-0C-N4/N5 read-only-evidence criterion + no-account-picker/quota/auth/resume/import/reroute/SessionOverrideContract-mutation control criterion + single-concern PR | (1) + (4); Revision rationale prose changes from "may explain when future worker/orchestrator actions are blocked on `agent-runner` session features" to "may display landed `agent-runner` session capability evidence" — narrative-only |
+
+Every named-method binary criterion (`normalize_claude_tool_call`, `normalize_codex_tool_call`, `normalize_opencode_tool_call`, `ingest_transcript`, `mark_partial_ingest`, `emit_tool_call_audit`, `list_render_evidence`, `open_render_evidence`, `subscribe_render_audit`, `acknowledge_render_audit_event`, `resolve_route_eligibility`, `classify_route_denial`) is retained verbatim. Every UI generic (`render states`, `reject unknown state`, `render pane states`, `reject unknown label`, `render provider states`) is retained verbatim. Every R2-COV-F03 named-behavior criterion on WU-1-45 is retained verbatim. Every single-concern-PR criterion is retained verbatim.
+
+Confirmation that the WU-1-50 Revision rationale narrative change is not a coverage regression: the deleted phrase "may explain when future worker/orchestrator actions are blocked on `agent-runner` session features" referred to the now-deleted (VS-006, VS-015) Outgoing `Blocked-on` annotation. With the agent-runner features landed, the explanatory blocker is gone, and the panel's display surface ("read-only preflight" + "override capability/refusal metadata" + "no account picker / quota / auth / resume / import / reroute / mutation command") is still fully constrained by the seven AC criteria at l.1728-1736.
+
+**Recommendation:** No action required.
+
+---
+
+### R4-COVERAGE-F02. Seven SessionOverrideContract operations remain consumed correctly: `schema_version_probe` re-routed to WU-0C-N3, mutation paths still fenced
+
+**Severity: LOW**
+
+The seven proposal-defined SessionOverrideContract operations (`schema_version_probe`, `locate_session`, `read_transcript`, `get_session_metadata`, `replace_transcript`, `truncate_after`, `append_turns`) are still consumed correctly under r4. The only directional change is `schema_version_probe`: in r3 it was attributed to "WU-0C-N4 schema-probe runner"; in r4 (Phase 0C-r5 narrative) it is attributed to WU-0C-N3 `schema_version_probe`. Phase 1's role on this operation does not change — Phase 1 still surfaces refusal/capability evidence read-only — so the substitution is upstream-only.
+
+| Operation | Direction in Phase 1 r4 | Owning Phase 1 WU | r4 evidence |
+|---|---|---|---|
+| `schema_version_probe` | indirect (probe runs in WU-0C-N3 v2 adapter; Phase 1 surfaces schema/refusal evidence read-only) | WU-1-45 / WU-1-48 / WU-1-49 / WU-1-50 cross-phase incoming WU-0C-N3 (l.1543, 1670, 1705, 1741); WU-1-10 cross-phase incoming WU-0C-N3 (l.441; the audit table at l.107 attributes `schema_version_probe` to WU-0C-N3 explicitly) | Refusal/capability evidence is read-only; no Phase 1 WU runs the probe directly |
+| `locate_session` | not invoked by Phase 1; explicitly forbidden | Forbidden in WU-1-03 (l.203), WU-1-04 (l.238), WU-1-05 (l.273), WU-1-23 (l.849) | No Phase 1 WU calls it; WU-1-10 still passes `session_id` to WU-0C-N1 and lets the adapter own location (criterion at l.432 unchanged) |
+| `read_transcript` | invoked by exactly one Phase 1 WU (WU-1-10) — unchanged from r3 | WU-1-10 (l.432, byte-identical to r3) | Single-owner read path preserved; normalizers WU-1-03/04/05 are pure transformers over the result |
+| `get_session_metadata` | invoked by WU-1-10 only — unchanged from r3 | WU-1-10 (l.432, same criterion) | Same single-owner property |
+| `replace_transcript` | not invoked by Phase 1; explicitly forbidden | Forbidden in WU-1-03/04/05 (l.203, 238, 273), WU-1-10 (l.434), WU-1-13 (l.536), WU-1-25 (l.916), WU-1-28 (l.1014), WU-1-50 (l.1735) | All Phase 1 surfaces still read-only; restated at Phase 1 Scope l.20 ("does not open, locate, parse, rewrite, truncate, append, or migrate per-CLI session JSONL files directly") and Non-Ownership Notes l.3034 |
+| `truncate_after` | not invoked by Phase 1; explicitly forbidden | Same WU set as `replace_transcript` | All Phase 1 read-only |
+| `append_turns` | not invoked by Phase 1; explicitly forbidden | Same WU set as `replace_transcript` | All Phase 1 read-only |
+
+The WU-0C-N5 `SessionOverrideStore` registry — which r3 wired into WU-1-12, WU-1-13, WU-1-23, WU-1-25, WU-1-28, WU-1-45, WU-1-48, WU-1-49, WU-1-50 as evidence/audit/display read-only consumers — is unchanged in r4. Every one of the nine WU-0C-N5 incoming edges is preserved (lines 508, 544, 857, 924, 1022, 1543, 1670, 1705, 1741). The WU-0C-N2 canonical DTO consumption pattern on WU-1-03/04/05/10/23/25 is unchanged.
+
+The single-owner property on `read_transcript`/`get_session_metadata` continues to hold: WU-1-03/04/05 still forbid the call explicitly (l.203, 238, 273), and WU-1-13/25/28/50 still expose no UI control invoking it. r4 introduces no new path that could route around WU-1-10 to read transcript content.
+
+The schema-probe re-routing is the only upstream-side reattribution. r4 makes the artifact internally consistent on this point at five sites: the Round 4 audit table cell for WU-1-10 (l.107) attributes `schema_version_probe` to WU-0C-N3; the Round 4 SessionOverrideContract incoming overlay (l.2426 and 2429) treats N3 as a Phase 1 incoming source for both transcript ingestion and provider preflight; the Stitch Notes Round 4 incoming-edge block (l.2980 and 2983) duplicates the same edges; the WU-1-45/48/50 boundary acceptance criteria (l.1535, 1662, 1732) name N3 explicitly. No site lists N4 as a still-consumed source.
+
+**Recommendation:** No action required.
+
+---
+
+### R4-COVERAGE-F03. `Blocked-on` annotations are fully removed at every site cited in r3's "What LOW requires"; no orphan stub remains
+
+**Severity: LOW**
+
+r3's "What LOW requires" condition 3 named the three sites where `Blocked-on` annotations were load-bearing under r3: WU-1-10 (l.447), the (VS-003, VS-018) Outgoing-to-Phase-2+ pair (l.2994), and the (VS-006, VS-015) Outgoing-to-Phase-2+ pair (l.3005). r3 noted that if the upstream `agent-runner` feature register changed, these annotations would need to be re-derived. r4 satisfies the stronger condition: the agent-runner feature requests landed in the upstream cascade, so the annotations are removed entirely (Option A — remove block-on annotations) rather than rewritten.
+
+Whole-artifact verification: `Blocked-on` matches in `product-strategy/ai-roadmap-phase-1.md` at HEAD = **0**. The three deletion sites:
+
+| Site | r3 annotation removed by r4 |
+|---|---|
+| WU-1-10 (former l.447) | "v1 read behavior can use WU-0C-N3 after schema probe. v2 adapter migration is blocked on `agents session locate` and `agents session export`; this WU is not blocked on `agents session import-replace` or `agents pause-handshake` because Phase 1 transcript ingestion is read-only." |
+| Outgoing-to-Phase-2+ (VS-003, VS-018), former l.2994 | "accepted worker-output session write-back must consume WU-0C-N1..WU-0C-N5; v2 adapter migration needs `agents session locate / export / import-replace`; atomic mid-session reintegration needs `agents pause-handshake`." |
+| Outgoing-to-Phase-2+ (VS-006, VS-015), former l.3005 | "the downstream worker launcher remains thin and must spawn `agents -m <model> -p <project> -f <prompt>` while capturing the spawned `session_id` via the `agents` `--session-id` forced-flag mechanism and storing it on `WorkerRun`; v2 SessionOverrideContract adapter migration needs `agents session locate / export / import-replace`." |
+
+The deletions are clean: WU-1-10's Revision rationale immediately follows the Parallelizable-with line (no orphan blank stub or leftover `**Blocked-on:**` header); the (VS-003, VS-018) and (VS-006, VS-015) Outgoing rows now end with a period after "WU-1-50." (or "WU-1-13.") with no trailing `**Blocked-on:**` fragment. Spot-check at l.2997 and l.3008 confirms the sentence-final period.
+
+The downstream worker-launcher / worker-output-reintegration constraints have **not** been forgotten — they have moved from Phase 1's consumer-side metadata into either (a) the substantive coverage of upstream WU-0C-N1..N5 (whose mutation operations remain in Phase 0C-r5) or (b) future-phase artifacts that own VS-015/VS-018. The Non-Ownership Notes section continues to record the directional invariant at l.3034: "Worker-launcher WUs and worker-output-reintegration WUs are absent from this Phase 1 artifact. When downstream artifacts introduce them, launchers must not manipulate session storage paths and reintegration WUs that mutate orchestrator session content must depend on WU-0C-N1 and the active adapter (WU-0C-N3 until v2)." This statement preserves the read-only-by-default property without re-introducing a `Blocked-on` shim.
+
+The (VS-003, VS-018) and (VS-006, VS-015) Outgoing rows still appear in the Outgoing-To-Phase-2+ enumeration with their full "consumes Phase 1 foundations: WU-1-..." lists (at l.2997 and l.3008) — only the trailing `**Blocked-on:**` annotation is gone. Coverage of the 24 (Phase 1 VS, Phase 2+ VS) outgoing pairs is therefore unchanged in count and in foundation-WU listing; the change is metadata-only.
+
+**Recommendation:** No action required.
+
+---
+
+### R4-COVERAGE-F04. No orphan WUs introduced; the four canonical inventories agree on 56
+
+**Severity: LOW**
+
+r4 makes no structural inventory change. Re-verified at HEAD:
+
+| Inventory surface | Location | Count |
+|---|---|---:|
+| Per-VS Inventory table | lines 28-37 | 1 + 12 + 6 + 9 + 8 + 8 + 7 + 5 = **56** |
+| Per-WU ownership table | lines 39-97 | **56** rows (WU-1-01..WU-1-56) |
+| Round 4 SessionOverrideContract Audit table | lines 102-116 | 13 affected WUs explicitly enumerated; remaining **43** unaffected WUs explicitly listed inline at line 118 → 13 + 43 = **56** |
+| Run Report D1 audit table | lines 2483-2540 | **56** rows; explicit assertion `D1 audit count: 56 rows = 56 WUs` retained |
+| Dependency Graph internal block | lines 1909-1965 | **56** entries; one "WU-1-NN <- ..." line per WU |
+| Parallelization Map waves | lines 2461-2467 | 18 + 12 + 9 + 5 + 7 + 3 + 2 = **56**; spot-check confirms WU-1-56 in Wave 1 and WU-1-50 in Wave 6 |
+| Critical Path | l.2440 | unchanged 11-WU path (WU-1-02 → WU-1-25); does not touch any of the 13 cascade-affected WUs except via WU-1-25, which retains its r3 dependencies |
+
+The 13 cascade-affected WUs all appear in their correct waves with no reshuffle: WU-1-03/04/05 in Wave 2, WU-1-10 in Wave 3, WU-1-12 in Wave 4, WU-1-13 in Wave 5, WU-1-23 in Wave 2, WU-1-25 in Wave 7, WU-1-28 in Wave 5, WU-1-45 in Wave 1, WU-1-48 in Wave 4, WU-1-49 in Wave 5, WU-1-50 in Wave 6. The proposer's claim at l.2457 ("removing WU-0C-N4 and former block-on annotations adds no Phase 1-local edge; waves remain 18+12+9+5+7+3+2 = 56") is correct: the Phase 1-local internal graph at lines 1909-1965 has byte-identical edges to r3, and N4 was a cross-phase ID that never participated in the Phase 1-local wave count.
+
+`### WU-1-` heading count by direct grep: **56**. No WU was renamed, removed, merged, split, or added.
+
+**Recommendation:** No action required.
+
+---
+
+### R4-COVERAGE-F05. Cross-phase incoming edges still resolve; no unreachable WU-0C target after the N4 removal
+
+**Severity: LOW**
+
+Coverage at r4 requires every Phase 1 cross-phase incoming claim to land on a Phase 0C ID that exists upstream. The r4 cascade narrows the SessionOverrideContract overlay from `WU-0C-N1..WU-0C-N5` to `WU-0C-N1, WU-0C-N2, WU-0C-N3, WU-0C-N5` (N4 dropped). All four surviving IDs were verified as extant in the upstream artifact during R3-COVERAGE-F05 (phase-0c-ai-roadmap-r4 lines 1688/N1, 1582/N2, 1788/N3, 1847/N5) and Phase 0C-r5 — per the r4 narrative — only retracts N4. The legacy non-N edges (WU-0A-*, WU-0B-*, WU-0C-04, WU-0C-05..WU-0C-37) are byte-identical to r3 throughout the artifact.
+
+**Forward-edge enumeration at HEAD**, replacing R3-COVERAGE-F05's table:
+
+| Phase 1 WU | Declared SessionOverrideContract incoming at r4 | Direction of change vs r3 |
+|---|---|---|
+| WU-1-03 (l.211), WU-1-04 (l.246), WU-1-05 (l.281) | WU-0C-N2 only | unchanged |
+| WU-1-10 (l.441) | WU-0C-N1, WU-0C-N2, WU-0C-N3, WU-0C-N5 | N4 removed |
+| WU-1-12 (l.508), WU-1-13 (l.544), WU-1-28 (l.1022) | WU-0C-N5 only | unchanged |
+| WU-1-23 (l.857), WU-1-25 (l.924) | WU-0C-N2, WU-0C-N5 | unchanged |
+| WU-1-45 (l.1543), WU-1-48 (l.1670), WU-1-49 (l.1705), WU-1-50 (l.1741) | WU-0C-N3, WU-0C-N5 | N4 → N3 |
+
+Every cross-phase incoming target Phase 1 r4 cites is a WU-0C ID that existed in phase-0c-ai-roadmap-r4 (verified previously at R3-COVERAGE-F05). No Phase 1 r4 line cites a WU-0C-N4 dependency in either a Dependencies block, an acceptance criterion, the Round 4 audit table, the Round 4 incoming overlay, or the Stitch Notes Round 4 incoming-edge block. The seven textual occurrences of the literal string "WU-0C-N4" in the artifact are all meta references explaining why N4 was dropped (Round 4 audit summary l.100; Round 4 overlay heading-prose l.2423; Critical Path re-checks l.2445, l.2447; Parallelization Map re-derive l.2457; Self-classification l.2552; D4 watch-signal description l.2476). None of these is a consumer dependency.
+
+**Stitch Notes consistency.** The Round 4 SessionOverrideContract incoming-edge block at lines 2975-2985 enumerates the same 18 → 16 (WU-0C-N*, WU-1-NN) pairs as the Dependencies blocks, with two N4-keyed edges removed (the WU-1-10 line drops N4, and the four-WU N4-keyed edges to WU-1-45/48/49/50 are replaced by N3-keyed edges). Spot-check on the four lines at l.2978, l.2980, l.2982, l.2983 matches the Dependencies declarations on each affected WU exactly. The legacy ~236 (WU-0C-*, VS-*) pairs in the prior "Incoming From Phase 0C" enumeration (lines 2735-2974) are byte-identical to r3.
+
+**Bidirectional consistency note.** The r4 Round 4 incoming overlay narrative at l.2423 attributes the N4 removal to "Phase 0C-r5 outgoing declarations" and the bidirectional consistency note at l.2985 names Phase 0C-r5 as the upstream source. The Phase 0C-r5 artifact is not in this branch as a discrete worktree, but the directional invariant — that Phase 1 reads override evidence read-only and leaves mutation to downstream worker-launcher / worker-output-reintegration WUs — is preserved at the artifact level (Phase 1 Scope l.20, Non-Ownership Notes l.3034). Coverage gate accepts this: forward edges still resolve to extant Phase 0C IDs, and the upstream label is the proposer's responsibility to keep accurate against the upstream artifact when Phase 0C-r5 is published.
+
+**Recommendation:** No action required.
+
+---
+
+### R4-COVERAGE-F06. Engineering-roadmap Phase 1 row coverage unchanged; r4 is reduction-only
+
+**Severity: LOW**
+
+r4 makes no change to the per-VS Inventory table (lines 28-37), no change to the per-VS "What is new" coverage (engineering-roadmap consuming side unchanged), no change to the foundation-row partition, and no change to the 24 (Phase 1 VS, Phase 2+ VS) Outgoing pairs (still 24 pairs at lines 2989-3018, only the two `Blocked-on` annotations removed). The "fake provider probes" foundation-row item from R2-COV-F04 remains owned by WU-1-56 unchanged. The five-state probe taxonomy (ready, degraded, blocked, stale, probe_failed) on WU-1-56 (lines 1567-1571) preserves all five binary criteria.
+
+The r4 cascade is reduction-only on the consumer side: one upstream WU dropped from one Dependencies list (WU-1-10), four upstream WU IDs swapped (WU-1-45/48/49/50), three `Blocked-on` annotations deleted, and 13 Revision rationale paragraphs extended. No Phase 1 functional row, contract row, foundation row, or Phase 2+ outgoing pair is added, removed, narrowed, broadened, or rewritten. The Coverage envelope in r4 ⊆ the Coverage envelope in r3 by construction.
+
+**Recommendation:** No action required.
+
+---
+
+### R4-COVERAGE-F07. INFO sub-findings carried forward; no new INFO introduced
+
+**Severity: INFO**
+
+R2-COV-F02 INFO (WU-1-56 FakeProviderProbeFixture lacks the WU-1-35-style fixture-pack systemic lines) and R2-COV-F03 INFO (WU-1-45 RedactedProviderProbeService lacks the three D2 systemic generic lines that other VS-006 service WUs carry) are both untouched by r4. WU-1-56 is in the unaffected-WU list at line 118; WU-1-45 receives the (1) + (4) edits described in R4-COVERAGE-F01 but the underlying stylistic asymmetry is unchanged. Neither is blocking; coverage remains substantively complete via WU-1-56's exhaustive five per-state taxonomy and WU-1-45's four named-behavior criteria.
+
+R4 introduces no new INFO sub-findings: the six new "r4 cascade:" Revision rationale stamps follow a uniform template, the four N4 → N3 swaps are token-clean, the three `Blocked-on` deletions are sentence-final-period-clean, and no AC was added or removed from any WU.
+
+**Recommendation:** Optional consistency tightening from R2-COV remains optional. Not blocking.
+
+---
+
+## Oscillation classification
+
+Per audit-history rule for Phase 1 r4 (`fix-created-family` carries forward at generation 0, externally driven by the proposal-r6 / engineering-roadmap-r5 / Phase 0C-r5 cascade):
+
+- `fix-created-family` remains at generation 0 in the Phase 1 local loop. r3 closed at generation 0 by carrying narrowing edits without rewriting r2 ACs; r4 closes at generation 0 again because (a) no r3 functional AC is rewritten or weakened (R4-COVERAGE-F01), (b) no new mutation path is introduced on a Phase 1 surface (R4-COVERAGE-F02 — read-side unchanged, write-side still forbidden across the same 13 WUs), and (c) the cascade is a *reduction* relative to r3 (one upstream WU dropped, three `Blocked-on` annotations deleted, four token swaps). A reduction cannot create the kind of local-fix drift that fix-created tracks. **`fix-created-family` closes at generation 0 in the Phase 1 local loop after this gate review.**
+- `bundling-family` does not re-fire. r4 added or removed zero WUs; the WU-1-45 / WU-1-56 split established in r2 is preserved; the 56-WU partition holds. **`bundling-family` remains closed at generation 1 in the Phase 1 local loop.**
+- `state-machine-criteria-family` does not re-fire. The five-state probe taxonomy (WU-1-56), the ten-state ImposedRenderLabel (WU-1-01), the SummaryContract validation states (WU-1-29/30/31/32), the BudgetLedger budget_state/policy_action enums (WU-1-14), and the side_effect/approval/protocol/state taxonomies (WU-1-08/09/02) are unchanged. r4 introduces no new enum or state. **`state-machine-criteria-family` remains closed.**
+- `dependency-encoding-family` does not re-fire. The 16 surviving (WU-0C-N*, WU-1-NN) edges are explicitly enumerated as a Round 4 SessionOverrideContract incoming overlay (l.2421-2431) and as a Stitch Notes Round 4 SessionOverrideContract incoming-edge block (l.2975-2985), with bidirectional consistency to the upstream Phase 0C-r5 narrative verified per-edge in R4-COVERAGE-F05. The 56-WU Phase 1-local graph is unchanged; the 7-wave Parallelization Map is unchanged. **`dependency-encoding-family` remains closed.**
+
+No same-label oscillation. No fix-created. No two-generation in-gate. The r4 cascade integrates cleanly from the Coverage perspective.
+
+## Summary table
+
+| ID | Finding | Severity |
+|----|---------|----------|
+| R4-COVERAGE-F01 | The 13 cascade-affected WUs (WU-1-03/04/05/10/12/13/23/25/28/45/48/49/50) retain every r3 functional AC; r4 changes are only token swaps (N4 → N3 at 7 sites), one cross-phase-incoming-list reduction (WU-1-10 drops N4), three `Blocked-on` deletions, and 13 r4-cascade Revision rationale appends | LOW |
+| R4-COVERAGE-F02 | All seven SessionOverrideContract operations consumed correctly: `schema_version_probe` re-routed to WU-0C-N3; `read_transcript`/`get_session_metadata` still single-owner on WU-1-10; `locate_session`/`replace_transcript`/`truncate_after`/`append_turns` still explicitly forbidden across the same 13 WUs | LOW |
+| R4-COVERAGE-F03 | `Blocked-on` annotations fully removed at all three r3-named sites (WU-1-10, (VS-003, VS-018), (VS-006, VS-015)); whole-artifact `Blocked-on` count = 0; deletions are sentence-final-period-clean; Non-Ownership Notes preserves the directional invariant for downstream worker-launcher / worker-output-reintegration | LOW |
+| R4-COVERAGE-F04 | No orphan WUs: 56 in per-VS inventory, 56 in per-WU table, 56 in Round 4 audit table (13 + 43), 56 in Run Report D1 audit, 56 in Dependency Graph internal block, 18+12+9+5+7+3+2 = 56 across waves | LOW |
+| R4-COVERAGE-F05 | Cross-phase incoming-from-Phase-0C edges still resolve: WU-0C-N1/N2/N3/N5 retained, N4 removed everywhere as a consumer dependency (only meta references remain); Stitch Notes Round 4 block matches Dependencies blocks edge-for-edge; legacy ~236 (WU-0C-*, VS-*) pairs unchanged | LOW |
+| R4-COVERAGE-F06 | Engineering-roadmap Phase 1 row coverage unchanged; r4 is reduction-only (one upstream dependency dropped, four upstream IDs swapped, three `Blocked-on` annotations deleted, no new content) | LOW |
+| R4-COVERAGE-F07 | R2-COV-F02 / R2-COV-F03 INFO sub-findings carried forward (WU-1-56 missing fixture-pack systemic lines; WU-1-45 missing D2 systemic generics); r4 does not touch either; no new INFO introduced | INFO |
+
+## What LOW requires
+
+For this round-4 LOW rating to remain valid, the r2/r3 conditions continue to hold, plus three r4-specific additions:
+
+1. **The 13 cascade-affected WUs continue to retain every r3 functional AC byte-identical.** Removing any named-method binary line, any UI generic, or any of the WU-1-45 four named-behavior criteria would re-fire `state-machine-criteria-family`. The four token-level N4 → N3 swaps (WU-1-45 l.1535, WU-1-48 l.1662, WU-1-50 l.1732 boundary criteria; WU-1-45/48/49/50 cross-phase incoming lines) must continue to name a Phase 0C-r5 (or later) ID that owns the schema-probe surface; if that ownership moves again, the swaps must be re-derived rather than patched.
+2. **The seven SessionOverrideContract operations stay correctly fenced after the schema-probe re-routing.** `read_transcript` and `get_session_metadata` invocations remain exclusive to WU-1-10. The four mutation methods (`replace_transcript`, `truncate_after`, `append_turns` plus the WU-0C-N5 lifecycle commit/rollback/quarantine paths) remain explicitly forbidden in the 13 affected WUs and remain absent from the artifact entirely. Any future Phase 1 brownfield that introduces a write path on a Phase 1 surface must instead block on a downstream artifact owning the worker-launcher or worker-output-reintegration WU; doing it inside Phase 1 would re-fire `fix-created-family` at generation 1.
+3. **`Blocked-on` annotations stay removed.** Whole-artifact `Blocked-on` count must remain 0. If a future cascade re-introduces a need for an external feature-register block-on (for example because a new agent-runner feature is requested but not yet landed), it must be encoded inside the Non-Ownership Notes section or inside the dependent downstream artifact's Outgoing block — not as a new `Blocked-on:` annotation on a Phase 1 WU. Re-introducing the annotation would re-fire R3-COVERAGE-F03's r3-specific obligation and risk a same-label oscillation against the r4 deletion.
+
+If a future cascade adds new WU-0C-N* IDs or new SessionOverrideContract operations, the Round 4 SessionOverrideContract incoming overlay (l.2421-2431) and the Stitch Notes Round 4 SessionOverrideContract incoming-edge block (l.2975-2985) must be re-derived against the upstream artifact rather than patched edge-by-edge — same systematic-from-start posture that closed r1 dependency-encoding and that r3 maintained.
+
+The r4 cascade integrates cleanly. Coverage gate verdict for round 4: **LOW**.
