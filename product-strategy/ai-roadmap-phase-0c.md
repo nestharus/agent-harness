@@ -37,11 +37,11 @@ Authoritative scope from `product-strategy/engineering-roadmap.md`:
 
 Scope interpretation for this per-phase decomposition:
 
-- Included: shared runtime service interfaces, pure gate evaluation, deterministic render assembly, budget recording/gates, configuration runtime reads/writes/provenance, provider monitoring over redacted subprocess/config/status evidence, identity/conflict runtime shell over Phase 0B `IdentityEvent` and `ConflictRecord`, recovery-action write/processor shell, agent-runner subprocess supervision, the `SessionOverrideContract` trait plus v1 `AgentRunnerDbAdapter` foundation, hook/plugin boundary contracts, Tauri command routing, event emission backbone, UI pane routing, and audit emit pipeline.
+- Included: shared runtime service interfaces, pure gate evaluation, deterministic render assembly, budget recording/gates, configuration runtime reads/writes/provenance, provider monitoring over redacted subprocess/config/status evidence, identity/conflict runtime shell over Phase 0B `IdentityEvent` and `ConflictRecord`, recovery-action write/processor shell, agent-runner subprocess supervision, the `SessionOverrideContract` trait plus `AgentRunnerCliAdapter` foundation, hook/plugin boundary contracts, Tauri command routing, event emission backbone, UI pane routing, and audit emit pipeline.
 - Excluded: operator-visible inspectors, worker launch UI, optimizer summary refresh behavior, orchestrator turn execution, topology mutation, recovery execution UI, question queue UI, provider reroute/substitution, reviewer sampling, and value-slice-specific `VS-*` apply/view/fixture triples.
 - Phase 0C may write durable rows through Phase 0B repositories, but it may not redefine Phase 0B schemas or reinterpret their enum/state-machine meanings.
 - Phase 0C freezes integration contracts so Phase 1+ slices consume one canonical service layer instead of inventing per-slice readers, gates, renderers, subprocess wrappers, session transcript writers, IPC routers, or event emitters.
-- Phase 0C does not reimplement provider routing, multi-account balancing, quota tracking, auth refresh, `--resume` mechanics, cross-provider session porting, session-id capture, or general per-CLI storage layout knowledge. The only direct DB/JSONL write surface is the pinned v1 `AgentRunnerDbAdapter`, and it is a temporary implementation detail behind `SessionOverrideContract`.
+- Phase 0C does not reimplement provider routing, multi-account balancing, quota tracking, auth refresh, `--resume` mechanics, cross-provider session porting, session-id capture, or general per-CLI storage layout knowledge. Transcript override uses `AgentRunnerCliAdapter` behind `SessionOverrideContract`; the harness does not write agent-runner `state.db` or provider JSONL files directly.
 
 Incoming Phase 0A dependencies:
 
@@ -71,17 +71,17 @@ Incoming Phase 0B dependencies:
 - Tool, working-set, foreground action, walk-state, turn state: WU-0B-20 through WU-0B-24.
 - Optimizer, conflict, worker, question, recovery state: WU-0B-25 through WU-0B-31.
 
-Round 4 local `agent-runner` source confirmation for v1 adapter scope:
+Round 5 `agent-runner` CLI confirmation for v2 adapter scope:
 
-- `src-tauri/src/state/db.rs` creates and migrates `invocations`, `session_turns`, `session_chains`, and `session_chain_segments`; it uses schema-ensure helpers rather than a numbered stable schema-version surface.
-- `src-tauri/src/config/model.rs` defines provider `session_storage` variants `ClaudeCode { projects_dir }` and `Codex { sessions_dir }`.
-- `src-tauri/src/config/sessions.rs` defines `turn_script`, optional `transcript_locator`, and optional `state_dir` entries; transcript locators are adapter evidence, not a general harness session-write API.
-- `src-tauri/src/sessions/mod.rs` exposes normalized turn ingestion and transcript location helpers; direct raw transcript mutation remains outside the general subprocess facade.
-- `src-tauri/src/migration/mod.rs` currently has a Claude JSONL copy path and an explicit Codex migration-deferred guard. Phase 0C v1 write support must therefore be schema-version-pinned and storage-kind-limited, and v2 remains blocked on supported `agents session` commands.
+- `agent-runner` README documents `session locate <session-id> [--json]` for stable session metadata; SQLite schema details are not the harness contract.
+- `session schema-probe` reports binary metadata, feature flags, and `safe_for_import_replace` without opening the DB read-write or running migrations.
+- `session export <session-id> [--format canonical-jsonl]` emits canonical JSONL with source offsets and SHA-256 preimage evidence.
+- `session import-replace <session-id> --from-file <path> [--preimage-sha256 <hex>]` performs atomic transcript replacement and returns typed failure paths such as `unsupported-storage`, exit 13 `session-busy`, and preimage mismatch.
+- `session pause-handshake <session-id> [--ttl-ms <ms>]` plus `resume-handshake` supplies the advisory mid-session lease used with `--preimage-sha256`.
 
 ## Work Unit Inventory
 
-Total Phase 0C WUs: **77**.
+Total Phase 0C WUs: **76**.
 
 | Group | WUs | Count |
 |---|---:|---:|
@@ -89,7 +89,7 @@ Total Phase 0C WUs: **77**.
 | BudgetLedger runtime service and gates | WU-0C-05..WU-0C-07 plus WU-0C-06a/WU-0C-07a | 5 |
 | ConfigurationRegistry runtime | WU-0C-08..WU-0C-10 plus WU-0C-09a | 4 |
 | Agent-runner subprocess supervisor family | WU-0C-11a..WU-0C-18 plus split DTO WUs | 21 |
-| SessionOverrideContract and v1 adapter foundation | WU-0C-N1..WU-0C-N5 | 5 |
+| SessionOverrideContract and CLI adapter foundation | WU-0C-N1, WU-0C-N2, WU-0C-N3, WU-0C-N5 | 4 |
 | Provider monitor and diagnostics | WU-0C-19..WU-0C-20 plus WU-0C-20a | 3 |
 | RenderEngine core | WU-0C-21..WU-0C-26 plus split DTO WUs | 12 |
 | Optimizer shell | WU-0C-27..WU-0C-29 plus WU-0C-29a/WU-0C-29b | 5 |
@@ -138,8 +138,7 @@ Total Phase 0C WUs: **77**.
 | WU-0C-18 | `AgentRunnerClient` facade | Unified agent-runner wrapper API |
 | WU-0C-N2 | `TranscriptTurn`, `SessionLocation`, `SessionMetadata`, and related override DTOs | SessionOverrideContract foundation |
 | WU-0C-N1 | `SessionOverrideContract` trait and TypeScript DTO surface | SessionOverrideContract foundation |
-| WU-0C-N4 | `AgentRunnerSchemaProbe` | SessionOverrideContract v1 compatibility probe |
-| WU-0C-N3 | `AgentRunnerDbAdapter` v1 | SessionOverrideContract v1 adapter |
+| WU-0C-N3 | `AgentRunnerCliAdapter` | SessionOverrideContract v2 implementation |
 | WU-0C-N5 | `SessionOverrideStore` registry | SessionOverrideContract audit/override registry |
 | WU-0C-19 | `ProviderProbeRequest` DTO | ProviderStateMonitor |
 | WU-0C-20a | `ProviderStateMonitorResult` DTO | ProviderStateMonitor |
@@ -1055,7 +1054,7 @@ AgentSessionCapture::capture_agent_runner_session(request: SessionCaptureRequest
 
 **Parallelizable with:** WU-0C-04, WU-0C-07, WU-0C-10, WU-0C-15a, WU-0C-15b, WU-0C-16.
 
-**Revision rationale:** Round 4 keeps this WU as a passive session-correlation reader over `agents` evidence. It no longer encodes CLI-specific capture mechanisms or transcript lookup behavior; those are `agent-runner` responsibilities and override writes use WU-0C-N1..WU-0C-N5.
+**Revision rationale:** Round 4 keeps this WU as a passive session-correlation reader over `agents` evidence. It no longer encodes CLI-specific capture mechanisms or transcript lookup behavior; those are `agent-runner` responsibilities and override writes use WU-0C-N1/N2/N3/N5.
 
 ### WU-0C-14a: AgentRunnerTraceEdge DTO
 
@@ -1243,7 +1242,7 @@ validate_session_turns_request(request: SessionTurnsRequest) -> Result<SessionTu
 
 **Parallelizable with:** WU-0C-04, WU-0C-07, WU-0C-10, WU-0C-15a, WU-0C-16.
 
-**Revision rationale:** Round 4 removes direct transcript-locator input from the general session-turn reader. Raw transcript location is owned by `agent-runner` or by the v1 override adapter behind WU-0C-N1.
+**Revision rationale:** Round 4 removes direct transcript-locator input from the general session-turn reader. Raw transcript location is owned by `agent-runner` and exposed to override consumers through WU-0C-N3's CLI adapter behind WU-0C-N1.
 
 ### WU-0C-15c: SessionTurnsRead DTO
 
@@ -1577,7 +1576,7 @@ AgentRunnerClient::resume(invocation_id: string, answer_payload_ref: string) -> 
 
 **Parallelizable with:** none in the agent-runner family; it is the join point for WU-0C-12 through WU-0C-17.
 
-**Revision rationale:** Round 4 keeps `AgentRunnerClient` as the subprocess/trace/config/diagnostics facade only. Session transcript write-back moved to WU-0C-N1..WU-0C-N5, and provider routing/resume/session porting remain delegated to `agent-runner`.
+**Revision rationale:** Round 4 keeps `AgentRunnerClient` as the subprocess/trace/config/diagnostics facade only. Session transcript write-back moved to WU-0C-N1/N2/N3/N5, and provider routing/resume/session porting remain delegated to `agent-runner`.
 
 ### WU-0C-N2: TranscriptTurn, SessionLocation, and SessionMetadata DTOs
 
@@ -1677,13 +1676,11 @@ SessionOverrideError:
 
 **Dependencies:** Incoming WU-0B-09 `EvidenceArtifact`, WU-0B-15 `AuditEvent`, WU-0B-21 `WorkingSetSnapshot`.
 
-**Produces:** Canonical session-override DTOs consumed by WU-0C-N1, WU-0C-N3, WU-0C-N4, WU-0C-N5, VS-010, VS-012, VS-018, VS-020, and VS-021.
+**Produces:** Canonical session-override DTOs consumed by WU-0C-N1, WU-0C-N3, WU-0C-N5, VS-010, VS-012, VS-018, VS-020, and VS-021.
 
 **Parallelizable with:** WU-0C-11a, WU-0C-15a, WU-0C-16a, WU-0C-19, WU-0C-21 after shared 0A/0B dependencies exist.
 
 **Single-concern PR constraint:** This WU may add only DTOs, validators, fixture JSON, and generated TypeScript types. It may not add adapter file/DB access, trait methods, IPC commands, or registry persistence.
-
-**Blocked-on:** None for the DTO contract. v2 population fields are placeholders until `agents session locate/export/import-replace`, pause-handshake, and schema-version probe land.
 
 ### WU-0C-N1: SessionOverrideContract Trait
 
@@ -1735,114 +1732,62 @@ SessionOverrideContract rules:
 
 **Single-concern PR constraint:** This WU may add only the trait/interface, fake adapter, and trait-level tests. It may not implement `state.db` access, JSONL rendering, crash recovery, registry persistence, or IPC routes.
 
-**Blocked-on:** None for v1 trait acceptance. v2 adapter migration is blocked on `agents session locate`, `agents session export`, `agents session import-replace`, pause-handshake, and schema-version probe.
+### WU-0C-N4: Removed in r5
 
-### WU-0C-N4: AgentRunnerSchemaProbe
+Removed in round 5. The r4 `AgentRunnerSchemaProbe` existed only to protect the v1 direct `state.db` / JSONL adapter. With the v1 adapter dropped, schema compatibility is a single `agents session schema-probe` CLI call owned by WU-0C-N3 and enforced by its construction-time `safe_for_import_replace` acceptance criterion.
 
-**Parent initiative:** SessionOverrideContract v1 compatibility probe
+### WU-0C-N3: AgentRunnerCliAdapter (SessionOverrideContract v2 implementation)
 
-**Contract:**
-```text
-schema_object: Rust service object
-
-SchemaProbe {
-  agents_binary_ref: string,
-  agents_version_or_commit: string,
-  state_db_path: string,
-  supported: boolean,
-  supported_range: string,
-  table_fingerprints: map<string, string>,
-  storage_capabilities: map<string, "read_write" | "read_only" | "unsupported">,
-  refusal_reason?: SessionOverrideError
-}
-
-AgentRunnerSchemaProbe::probe(state_db_path: string, agents_binary: string) -> Result<SchemaProbe, SessionOverrideError>
-```
-
-**Test boundary:** `product-strategy/contracts/wu-0c-n4-agent-runner-schema-probe.md`, `src-tauri/src/contracts/agent_runner_schema_probe.rs`
-
-**Code boundary:** `src-tauri/src/session_override/schema_probe.rs`, `src-tauri/src/contracts/agent_runner_schema_probe.rs`, `src-tauri/tests/wu_0c_n4_agent_runner_schema_probe_contract.rs`
-
-**Acceptance criteria:**
-
-- [ ] Calling `probe(state_db_path, agents_binary)` against a fixture with `invocations`, `session_turns`, `session_chains`, and `session_chain_segments` matching the pinned range returns `supported = true`.
-- [ ] The probe validates required columns for `invocations.session_id`, `invocations.session_capture_method`, `invocations.resume_acceptance_status`, `session_turns.provider_name`, `session_turns.session_id`, `session_turns.turn_id`, `session_turns.parent_turn_id`, `session_turns.is_sidechain`, `session_turns.is_compaction_boundary`, `session_turns.source_file`, `session_chains.chain_id`, and `session_chain_segments.ended_at`.
-- [ ] Missing required tables, missing required columns, incompatible indexes, or unreadable DB files return `SessionOverrideError::UnsupportedSchema` or `DbFailure` before any write-capability is reported.
-- [ ] Unknown or unparseable `agents_binary` version/commit returns `UnsupportedSchema` unless the fixture explicitly marks a test-only fake binary.
-- [ ] The probe reports `claude_code_jsonl` and `codex_jsonl` storage as `read_write`, `read_only`, or `unsupported` only from the pinned fixture capability table; it does not infer support heuristically from path names.
-- [ ] Probe output includes deterministic table fingerprints for all required tables and indexes so audit records can cite the checked surface.
-- [ ] The service opens SQLite read-only and performs no schema migration, `PRAGMA user_version` update, table creation, transcript write, or agent-runner config edit.
-
-**Pipeline phases:** Core path Phases 2.5 through 10 as described in the Pipeline Reference.
-
-**Dependencies:** WU-0C-N2; incoming WU-0A-03 `LocalStorageLayout`, WU-0A-15 `FakeAgentsFixture`.
-
-**Produces:** Runtime compatibility probe consumed by WU-0C-N3 and v1 refusal paths in WU-0C-N1 tests.
-
-**Parallelizable with:** WU-0C-12a, WU-0C-13a, WU-0C-14a, WU-0C-16b after WU-0C-N2 lands.
-
-**Single-concern PR constraint:** This WU may read fixture SQLite metadata and binary-version evidence only. It may not locate sessions, parse transcript bodies, mutate state, or write override registry records.
-
-**Blocked-on:** v1 ships with local table/binary probing. Replacement by an upstream supported-surface probe is blocked on `agents schema-version probe` or equivalent.
-
-### WU-0C-N3: AgentRunnerDbAdapter v1
-
-**Parent initiative:** SessionOverrideContract v1 adapter
+**Parent initiative:** SessionOverrideContract v2 implementation
 
 **Contract:**
 ```text
 schema_object: Rust service object implementing SessionOverrideContract
 
-AgentRunnerDbAdapter::new(state_db_path, sessions_config_ref, agents_binary, lock_root) -> AgentRunnerDbAdapter
+AgentRunnerCliAdapter::new(agents_binary, evidence_writer, audit_writer, recovery_writer) -> AgentRunnerCliAdapter
 
 Implements:
-- schema_version_probe
-- locate_session
-- read_transcript
-- replace_transcript
-- truncate_after
-- append_turns
-- get_session_metadata
+- schema_version_probe -> agents session schema-probe
+- locate_session -> agents session locate <id> [--json]
+- read_transcript -> agents session export <id> [--format canonical-jsonl]
+- replace_transcript -> agents session import-replace <id> --from-file <path> [--preimage-sha256 <hex>]
+- truncate_after / append_turns -> read_transcript + canonical JSONL edit + replace_transcript
+- get_session_metadata -> agents session locate <id> --json, mapped to the metadata subset
 
-v1 write protocol:
-- refuse outside pinned SchemaProbe supported range
-- locate exactly one active session/provider/segment
-- prove session idle by lock + stable mtime + SQLite non-busy observations
-- write same-directory temp JSONL and fsync where available
-- record pending override before rename
-- atomic rename final transcript
-- update minimum state rows in one SQLite transaction
-- commit or quarantine pending override after crash recovery
+Atomic mid-session override:
+- acquire agents session pause-handshake <id> [--ttl-ms <ms>]
+- use the returned token and import-replace with --preimage-sha256
+- release with agents session resume-handshake <id> --token <token>
 ```
 
-**Test boundary:** `product-strategy/contracts/wu-0c-n3-agent-runner-db-adapter.md`, `src-tauri/src/contracts/agent_runner_db_adapter.rs`
+**Test boundary:** `src-tauri/tests/agent_runner_cli_adapter_contract.rs`
 
-**Code boundary:** `src-tauri/src/session_override/agent_runner_db_adapter.rs`, `src-tauri/src/session_override/jsonl_render.rs`, `src-tauri/src/contracts/agent_runner_db_adapter.rs`, `src-tauri/tests/wu_0c_n3_agent_runner_db_adapter_contract.rs`
+**Code boundary:** `src-tauri/src/session_override/agent_runner_cli_adapter.rs`, contract test, integration test against a fake `agents` binary fixture reusing the WU-0A-15 fake_agents pattern.
 
 **Acceptance criteria:**
 
-- [ ] `locate_session(session_id)` reads fixture `state.db` rows plus configured transcript locator output and returns exactly one `SessionLocation` for a supported session.
-- [ ] `locate_session(session_id)` returns `SessionNotFound`, `AmbiguousSession`, or `UnsupportedStorage` for missing, duplicate, or unsupported fixtures and performs no file mutation.
-- [ ] `read_transcript(session_id)` returns ordered `TranscriptTurn` fixtures with source offsets and hashes preserved for supported plaintext JSONL sessions; malformed records become `unsupported_record` turns rather than being dropped.
-- [ ] `replace_transcript(session_id, new_jsonl, preconditions)` refuses on unsupported schema, busy session, preimage mismatch, unsupported storage, or adapter render failure before renaming any file.
-- [ ] Successful `replace_transcript` writes a same-directory temp file, records a pending override, atomically renames it, updates only required session-turn/chain consistency rows, and returns an `OverrideReceipt` with preimage/postimage hashes.
-- [ ] `truncate_after(session_id, turn_index, preconditions)` truncates only at a valid turn boundary and rejects boundaries that split a tool-call/result dependency or compaction-boundary invariant.
-- [ ] `append_turns(session_id, turns, preconditions)` appends only adapter-renderable `TranscriptTurn` records, rejects duplicate turn IDs, and refuses unsupported append cases before file mutation.
-- [ ] Crash-injection fixtures after temp write, after rename, and after DB transaction recover deterministically to committed, rolled-back, or `QuarantinedStorageConflict` states.
-- [ ] The adapter uses flock-style/session-idle locking and returns `SessionBusy` when it cannot prove no in-flight `agents` write owns the same session.
-- [ ] The adapter never edits `agents`, `providers.toml`, `sessions.toml`, model TOMLs, auth stores, quota scripts, provider credentials, provider routing policy, or cross-provider migration settings.
+- [ ] Each trait method invokes the corresponding `agents session` subcommand and maps stdout/stderr JSON into the WU-0C-N2 DTOs and `SessionOverrideError` variants.
+- [ ] `unsupported-storage` exit/error code from locate/export/import surfaces as `SessionOverrideError::UnsupportedStorage` and performs no harness-side transcript mutation.
+- [ ] `session-busy` exit code 13 from pause-handshake or import-replace surfaces as `SessionOverrideError::SessionBusy`.
+- [ ] `--preimage-sha256` mismatch surfaces as `SessionOverrideError::PreimageMismatch`.
+- [ ] `pause-handshake` lease TTL is respected for atomic mid-session override, and `resume-handshake` is always called on adapter drop when a lease token is held.
+- [ ] Adapter construction calls `agents session schema-probe` and refuses operation if the output is malformed, required feature flags are absent, or `safe_for_import_replace` is false.
+- [ ] `truncate_after` and `append_turns` compose `read_transcript`, a canonical JSONL boundary edit, and `replace_transcript`; if `agent-runner` gains finer-grained surfaces later, only this adapter mapping changes.
+- [ ] The fake `agents` binary fixture covers success, unsupported storage, busy lease, preimage mismatch, unsafe schema probe, malformed JSON, and missing subcommand cases.
+- [ ] The adapter records invocation evidence through WU-0B-09, override/audit receipts through WU-0B-15-compatible drafts, and write-failure recovery metadata through WU-0B-31 refs.
+- [ ] The adapter never opens or writes `agent-runner` `state.db`, provider transcript files, `providers.toml`, `sessions.toml`, model TOMLs, auth stores, quota scripts, provider credentials, provider routing policy, or cross-provider migration settings directly.
 
 **Pipeline phases:** Core path Phases 2.5 through 10 as described in the Pipeline Reference.
 
-**Dependencies:** WU-0C-N1, WU-0C-N2, WU-0C-N4, WU-0C-N5, WU-0C-16; incoming WU-0A-03 `LocalStorageLayout`, WU-0A-15 `FakeAgentsFixture`, WU-0B-09 `EvidenceArtifact`, WU-0B-15 `AuditEvent`.
+**Dependencies:** WU-0C-N1, WU-0C-N2; incoming WU-0A-15 `FakeAgentsFixture`, Phase 0B WU-0B-09 `EvidenceArtifact` for `agents` invocation logs, WU-0B-15 `AuditEvent` for override receipts, and WU-0B-31 `RecoveryAction` for write failures.
 
-**Produces:** Shipping v1 `SessionOverrideContract` implementation consumed by VS-010, VS-012, VS-018, VS-020, and VS-021 until the v2 CLI adapter lands.
+**Produces:** Shipping `SessionOverrideContract` implementation consumed by VS-010, VS-012, VS-018, VS-020, and VS-021.
 
-**Parallelizable with:** WU-0C-17, WU-0C-20a, WU-0C-23, WU-0C-24 after WU-0C-N1/N2/N4 and WU-0C-16 land.
+**Parallelizable with:** WU-0C-04, WU-0C-12, WU-0C-13, WU-0C-14b, WU-0C-15b, WU-0C-16, WU-0C-N5, WU-0C-22, WU-0C-25a, WU-0C-26a, WU-0C-31a, and WU-0C-37 after WU-0C-N1/N2 land.
 
-**Single-concern PR constraint:** This WU owns only the v1 direct DB/JSONL adapter and its fixtures. It may not add UI flows, provider routing, resume composition, worker launch behavior, optimizer behavior, or the future v2 CLI adapter.
+**Single-concern PR constraint:** This WU owns only the CLI adapter, its command mapping, and fake-binary integration tests. It may not add UI flows, provider routing, resume composition, worker launch behavior, optimizer behavior, direct SQLite writes, direct provider transcript writes, or a harness-side schema-probe wrapper WU.
 
-**Blocked-on:** v1 ships now under schema-version pinning and idle-only writes. v2 swap-later is blocked on `agents session locate`, `agents session export`, `agents session import-replace`, pause-handshake, and schema-version probe. Atomic mid-session override remains blocked on `agents pause-handshake`.
+**Revision rationale:** r4 introduced WU-0C-N3 as a v1 `AgentRunnerDbAdapter` with direct `state.db` and JSONL writes pinned by WU-0C-N4. r5 rescopes it to the v2 `AgentRunnerCliAdapter` after agent-runner feature requests landed in the proposal-r6 / engineering-roadmap-r5 cascade (commits #14-#23). The schema probe is now the `agents session schema-probe` call inside this adapter rather than a separate WU. Classification: externally driven `fix-created-family` gen 0.
 
 ### WU-0C-N5: SessionOverrideStore Registry
 
@@ -1894,13 +1839,11 @@ SessionOverrideStore::list_by_session(session_id) -> Result<Vec<SessionOverrideR
 
 **Dependencies:** WU-0C-N1, WU-0C-N2; incoming WU-0B-09 `EvidenceArtifact`, WU-0B-15 `AuditEvent`, WU-0B-31 `RecoveryAction`.
 
-**Produces:** Workspace-level override ledger consumed by WU-0C-N3 crash recovery, VS-001 evidence inspectors, VS-003 audit surfaces, VS-020 recovery, and VS-021 reroute governance.
+**Produces:** Workspace-level override ledger consumed by VS-001 evidence inspectors, VS-003 audit surfaces, VS-020 recovery, VS-021 reroute governance, and WU-0C-31 recovery metadata reads.
 
 **Parallelizable with:** WU-0C-25, WU-0C-27, WU-0C-29d after WU-0C-N1/N2 land.
 
 **Single-concern PR constraint:** This WU owns only the registry record/service and lifecycle transitions. It may not perform file writes, DB adapter probes, UI rendering, recovery execution, or provider routing.
-
-**Blocked-on:** None for the v1 registry. v2 adapter-kind activation is blocked on `agents session locate/export/import-replace` and schema-version probe.
 
 ### WU-0C-19: ProviderProbeRequest DTO
 
@@ -3272,10 +3215,10 @@ Existing WUs audited for SessionOverrideContract boundary violations:
 | WU-0C-15c `SessionTurnsRead` | DTO exposed transcript locator/opencode-gap details. | Replaced with provider-neutral missing-locator/substrate-gap reporting and no raw transcript body exposure. | No write dependency; canonical transcript DTOs live in WU-0C-N2. | Kept. |
 | WU-0C-15d `SessionTurnsReader` | Criteria used Claude/Codex transcript fixtures and direct parsing language. | Reads normalized `agent-runner` evidence only; never calls `replace_transcript`, `truncate_after`, or `append_turns`. | No mutation dependency; write consumers depend on WU-0C-N1. | Kept. |
 | WU-0C-18 `AgentRunnerClient` | Facade could become a catch-all for session storage, resume, and provider routing. | Explicitly limited to subprocess/trace/config/diagnostics/read-only operations and excludes transcript writes. | No write dependency; SessionOverrideContract is a separate service family. | Kept. |
-| WU-0C-31 `RecoveryActionProcessorSkeleton` | Recovery could need override quarantine state. | Dependency graph now admits WU-0C-N5 registry as recovery metadata input while preserving no-side-effect skeleton behavior. | Consumes WU-0C-N5 metadata only; live replacement remains blocked on pause-handshake. | Kept. |
+| WU-0C-31 `RecoveryActionProcessorSkeleton` | Recovery could need override quarantine state. | Dependency graph now admits WU-0C-N5 registry as recovery metadata input while preserving no-side-effect skeleton behavior. | Consumes WU-0C-N5 metadata only; live replacement uses WU-0C-N3's pause-handshake/import-replace path. | Kept. |
 | WU-0C-34 `TauriIpcCommandRouter` | IPC could accidentally expose raw write operations as Phase 0C commands. | Adds locate/metadata/registry read commands only; no UI command for replace/truncate/append in Phase 0C. | Depends on WU-0C-N1 and WU-0C-N5 for read surfaces. | Kept. |
 
-No WU became empty after refactor. No WU was removed or merged. The general rule after round 4 is: read-only observation of `agents` subprocess/trace/config/session-turn evidence stays in WU-0C-11a..WU-0C-18; any transcript content mutation or raw storage write-back goes through WU-0C-N1 and the active adapter.
+Round 5 update: WU-0C-N4 was removed because schema probing is now the `agents session schema-probe` call inside WU-0C-N3. WU-0C-N3 was rescoped from direct DB/JSONL mutation to the CLI adapter. The general rule after round 5 is: read-only observation of `agents` subprocess/trace/config/session-turn evidence stays in WU-0C-11a..WU-0C-18; any transcript content mutation goes through WU-0C-N1 and WU-0C-N3's documented `agents session` commands.
 
 ## Dependency Graph
 
@@ -3331,8 +3274,7 @@ WU-0C-18 <- WU-0C-12, WU-0C-13, WU-0C-14, WU-0C-15d, WU-0C-16, WU-0C-17
 
 WU-0C-N2 <- WU-0B-09, WU-0B-15, WU-0B-21
 WU-0C-N1 <- WU-0C-N2, WU-0B-09, WU-0B-15
-WU-0C-N4 <- WU-0C-N2, WU-0A-03, WU-0A-15
-WU-0C-N3 <- WU-0C-N1, WU-0C-N2, WU-0C-N4, WU-0C-N5, WU-0C-16, WU-0A-03, WU-0A-15, WU-0B-09, WU-0B-15
+WU-0C-N3 <- WU-0C-N1, WU-0C-N2, WU-0A-15, WU-0B-09, WU-0B-15, WU-0B-31
 WU-0C-N5 <- WU-0C-N1, WU-0C-N2, WU-0B-09, WU-0B-15, WU-0B-31
 
 WU-0C-19 <- WU-0B-17, WU-0B-18, WU-0B-19
@@ -3383,7 +3325,7 @@ Acyclicity check:
 - All split DTO WUs sit upstream of their corresponding method-bearing service WUs.
 - `WU-0C-22` is strictly after `WU-0C-10`, and `WU-0C-23` is strictly after `WU-0C-04`; neither remains in the same wave as its prerequisite.
 - `WU-0C-29c` and `WU-0C-29d` record existing Phase 0B identity/conflict schemas without topology mutation, so they do not create a cycle with optimizer or recovery services.
-- `WU-0C-N1..WU-0C-N5` sit after their DTO/probe prerequisites and before any downstream session transcript write-back consumer; adapter WUs do not depend on VS-010/012/018 value behavior.
+- SessionOverrideContract WU-0C-N1, WU-0C-N2, WU-0C-N3, and WU-0C-N5 sit after their DTO/trait prerequisites and before any downstream session transcript write-back consumer; adapter WUs do not depend on VS-010/012/018 value behavior.
 - `WU-0C-34` command routing depends on service surfaces, but services do not depend on command routing.
 - `WU-0C-37` audit emit depends on event emission and AuditEvent repository, while services emit only audit drafts, so no service-to-audit-to-service cycle exists.
 
@@ -3420,9 +3362,8 @@ Session override path:
 WU-0C-N2 TranscriptTurn/SessionLocation/SessionMetadata DTOs
   -> WU-0C-N1 SessionOverrideContract trait
   -> WU-0C-N5 SessionOverrideStore registry
-WU-0C-N2 TranscriptTurn/SessionLocation/SessionMetadata DTOs
-  -> WU-0C-N4 AgentRunnerSchemaProbe
-  -> WU-0C-N3 AgentRunnerDbAdapter v1
+WU-0C-N1 SessionOverrideContract trait
+  -> WU-0C-N3 AgentRunnerCliAdapter
 ```
 
 Optimizer and identity/conflict paths:
@@ -3444,14 +3385,14 @@ The critical path gates Phase 1 VS-001 because RenderEngine needs policy, budget
 
 ## Parallelization Map
 
-Parallel groups are derived by topological depth from the graph above. No wave contains a direct or transitive dependency edge between members.
+Parallel groups are derived by topological depth from the graph above. No wave contains a direct or transitive dependency edge between members. Wave counts sum to 76.
 
 | Wave | WUs | Max concurrent worktrees | Notes |
 |---:|---|---:|---|
 | 1 | WU-0C-01, WU-0C-02a, WU-0C-04a, WU-0C-05, WU-0C-06a, WU-0C-07a, WU-0C-08, WU-0C-09a, WU-0C-11a, WU-0C-11b, WU-0C-15a, WU-0C-16a, WU-0C-16b, WU-0C-17b, WU-0C-N2, WU-0C-19, WU-0C-21, WU-0C-23a, WU-0C-24a, WU-0C-30a, WU-0C-35a, WU-0C-36a, WU-0C-37a | 23 | External 0A/0B-only DTOs, primitive service DTOs, and session-override DTOs. |
-| 2 | WU-0C-02, WU-0C-03, WU-0C-06, WU-0C-09, WU-0C-10, WU-0C-12a, WU-0C-13a, WU-0C-13b, WU-0C-14a, WU-0C-17a, WU-0C-N1, WU-0C-N4, WU-0C-20a, WU-0C-22a, WU-0C-23b, WU-0C-24, WU-0C-29a, WU-0C-30, WU-0C-35 | 19 | First derived DTOs, leaf services, SessionOverrideContract trait, and schema probe. |
-| 3 | WU-0C-04, WU-0C-12, WU-0C-13, WU-0C-14b, WU-0C-15b, WU-0C-16, WU-0C-N5, WU-0C-22, WU-0C-25a, WU-0C-26a, WU-0C-31a, WU-0C-37 | 12 | Policy, agent-runner basics, override registry, render policy resolver, render budget/result DTOs, audit emit. |
-| 4 | WU-0C-07, WU-0C-14, WU-0C-15c, WU-0C-N3, WU-0C-23, WU-0C-29c, WU-0C-32 | 7 | Budget gate, trace reader, session override v1 adapter, privilege filter, identity shell, hook payload. |
+| 2 | WU-0C-02, WU-0C-03, WU-0C-06, WU-0C-09, WU-0C-10, WU-0C-12a, WU-0C-13a, WU-0C-13b, WU-0C-14a, WU-0C-17a, WU-0C-N1, WU-0C-20a, WU-0C-22a, WU-0C-23b, WU-0C-24, WU-0C-29a, WU-0C-30, WU-0C-35 | 18 | First derived DTOs, leaf services, and SessionOverrideContract trait. |
+| 3 | WU-0C-04, WU-0C-12, WU-0C-13, WU-0C-14b, WU-0C-15b, WU-0C-16, WU-0C-N3, WU-0C-N5, WU-0C-22, WU-0C-25a, WU-0C-26a, WU-0C-31a, WU-0C-37 | 13 | Policy, agent-runner basics, CLI override adapter, override registry, render policy resolver, render budget/result DTOs, audit emit. |
+| 4 | WU-0C-07, WU-0C-14, WU-0C-15c, WU-0C-23, WU-0C-29c, WU-0C-32 | 6 | Budget gate, trace reader, privilege filter, identity shell, hook payload. |
 | 5 | WU-0C-15d, WU-0C-25, WU-0C-27, WU-0C-29d, WU-0C-33a | 5 | Session turns service, render budget adapter, optimizer queue, conflict writer, plugin capability DTO. |
 | 6 | WU-0C-17, WU-0C-26, WU-0C-28, WU-0C-33 | 4 | Provider diagnostics, render core, optimizer cycle, plugin matrix. |
 | 7 | WU-0C-18, WU-0C-29b | 2 | Agent facade and optimizer lease DTO. |
@@ -3511,8 +3452,7 @@ Phase 0C schema/service ownership now enumerates every Rust struct, TypeScript D
 | `AgentRunnerClient` facade | WU-0C-18 | Own WU; delegates to separately owned DTO/service WUs. |
 | `TranscriptTurn` / `SessionLocation` / `SessionMetadata` DTO family | WU-0C-N2 | Own WU. |
 | `SessionOverrideContract` trait | WU-0C-N1 | Own WU. |
-| `AgentRunnerSchemaProbe` | WU-0C-N4 | Own WU. |
-| `AgentRunnerDbAdapter` v1 | WU-0C-N3 | Own WU. |
+| `AgentRunnerCliAdapter` | WU-0C-N3 | Own WU. |
 | `SessionOverrideStore` registry | WU-0C-N5 | Own WU. |
 | `ProviderProbeRequest` | WU-0C-19 | Own WU. |
 | `ProviderStateMonitorResult` | WU-0C-20a | Own WU. |
@@ -3559,7 +3499,7 @@ Every WU declaring a function, method, enum, state machine, or routing invariant
 |---|---|
 | Policy/budget/config | DTO validators plus `PolicyEngine`, budget accounting/gate, config read/write/provenance method criteria. |
 | Agent-runner | Split DTO validators plus subprocess, capture, trace, normalized session turns, config snapshot, diagnostics, and facade method criteria; no provider routing or transcript write-back. |
-| Session override | DTO validators, trait-level fake adapter criteria, schema probe compatibility criteria, v1 adapter locate/read/write/crash-recovery criteria, and registry lifecycle criteria. |
+| Session override | DTO validators, trait-level fake adapter criteria, CLI schema-probe compatibility criteria, CLI adapter locate/export/import-replace/pause-handshake criteria, and registry lifecycle criteria. |
 | Provider/render | Provider probe/monitor validators, render policy/privilege/budget/result validators, cache hash, render core, and golden fixture criteria. |
 | Optimizer/identity/conflict/recovery | Queue/state-machine/scheduler criteria, identity/conflict routing invariants, recovery writer/processor transitions. |
 | Hook/IPC/UI/audit | Hook/plugin validators, command routing invariant, event topic isolation, pane routing, audit append/order invariants. |
@@ -3588,17 +3528,17 @@ Regression check:
 - Phase 0A UI/IPC shell primitives remain canonical; Phase 0C extends them without moving files or changing meanings.
 - Phase 0B durable schemas remain canonical; Phase 0C does not duplicate `IdentityEvent`, `ConflictRecord`, `PolicySet`, `BudgetLedger`, `ProviderState`, `WorkingSetSnapshot`, `OptimizerRequest`, `RecoveryAction`, or `AuditEvent` ownership.
 - Parallelization Map is re-derived by topological depth from the declared graph and contains no intra-wave dependencies.
-- SessionOverrideContract WUs add five new nodes: DTOs in wave 1, trait/probe in wave 2, registry in wave 3, and v1 adapter in wave 4. Existing session-turn WUs were narrowed to normalized evidence; no WU became empty or required removal.
+- Round 5 SessionOverrideContract WUs now add four active nodes: DTOs in wave 1, trait in wave 2, CLI adapter plus registry in wave 3. WU-0C-N4 is intentionally removed because CLI schema-probe is a WU-0C-N3 construction gate. Existing session-turn WUs remain narrowed to normalized evidence.
 
 ### Rule D4 - Watch-Signal Compliance
 
-| Active watch signal | Phase 0C round 4 handling |
+| Active watch signal | Phase 0C round 5 handling |
 |---|---|
 | `bundling-family` | Applied Rule D1 strictly to every named DTO/service family, including the parent-loop SessionTurns pattern and every input/output DTO listed in R1-DECOMP-F02. |
 | `state-machine-criteria-family` | Preserved the round-1 D2 criteria and added binary criteria for all new validators, identity/conflict methods, and routing invariants. |
-| `fix-created-family` | Round 4 classification is fix-created-family gen 0 from the proposal-r5/engineering-roadmap-r4 cascade. New concerns are assigned to WU-0C-N1..WU-0C-N5; existing agent-runner/session-turn WUs are narrowed rather than deleted. |
+| `fix-created-family` | Round 5 classification is fix-created-family gen 0 from the proposal-r6/engineering-roadmap-r5 cascade. WU-0C-N3 is rescoped to the landed CLI surfaces and WU-0C-N4 is removed rather than preserved as a one-line wrapper. |
 | `dependency-encoding-family` | Foundation-row outgoing blocks now declared for all Phase 0C foundation rows in engineering-roadmap lines 23-46; per-VS Outgoing-to-Phase-1 / Outgoing-to-Phase-2+ blocks systematically derived from the (foundation-row, needed-by VS) pairs in the foundation table cross-checked against per-slice Foundation dependencies (lines 50-475); cross-slice OptimizerRequest contract explicitly enumerated. |
-| `session-override-boundary-family` | New in round 4. Provider routing, account/quota/auth, resume composition, session porting, and per-CLI storage knowledge are excluded from general harness WUs; direct DB/JSONL writes are isolated to WU-0C-N3 behind WU-0C-N1. |
+| `session-override-boundary-family` | Provider routing, account/quota/auth, resume composition, session porting, and per-CLI storage knowledge remain excluded from general harness WUs; WU-0C-N3 shells out to `agents session` commands instead of writing storage directly. |
 
 Self-classification:
 
@@ -3609,6 +3549,7 @@ Self-classification:
 - named three-generation / four-generation: parent-loop bundling-family and dependency-encoding-family acknowledged; this round explicitly closes the same-family recurrence.
 - round-3 brownfield: Stitch Notes outgoing-edge declarations re-derived systematically from engineering-roadmap Phase 0 foundation table; same-family `dependency-encoding-family` at generation 2 closed by re-derivation rather than per-edge patch.
 - round-4 brownfield: SessionOverrideContract cascade integrated from proposal-r5 and engineering-roadmap-r4; fix-created-family gen 0 watch active for new adapter/trait dependencies.
+- round-5 brownfield: proposal-r6 and engineering-roadmap-r5 drop the v1 DB adapter; WU-0C-N3 becomes the CLI adapter and WU-0C-N4 is removed. fix-created-family gen 0 remains externally driven.
 
 ## Stitch Notes
 
@@ -3619,7 +3560,7 @@ Incoming edges from Phase 0A to preserve:
 - WU-0C-35a/WU-0C-35 consume `EventTopic`, `IpcEvent<T>`, and `subscribe_workspace_events`; do not create a second event bus.
 - WU-0C-36a/WU-0C-36 consume `PaneId`, `ShellRegionState`, the workspace route shell, and `renderWithHarness`; do not create a second shell view-state model.
 - WU-0C-37a/WU-0C-37 consume `TraceContext` and `EventTopic` for audit event emission.
-- WU-0C-N3 consumes WU-0A-03 local storage and WU-0A-15 fake `agents`/temp SQLite fixtures; do not create a second local fixture substrate.
+- WU-0C-N3 consumes WU-0A-15 fake `agents` fixture patterns for CLI integration tests; do not create a second fake subprocess substrate.
 
 Incoming edges from Phase 0B to preserve:
 
@@ -3631,7 +3572,7 @@ Incoming edges from Phase 0B to preserve:
 - Optimizer shell consumes WU-0B-25, WU-0B-26, and WU-0B-27 but does not run `glm` or merge graph edits.
 - Identity/conflict shell writes WU-0B-13 `IdentityEvent` and WU-0B-27 `ConflictRecord` records without mutating topology or resolving conflicts.
 - Recovery shell consumes WU-0B-31 and related worker/question/provider/conflict refs without executing recovery side effects.
-- SessionOverrideContract WU-0C-N1..WU-0C-N5 consume WU-0B-09 EvidenceArtifact and WU-0B-15 AuditEvent refs for receipts/refusals, and WU-0B-31 RecoveryAction refs for quarantine handoff. They do not define a new graph source of truth.
+- SessionOverrideContract WU-0C-N1/N2/N3/N5 consume WU-0B-09 EvidenceArtifact and WU-0B-15 AuditEvent refs for receipts/refusals, and WU-0B-31 RecoveryAction refs for quarantine handoff. They do not define a new graph source of truth.
 
 Outgoing edges by engineering-roadmap Phase 0 foundation row:
 
@@ -3642,7 +3583,7 @@ Outgoing edges by engineering-roadmap Phase 0 foundation row:
 - BudgetLedger WU-0C-05..WU-0C-07 feed VS-001, VS-004, VS-008, VS-009, VS-010, VS-015, VS-016, VS-019, VS-020, and VS-021.
 - ProviderStateMonitor and provider/capability records WU-0C-19/WU-0C-20 feed VS-001, VS-006, VS-015, VS-016, VS-017, VS-020, and VS-021.
 - CLI subprocess supervisor around `agents` WU-0C-11a..WU-0C-18 feed VS-001, VS-003, VS-006, VS-009, VS-015, VS-016, VS-017, VS-020, and VS-021.
-- SessionOverrideContract WU-0C-N1..WU-0C-N5 feed VS-010, VS-012, VS-018, VS-020, VS-021, and downstream Phase 1/2/3 WUs that need transcript write-back receipts, refusal reasons, or override metadata.
+- SessionOverrideContract WU-0C-N1/N2/N3/N5 feed VS-010, VS-012, VS-018, VS-020, VS-021, and downstream Phase 1/2/3 WUs that need transcript write-back receipts, refusal reasons, or override metadata.
 - Optimizer queue, OptimizerRequest/OptimizerEdit store, and merge-validation shell WU-0C-27..WU-0C-29 feed VS-009, VS-010, VS-011, VS-012, VS-013, VS-014, VS-018, VS-019, and VS-020.
 - Identity/conflict shell WU-0C-29c/WU-0C-29d feed VS-012, VS-013, VS-017, VS-018, VS-020, and VS-021.
 - RecoveryAction schema, side-effect taxonomy, and audit linkage WU-0C-30/WU-0C-31 feed VS-003, VS-006, VS-013, VS-017, VS-018, VS-020, and VS-021.
@@ -3666,25 +3607,25 @@ Outgoing to Phase 2+:
 
 - VS-008 consumes policy WU-0C-04; budget WU-0C-05..WU-0C-07; render WU-0C-21..WU-0C-26; hook/plugin WU-0C-32/WU-0C-33; and audit WU-0C-37.
 - VS-009 consumes policy WU-0C-04; configuration WU-0C-08..WU-0C-10; budget WU-0C-05..WU-0C-07; render WU-0C-21..WU-0C-26; agent-runner WU-0C-11a..WU-0C-18; provider WU-0C-19/WU-0C-20; optimizer WU-0C-27..WU-0C-29; hook/plugin WU-0C-32/WU-0C-33; IPC/events WU-0C-34/WU-0C-35; and audit WU-0C-37.
-- VS-010 consumes policy WU-0C-04; configuration WU-0C-08..WU-0C-10; budget WU-0C-05..WU-0C-07; render WU-0C-21..WU-0C-26; optimizer WU-0C-27..WU-0C-29; SessionOverrideContract WU-0C-N1..WU-0C-N5 for turn-decomposition/detail-injection write-back; IPC/events WU-0C-34/WU-0C-35; UI WU-0C-36; and audit WU-0C-37. **Blocked-on:** v2 adapter migration needs `agents session locate/export/import-replace`; atomic mid-session override needs `agents pause-handshake`. Until then VS-010 uses WU-0C-N3 v1 idle-only write-back.
+- VS-010 consumes policy WU-0C-04; configuration WU-0C-08..WU-0C-10; budget WU-0C-05..WU-0C-07; render WU-0C-21..WU-0C-26; optimizer WU-0C-27..WU-0C-29; SessionOverrideContract WU-0C-N1/N2/N3/N5 for turn-decomposition/detail-injection write-back; IPC/events WU-0C-34/WU-0C-35; UI WU-0C-36; and audit WU-0C-37.
 - VS-011 consumes policy WU-0C-04; configuration WU-0C-08..WU-0C-10; optimizer WU-0C-27..WU-0C-29; UI WU-0C-36; and audit WU-0C-37.
-- VS-012 consumes policy WU-0C-04; optimizer WU-0C-27..WU-0C-29; identity/conflict shell WU-0C-29c/WU-0C-29d; SessionOverrideContract WU-0C-N1..WU-0C-N5 for repack transcript replacement; and audit WU-0C-37; Phase 3 still owns topology mutation and conflict-resolution behavior. **Blocked-on:** v2 adapter migration needs `agents session locate/export/import-replace`; atomic mid-session override needs `agents pause-handshake`. Until then VS-012 uses WU-0C-N3 v1 idle-only replacement.
+- VS-012 consumes policy WU-0C-04; optimizer WU-0C-27..WU-0C-29; identity/conflict shell WU-0C-29c/WU-0C-29d; SessionOverrideContract WU-0C-N1/N2/N3/N5 for repack transcript replacement; and audit WU-0C-37; Phase 3 still owns topology mutation and conflict-resolution behavior.
 - VS-013 consumes policy WU-0C-04; optimizer WU-0C-27..WU-0C-29; identity/conflict shell WU-0C-29c/WU-0C-29d; recovery WU-0C-30/WU-0C-31; and audit WU-0C-37; Phase 3 still owns topology mutation and conflict-resolution behavior.
 - VS-014 consumes policy WU-0C-04; render WU-0C-21..WU-0C-26; optimizer WU-0C-27..WU-0C-29; UI WU-0C-36; and audit WU-0C-37.
 - VS-015 consumes policy WU-0C-04; configuration WU-0C-08..WU-0C-10; budget WU-0C-05..WU-0C-07; render WU-0C-21..WU-0C-26; agent-runner WU-0C-11a..WU-0C-18; provider WU-0C-19/WU-0C-20; hook/plugin WU-0C-32/WU-0C-33; and audit WU-0C-37.
 - VS-016 consumes budget WU-0C-05..WU-0C-07; agent-runner WU-0C-11a..WU-0C-18; provider WU-0C-19/WU-0C-20; IPC/events WU-0C-34/WU-0C-35; UI WU-0C-36; and audit WU-0C-37.
 - VS-017 consumes policy WU-0C-04; render WU-0C-21..WU-0C-26; agent-runner WU-0C-11a..WU-0C-18; provider WU-0C-19/WU-0C-20; identity/conflict shell WU-0C-29c/WU-0C-29d; recovery WU-0C-30/WU-0C-31; hook/plugin WU-0C-32/WU-0C-33; IPC/events WU-0C-34/WU-0C-35; UI WU-0C-36; and audit WU-0C-37.
-- VS-018 consumes policy WU-0C-04; optimizer WU-0C-27..WU-0C-29; identity/conflict shell WU-0C-29c/WU-0C-29d; SessionOverrideContract WU-0C-N1..WU-0C-N5 for accepted worker-output write-back; recovery WU-0C-30/WU-0C-31; hook/plugin WU-0C-32/WU-0C-33; UI WU-0C-36; and audit WU-0C-37. **Blocked-on:** v2 adapter migration needs `agents session locate/export/import-replace`; atomic mid-session override needs `agents pause-handshake`. Until then VS-018 may stage accepted output and uses WU-0C-N3 only when session-idle.
+- VS-018 consumes policy WU-0C-04; optimizer WU-0C-27..WU-0C-29; identity/conflict shell WU-0C-29c/WU-0C-29d; SessionOverrideContract WU-0C-N1/N2/N3/N5 for accepted worker-output write-back; recovery WU-0C-30/WU-0C-31; hook/plugin WU-0C-32/WU-0C-33; UI WU-0C-36; and audit WU-0C-37.
 - VS-019 consumes policy WU-0C-04; budget WU-0C-05..WU-0C-07; agent-runner WU-0C-11a..WU-0C-18; optimizer WU-0C-27..WU-0C-29; UI WU-0C-36; and audit WU-0C-37.
-- VS-020 consumes policy WU-0C-04; configuration WU-0C-08..WU-0C-10; budget WU-0C-05..WU-0C-07; render WU-0C-21..WU-0C-26; agent-runner WU-0C-11a..WU-0C-18; SessionOverrideContract WU-0C-N1..WU-0C-N5 for refusal/quarantine metadata; provider WU-0C-19/WU-0C-20; optimizer WU-0C-27..WU-0C-29; identity/conflict shell WU-0C-29c/WU-0C-29d; recovery WU-0C-30/WU-0C-31; IPC/events WU-0C-34/WU-0C-35; UI WU-0C-36; and audit WU-0C-37. **Blocked-on:** recovery actions that need live mid-session replacement require `agents pause-handshake`; v2 replacement requires `agents session import-replace`.
-- VS-021 consumes policy WU-0C-04; budget WU-0C-05..WU-0C-07; agent-runner WU-0C-11a..WU-0C-18; SessionOverrideContract WU-0C-N1..WU-0C-N5 for changed-session-contract evidence; provider WU-0C-19/WU-0C-20; identity/conflict shell WU-0C-29c/WU-0C-29d; recovery WU-0C-30/WU-0C-31; IPC/events WU-0C-34/WU-0C-35; UI WU-0C-36; and audit WU-0C-37. **Blocked-on:** v2 reroute/write-back migration requires `agents session locate/export/import-replace` and schema-version probe.
+- VS-020 consumes policy WU-0C-04; configuration WU-0C-08..WU-0C-10; budget WU-0C-05..WU-0C-07; render WU-0C-21..WU-0C-26; agent-runner WU-0C-11a..WU-0C-18; SessionOverrideContract WU-0C-N1/N2/N3/N5 for refusal/quarantine metadata; provider WU-0C-19/WU-0C-20; optimizer WU-0C-27..WU-0C-29; identity/conflict shell WU-0C-29c/WU-0C-29d; recovery WU-0C-30/WU-0C-31; IPC/events WU-0C-34/WU-0C-35; UI WU-0C-36; and audit WU-0C-37.
+- VS-021 consumes policy WU-0C-04; budget WU-0C-05..WU-0C-07; agent-runner WU-0C-11a..WU-0C-18; SessionOverrideContract WU-0C-N1/N2/N3/N5 for changed-session-contract evidence; provider WU-0C-19/WU-0C-20; identity/conflict shell WU-0C-29c/WU-0C-29d; recovery WU-0C-30/WU-0C-31; IPC/events WU-0C-34/WU-0C-35; UI WU-0C-36; and audit WU-0C-37.
 
 Cross-phase outgoing edges added in round 4:
 
-- SessionOverrideContract WU-0C-N1..WU-0C-N5 -> Phase 1 worker-launcher and worker-output-reintegration WUs for override receipt display, refusal surfacing, and accepted-output write-back prerequisites.
-- SessionOverrideContract WU-0C-N1..WU-0C-N5 -> Phase 2 turn-decomposition and detail-injection-router WUs; those WUs may produce canonical turns or packed transcripts but must call `append_turns`, `truncate_after`, or `replace_transcript` through WU-0C-N1.
-- SessionOverrideContract WU-0C-N1..WU-0C-N5 -> Phase 3 repack-planner WUs; those WUs may plan packed transcript replacement but must not open CLI JSONL files directly.
-- Downstream Phase 1/2/3 revisions should add explicit incoming-from-Phase-0C edges back to WU-0C-N1..WU-0C-N5 where worker launch, worker reintegration, turn decomposition, detail injection, or repack planning consumes session override receipts/refusals.
+- SessionOverrideContract WU-0C-N1/N2/N3/N5 -> Phase 1 worker-launcher and worker-output-reintegration WUs for override receipt display, refusal surfacing, and accepted-output write-back prerequisites.
+- SessionOverrideContract WU-0C-N1/N2/N3/N5 -> Phase 2 turn-decomposition and detail-injection-router WUs; those WUs may produce canonical turns or packed transcripts but must call `append_turns`, `truncate_after`, or `replace_transcript` through WU-0C-N1.
+- SessionOverrideContract WU-0C-N1/N2/N3/N5 -> Phase 3 repack-planner WUs; those WUs may plan packed transcript replacement but must not open CLI JSONL files directly.
+- Downstream Phase 1/2/3 revisions should add explicit incoming-from-Phase-0C edges back to WU-0C-N1/N2/N3/N5 where worker launch, worker reintegration, turn decomposition, detail injection, or repack planning consumes session override receipts/refusals.
 
 Explicit non-ownership notes:
 
@@ -3693,4 +3634,4 @@ Explicit non-ownership notes:
 - Phase 0C does not launch real workers, resume questions as a product workflow, run optimizer edit drafting, merge optimizer edits, resolve conflicts, mutate topology, execute recovery side effects, sample reviewers, or reroute providers.
 - Phase 0C does not replace `agent-runner`; it creates a subprocess/trace/config wrapper around the installed `/home/nes/.local/bin/agents` substrate plus a versioned session-override trait.
 - Phase 0C does not reimplement provider routing, multi-account load balancing, quota tracking, auth refresh, `--resume` mechanics, cross-provider session porting, or session-id capture.
-- Direct `state.db` and per-CLI JSONL mutation is allowed only inside WU-0C-N3 `AgentRunnerDbAdapter` v1, pinned by WU-0C-N4 and replaceable by a future WU-0C-N1-compatible `AgentRunnerCliAdapter` after `agents session locate/export/import-replace`, pause-handshake, and schema-version probe land.
+- Phase 0C does not perform direct `state.db` or per-CLI JSONL mutation. WU-0C-N3 `AgentRunnerCliAdapter` delegates locate/export/import-replace/pause-handshake/resume-handshake/schema-probe to the installed `agents` binary.
