@@ -61,3 +61,29 @@ Watch signals:
 - idle-lock behavior proves insufficient under real in-flight `agents` writes.
 - Codex or Claude JSONL format changes invalidate packed transcript writes before v2 lands.
 - future roadmap/ticket work units keep old direct-jsonl responsibilities instead of depending on `SessionOverrideStore`.
+
+## Round 6 - Option A CLI Adapter Simplification
+
+Classification: `fix-created-family` at gen 0 in the proposal-local loop, externally driven by `agent-runner` feature landings.
+
+Summary: user chose Option A after all five agent-runner feature requests landed in commits/PRs #14-#23. The proposal drops the planned v1 `AgentRunnerDbAdapter` entirely and makes `AgentRunnerCliAdapter` the only session-override adapter. `SessionOverrideContract` now consumes documented `agents session locate/export/import-replace/pause-handshake/schema-probe` surfaces, relies on `schema-probe` feature flags plus `safe_for_import_replace`, and pairs advisory `pause-handshake` leases with `import-replace --preimage-sha256`.
+
+D1 assessment: improved. The revision reduces moving parts and removes the direct state.db write path, but still needs implementation work to keep `truncate_after` and `append_turns` honest canonical-JSONL edits rather than hidden provider-specific renderers.
+
+D2 assessment: improved. The upstream CLI contract gives clearer evidence and compatibility boundaries than schema pinning. Residual risk is that `schema-probe` feature flags may not capture every semantic break in canonical JSONL or receipt shapes.
+
+D3 assessment: improved but not eliminated. Race handling is now explicit: advisory lease plus preimage gate, with exit 13 `session-busy` handled as a closed path. External non-`agents` writers remain the watch item because the lease is advisory.
+
+Changes made:
+
+- Replaced v1/v2 adapter split with single `AgentRunnerCliAdapter`.
+- Renamed the feature-request register to consumed agent-runner features and tied each surface to landed commits/PRs.
+- Revised anti-scope, assumptions, failure defaults, atomicity/recovery, and test intent around the CLI adapter.
+- Dropped block-on-upstream language now that the needed `agents session` surfaces exist.
+
+Watch signals:
+
+- implementation work units reintroduce direct state.db reads or writes.
+- `truncate_after` / `append_turns` grow provider-native rendering responsibilities instead of editing exported canonical JSONL.
+- tests mock happy-path CLI output but miss exit-code behavior, especially `unsupported-storage`, `session-busy` exit 13, and `preimage-mismatch`.
+- external writers mutate session JSONL mid-session often enough that advisory lease plus preimage gate causes repeated deferrals.

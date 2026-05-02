@@ -74,13 +74,13 @@ The UI exposes a per-session `CapabilityFingerprint` so the user and orchestrato
 
 ### SessionOverrideContract Boundary
 
-The harness and `agent-runner` meet at a versioned session-override boundary. The harness owns the domain layer: context graph nodes and edges, summaries, revisions, working set, repack planner, render policy and outputs, orchestrator turn state, evidence, provenance, audit, optimizer queue, recovery, question routing, budget ledger, worker dispatch state, policy, and configuration. `agent-runner` owns the execution substrate: provider routing, multi-account load balancing, quota tracking, auth refresh delegation, `--resume` mechanics, cross-provider session porting, per-CLI session storage location knowledge, and session-id generation or capture.
+The harness and `agent-runner` meet at a stable session-override boundary. The harness owns the domain layer: context graph nodes and edges, summaries, revisions, working set, repack planner, render policy and outputs, orchestrator turn state, evidence, provenance, audit, optimizer queue, recovery, question routing, budget ledger, worker dispatch state, policy, and configuration. `agent-runner` owns the execution substrate: provider routing, multi-account load balancing, quota tracking, auth refresh delegation, `--resume` mechanics, cross-provider session porting, per-CLI session storage location knowledge, and session-id generation or capture.
 
-The seam is the Rust `SessionOverrideContract`. It is the only harness write-back path that may replace, truncate, or extend an `agents`-owned session transcript. The repack planner and detail-injection router produce a packed transcript; the session-override implementation locates the session, probes supported schema/storage shape, writes through the selected adapter, and emits audit/provenance records. This addresses `D7`, `D10`, `D15`, and `D16`; it implements `P8`, `P14`, and `P15`.
+The seam is the Rust `SessionOverrideContract`. It is the only harness write-back path that may replace, truncate, or extend an `agents`-owned session transcript. The repack planner and detail-injection router produce a packed transcript; the session-override implementation locates the session, probes supported CLI capabilities, writes through `AgentRunnerCliAdapter`, and emits audit/provenance records. This addresses `D7`, `D10`, `D15`, and `D16`; it implements `P8`, `P14`, and `P15`.
 
 The contract operations are:
 
-- `schema_version_probe()`: identify the `agent-runner` binary and state schema surface before any write. Unsupported or unknown schema returns a refusal, not a best-effort mutation.
+- `schema_version_probe()`: call `agents session schema-probe` before any write and verify the expected feature flags plus `safe_for_import_replace`. Unsupported or unknown capability returns a refusal, not a best-effort mutation.
 - `locate_session(session_ref)`: resolve a harness session reference to provider name, storage kind, raw transcript path if available, active chain/segment metadata when known, and transcript mutability state.
 - `read_transcript(session_ref)`: return canonical transcript records plus source offsets and content hashes for audit.
 - `replace_transcript(session_ref, packed_transcript)`: atomically replace the transcript with a harness-rendered packed transcript.
@@ -88,14 +88,13 @@ The contract operations are:
 - `append_turns(session_ref, turns)`: append canonical turns while preserving provider-specific record shape through the adapter.
 - `get_session_metadata(session_ref)`: return provider, chain, segment, capture method, transcript state, compaction-boundary state, resume acceptance state, and last observed turn.
 
-The adapter stack has one harness trait, `SessionOverrideStore`, and two implementations:
+The adapter stack has one harness trait, `SessionOverrideStore`, and one implementation:
 
-- `AgentRunnerDbAdapter` is v1. It reads `~/.local/share/oulipoly-agent-runner/state.db`, locates active `session_chains`, `session_chain_segments`, `session_turns`, `invocations`, configured session storage, and transcript locator output, then writes only known per-CLI JSONL files plus the minimal `agent-runner` state rows required for consistency. It is schema-version-pinned to a tested `agents` binary range and refuses writes outside that range.
-- `AgentRunnerCliAdapter` is v2. It calls future `agents session locate`, `agents session export`, `agents session import-replace`, and pause/lock commands. It implements the same harness-side trait, so call sites do not change when the upstream CLI surface lands.
+- `AgentRunnerCliAdapter` calls the `agents` binary directly through `agents session locate`, `agents session export`, `agents session import-replace`, `agents session pause-handshake`, `agents session resume-handshake`, and `agents session schema-probe`. The harness consumes these documented stable CLI surfaces instead of reading or writing `agent-runner` state.db.
 
-Atomicity is required because every override spans SQLite state and a JSONL file. The write protocol is two-phase: acquire a session-idle lock, probe schema, read current hashes, write a replacement JSONL to a same-directory temp file, write a pending override row or audit marker in the harness store, rename the JSONL atomically, update `agent-runner` state rows in one SQLite transaction when needed, then mark the override committed. On startup, crash recovery resolves pending overrides by comparing preimage hash, temp file, final file, and state row: complete the commit when both sides agree, roll back the temp file when no state change occurred, or quarantine the session when the two sides disagree.
+Atomicity is required because transcript replacement must keep the provider transcript and `agent-runner` session index consistent. `agents session import-replace` owns that atomic swap and replacement of `session_turns`; the harness wraps it with a pending override audit record, preimage hash, postimage receipt, and recovery classification. The harness does not mutate `agent-runner` SQLite rows directly.
 
-Race handling fails closed. v1 does not support concurrent override during an in-flight `agents` session write. It must observe session-idle through filesystem locks, SQLite busy/transaction probes, and provider transcript mtime stability before writing. The intended stronger surface is a future `agents` pause-handshake or mid-session lock; until that exists, the harness waits for idle or blocks the override.
+Race handling fails closed. The harness pairs `agents session pause-handshake`'s advisory lease and TTL token with `agents session import-replace --preimage-sha256`. A held pause lease makes concurrent `import-replace` return exit `13` / `session-busy`, while the preimage hash protects against external writers that bypass the advisory lease. If locate/export reports `unsupported-storage`, the harness keeps the graph update as local evidence and refuses transcript mutation.
 
 ### Provider State as Observable State
 
@@ -133,7 +132,7 @@ The system does not treat cost as billing-only telemetry. A graph that is too ex
 
 - Rust/Tokio service embedded in the Tauri app.
 - Owns the harness SQLite database, graph mutation transactions, render generation, policy enforcement, and event streaming to the UI.
-- Talks to `agents` as a subprocess boundary and reads or mutates `agent-runner` session state only through `SessionOverrideContract` and documented local files or SQLite access.
+- Talks to `agents` as a subprocess boundary and reads or mutates `agent-runner` session state only through `SessionOverrideContract` and documented `agents session` CLI surfaces.
 - Addresses `D7`, `D10`, `D13`, `D16`; implements `P8`, `P12`, `P15`.
 
 `GraphStore`
@@ -167,7 +166,7 @@ The system does not treat cost as billing-only telemetry. A graph that is too ex
 `SessionOverrideStore`
 
 - Harness-side trait that implements `SessionOverrideContract` for session transcript read and write-back.
-- Has `AgentRunnerDbAdapter` for v1 direct state.db plus JSONL mutation and `AgentRunnerCliAdapter` for the future `agents session` command surface.
+- Has `AgentRunnerCliAdapter` for the documented `agents session` command surface.
 - Exists only to apply harness-owned packed transcripts to `agents`-owned session storage. It does not route providers, refresh auth, balance accounts, mint session IDs, or port sessions across providers.
 - Addresses `D7`, `D10`, `D15`, and `D16`; implements `P8`, `P14`, and `P15`.
 
@@ -1485,8 +1484,9 @@ Addresses `D10` and `D12`; implements `P7`, `P10`.
 - General-purpose agent framework. The design is a personal orchestrator harness, not a library for arbitrary multi-agent systems. This follows `P16` and the anti-goals.
 - Replacing `agent-runner`. The harness depends on `agents` for invocation, balancing, resume, cross-provider session porting, session-id capture, per-CLI storage knowledge, quota tracking, and session ingestion. This follows `P15`.
 - Reimplementing provider routing, multi-account load balancing, quota tracking, auth refresh, `--resume` mechanics, cross-provider session porting, or session-id capture. Those remain delegated to `agent-runner`; the harness only records their observable effects where needed for graph, audit, provider state, and recovery.
-- Mutating `agent-runner` configuration or binary from the v1 session-override adapter. `AgentRunnerDbAdapter` reads `state.db` and writes only known transcript JSONL files and required state rows at paths derived from `agent-runner` state or configured transcript locators. It does not edit `providers.toml`, `sessions.toml`, model TOMLs, auth stores, or the `agents` executable.
-- Concurrent transcript override during an in-flight `agents` write. Until `agent-runner` exposes a pause-handshake or mid-session lock, the harness must wait for session-idle or refuse the override.
+- Touching `agent-runner` state.db directly. The supported command path for stable session metadata is `agents session locate`; the SQLite schema is not the contract.
+- Mutating `agent-runner` configuration or binary. `AgentRunnerCliAdapter` does not edit `providers.toml`, `sessions.toml`, model TOMLs, auth stores, quota scripts, provider credentials, local runtime registries, or the `agents` executable.
+- Bypassing `pause-handshake` for mid-session transcript writes. The harness uses the advisory lease plus `import-replace --preimage-sha256`, and refuses or defers when `agents` returns `session-busy`.
 - Multi-tenant SaaS or web collaboration. This is excluded by `P16`.
 - Sidebar-of-many-chats UI. Multiple initiatives are graph roots under one orchestrator, not separate chat sessions. This follows `P13` and `P16`.
 - `/compact` interoperability. Native compaction conflicts with graph provenance and summary contracts. This follows `P9`.
@@ -1547,7 +1547,7 @@ No difficulty in `problem.md` appears ungrounded by the current philosophy. The 
 
 ## Layer 0 Context Management and Session Override
 
-This section is an additive operational-policy layer over the graph, summaries, pack/unpack flow, background optimizer, and `agent-runner` substrate. It preserves the round-4 model assignment, turn chunking, and node-size bounds. Round 5 changes only the write-back mechanism: the harness no longer treats per-CLI JSONL manipulation as a general harness responsibility. Repack and detail-injection still produce packed transcript material, but mutation of an `agents` session goes through `SessionOverrideContract`.
+This section is an additive operational-policy layer over the graph, summaries, pack/unpack flow, background optimizer, and `agent-runner` substrate. It preserves the round-4 model assignment, turn chunking, and node-size bounds. Round 6 simplifies the write-back mechanism now that the needed `agents session` commands have landed: the harness no longer plans a direct state.db adapter. Repack and detail-injection still produce packed transcript material, but mutation of an `agents` session goes through `SessionOverrideContract` and the `AgentRunnerCliAdapter`.
 
 ### Architectural Axioms
 
@@ -1555,7 +1555,7 @@ Axiom 1: transcript ingestion is turn-chunked. The optimizer treats a turn as an
 
 Axiom 2: graph nodes are size-bounded by the repack planner below 200K total prompt budget. Repack planning decides how to split, pack, or rebalance context graph nodes, and its operating constraint is that no regeneration unit should exceed the budget for `summary + cross_references + full_content` plus output reserve. The planner enforces a ceiling below 200K total tokens, with a preferred full-regeneration budget of 180K input plus 8K output reserve, so a 204K-class model can process a graph node in the normal path. Split, merge, reparent, and rollup decisions are driven by this size budget.
 
-Axiom 3: `SessionOverrideContract` delineates the harness/agents binary boundary. The harness owns context graph, repack planning, render policy, evidence, provenance, audit, optimizer, recovery, question routing, worker dispatch state, and policy. `agent-runner` owns provider routing, multi-account balancing, quota tracking, auth refresh delegation, resume mechanics, cross-provider session porting, session-id capture, per-CLI storage layout knowledge, and its internal session chain state. The harness may replace or extend an `agents` session transcript only through the versioned `SessionOverrideStore` trait and one of its adapters.
+Axiom 3: `SessionOverrideContract` delineates the harness/agents binary boundary. The harness owns context graph, repack planning, render policy, evidence, provenance, audit, optimizer, recovery, question routing, worker dispatch state, and policy. `agent-runner` owns provider routing, multi-account balancing, quota tracking, auth refresh delegation, resume mechanics, cross-provider session porting, session-id capture, per-CLI storage layout knowledge, and its internal session chain state. The harness may replace or extend an `agents` session transcript only through the `SessionOverrideStore` trait and `AgentRunnerCliAdapter`, which call documented `agents session` CLI surfaces.
 
 Together these axioms mean context-management tasks do not require larger-than-204K routine model windows, and they also do not require the harness to become a second agent runner. The harness keeps graph memory canonical; `agents` keeps provider/session execution canonical.
 
@@ -1590,33 +1590,30 @@ trait SessionOverrideContract {
 }
 ```
 
-`schema_version_probe()` is a precondition for every write. Because `agent-runner` currently uses idempotent schema-ensure helpers rather than a numbered `PRAGMA user_version`, v1 probes the installed `agents` binary version or commit identity plus the exact table/column/index surface it depends on. Unknown binary, missing expected columns, extra incompatible state, or unsupported storage kind returns `unsupported_schema` before any file write.
+`schema_version_probe()` is a precondition for every write. It calls `agents session schema-probe`, verifies the expected feature flags, and requires the `safe_for_import_replace` predicate before any session override. Unknown binary, missing feature flags, incompatible output shape, or `safe_for_import_replace=false` returns `unsupported_schema` before any transcript mutation.
 
-`SessionLocation` records provider name, storage kind, raw transcript path, active chain and segment where available, transcript locator evidence, source hashes, mutability state, and whether the session appears idle. `CanonicalTranscript` is a harness format with provider-specific source offsets preserved, not a claim that Claude, Codex, and other CLIs share a native schema.
+`SessionLocation` records the stable metadata returned by `agents session locate`: provider name, storage kind, transcript path when available, active chain and segment where available, transcript locator evidence, source hashes, and mutability state. `CanonicalTranscript` is the canonical JSONL emitted by `agents session export`, including source byte ranges and hashes; it is not a claim that Claude, Codex, and other CLIs share a native schema.
 
 ### Adapter Layering
 
 `SessionOverrideStore` is the dependency used by repack, detail injection, recovery, and tests.
 
-`AgentRunnerDbAdapter` is the v1 implementation. It targets the current `agent-runner` state surface:
+`AgentRunnerCliAdapter` is the only implementation. It shells out to `/home/nes/.local/bin/agents` or the configured `agents` binary and maps trait operations to documented CLI commands:
 
-- SQLite state at `~/.local/share/oulipoly-agent-runner/state.db`.
-- `invocations` rows with session capture and resume acceptance fields.
-- `session_turns` rows with provider, session, turn, parent, sidechain, compaction-boundary, source file, and ingest timestamp.
-- `session_chains` and `session_chain_segments` rows for stable conversation identity and active provider/session segment.
-- Provider `session_storage` declarations for `claude_code` and `codex`, with v1 write support limited to known plaintext JSONL targets that are safe under the pinned range.
-- Optional transcript locator scripts such as `claude-code-locate-transcript` and `codex-locate-transcript`.
+- `schema_version_probe()` -> `agents session schema-probe`.
+- `locate_session()` and `get_session_metadata()` -> `agents session locate <id> [--json]`.
+- `read_transcript()` -> `agents session export <id>`.
+- `replace_transcript()` -> `agents session import-replace <id> --from-file <path> --preimage-sha256 <hash>`.
+- `truncate_after()` and `append_turns()` -> canonical JSONL edit of an `export` stream followed by `import-replace`.
+- Mid-session write coordination -> `agents session pause-handshake <id> [--ttl-ms <ms>]` and `agents session resume-handshake <id> --token <token>`.
 
-The v1 adapter reads `state.db`, locates the source transcript, writes a temp JSONL beside the final file, atomically renames it, and updates only the minimum state rows required to keep `agent-runner` lookup and harness audit consistent. It does not modify `agents`, `providers.toml`, `sessions.toml`, model TOMLs, auth stores, quota scripts, or provider routing policy.
-
-`AgentRunnerCliAdapter` is the v2 implementation. It is contingent on upstream `agents session` commands and a pause/lock handshake. Once those commands exist, the harness keeps the same trait and swaps adapter configuration; repack, detail injection, recovery, and tests do not learn a second call pattern.
+The harness never reads or writes `~/.local/share/oulipoly-agent-runner/state.db`. Per the `agent-runner` README, `agents session locate` is the supported command path for stable session metadata; the SQLite schema is not the contract.
 
 ### Current Agent-Runner Surface
 
-The r5 split is based on the current local `agent-runner` source and README surface:
+The local `agent-runner` README and commits #14-#23 expose the needed session override surface:
 
 - Headless CLI mode exists through `/home/nes/.local/bin/agents` / `oulipoly-agent-runner`.
-- Persistent runner state lives in SQLite at `~/.local/share/oulipoly-agent-runner/state.db`.
 - Provider routing and load balancing are account-aware and quota-aware, with provider state keyed by provider name such as `claude`, `claude2`, `codex`, or `codex2`.
 - Quota refresh and auth refresh are delegated through provider configuration and scripts rather than owned by the harness.
 - Non-interactive resume exists through `agents resume --session-id <id>` and interactive resume exists through `agents repl <model> --resume <id>`.
@@ -1624,11 +1621,13 @@ The r5 split is based on the current local `agent-runner` source and README surf
 - Session capture can be configured through mechanisms such as `forced_flag_verified` with `--session-id` and `stdout_json_event`.
 - Session ingestion stores turn metadata in `session_turns`, including parent, sidechain, compaction-boundary, source file, and ingest timestamp fields.
 - Stable conversation identity is represented through `session_chains` and `session_chain_segments`.
-- Transcript locators can lazily resolve raw transcript paths for trace inspection.
+- `agents session locate <id> [--json]` resolves a canonical file-backed transcript to stable metadata and returns `unsupported-storage` rather than partial JSON when no safe target exists.
+- `agents session schema-probe` is a read-only compatibility check reporting schema versions, feature flags, and `safe_for_import_replace`.
+- `agents session export <id>` emits canonical JSONL with source byte ranges and SHA-256 preimages; this export stream is the round-trip oracle for `import-replace`.
+- `agents session import-replace <id>` accepts canonical JSONL only, atomically swaps the provider transcript, replaces `session_turns`, and emits a receipt JSON.
+- `agents session pause-handshake <id>` and `resume-handshake` provide an advisory lease and TTL token; the lease does not block external writers, so the harness also uses `--preimage-sha256`.
 - Claude-Code session migration currently has a JSONL copy path with compaction-boundary awareness under known storage declarations.
 - Codex storage can participate in chain identity and same-provider resume, but cross-account Codex file-copy migration remains deferred.
-
-The current surface does not expose a stable `agents session locate`, `agents session export`, `agents session import-replace`, pause-handshake, or explicit schema-version probe. That absence is why v1 exists and why v1 must be pinned and narrow.
 
 ### Write-Back Flow
 
@@ -1644,24 +1643,24 @@ The online renderer remains deterministic. It constructs foreground context from
 
 ### Atomicity and Recovery
 
-Every transcript replacement is a two-phase write because it crosses a JSONL file and SQLite state:
+Every transcript replacement delegates the storage mutation to `agents session import-replace`:
 
-1. Probe `agents` schema/binary support and adapter capability.
-2. Acquire the session-idle lock or fail closed.
-3. Read current JSONL hash, transcript mtime, active segment, and relevant state rows.
-4. Write the replacement transcript to a same-directory temp file with fsync where available.
-5. Write a harness pending-override audit record with preimage hash, temp path, final path, state-row intent, and packed transcript hash.
-6. Rename temp file to final JSONL path.
-7. Update required state rows in one SQLite transaction when the operation changes chain/segment/turn visibility.
-8. Mark the harness override committed and emit `AuditEvent` plus `EvidenceArtifact` records.
+1. Run `agents session schema-probe` and require expected feature flags plus `safe_for_import_replace`.
+2. Run `agents session locate <id> --json`; if it returns `unsupported-storage`, refuse transcript mutation.
+3. Run `agents session export <id>` and compute the canonical preimage hash.
+4. Produce edited canonical JSONL from the export stream.
+5. Acquire `agents session pause-handshake <id>`, recording token and TTL in the pending override audit record.
+6. Call `agents session import-replace <id> --from-file <path> --preimage-sha256 <hash>`.
+7. Release the lease with `agents session resume-handshake <id> --token <token>` when a token was acquired.
+8. Record the import receipt JSON, postimage hash, and `AuditEvent` / `EvidenceArtifact` records.
 
-Crash recovery compares the pending record against the final file and `state.db`. Matching final file plus matching state commits the pending record. Temp file without state change rolls back by deleting temp and keeping the preimage. File/state disagreement marks the session `quarantined_storage_conflict` and blocks resume until recovery classifies preserved, replayed, and discarded material.
+`import-replace` owns the atomic provider-transcript swap and `session_turns` replacement. Harness crash recovery does not repair `agent-runner` internals; it replays its pending audit record by re-exporting the session, comparing preimage/postimage hashes and any receipt already captured, then classifies the override as committed, not-started, or unknown and quarantines only the harness resume path when the outcome cannot be proven.
 
 ### Race Handling
 
-v1 refuses concurrent override during in-flight `agents` writes. The adapter must prove session-idle by acquiring the agreed lock path when available, observing SQLite non-busy state, checking transcript mtime stability, and confirming no active runner process is writing the same session. If it cannot prove idle, it returns `session_busy`.
+`pause-handshake` is advisory. It coordinates well-behaved `agents` consumers and makes same-session `import-replace` return exit `13` / `session-busy` while the lease is held, but it does not block non-`agents` tools from editing the transcript file.
 
-The preferred v2 surface is an `agents` pause-handshake: the harness asks `agents` to pause a session, `agents` drains or rejects in-flight writes, returns a lease token, and only then accepts import/replace. Until that lands, overrides happen only between turns or while the session is otherwise idle.
+The harness therefore always pairs the advisory lease with `import-replace --preimage-sha256`. If another writer changes the transcript after export, `preimage-mismatch` aborts before mutation. If `pause-handshake` or `import-replace` returns `session-busy`, the harness waits, asks for user action, or defers the override; it does not retry without the lease and preimage check for mid-session writes.
 
 ### Failure Defaults
 
@@ -1671,10 +1670,10 @@ Session override failures are recovery inputs, not invisible prompt degradation:
 - `session_not_found`: route to recovery with evidence of the lookup path; do not synthesize a new upstream session.
 - `ambiguous_session`: require an explicit chain/session disambiguation; do not choose by heuristic inside the harness when `agent-runner` cannot.
 - `unsupported_storage`: keep the graph update as harness evidence and avoid mutating the provider transcript.
-- `session_busy`: wait, ask for user action, or defer until session-idle; do not race the wrapped CLI.
-- `preimage_mismatch`: abort before rename and re-read the session because another writer changed the transcript after probe.
-- `post_rename_db_failure`: enter crash-recovery classification and block resume until preserved/replayed/discarded state is explicit.
-- `adapter_render_failure`: refuse `append_turns` or `replace_transcript` if the adapter cannot render provider-native records for the pinned range.
+- `session_busy`: wait, ask for user action, or defer; do not bypass `pause-handshake` or the preimage check.
+- `preimage_mismatch`: abort before mutation and re-read the session because another writer changed the transcript after export.
+- `invalid_input_transcript`: refuse `append_turns`, `truncate_after`, or `replace_transcript` if the edited canonical JSONL is malformed or lossy under `agents` rendering.
+- `unknown_commit_outcome`: re-export and compare hashes; quarantine harness resume only if the committed/not-started state cannot be proven.
 
 These defaults keep the graph source of truth intact while avoiding silent corruption of `agents` session state.
 
@@ -1690,8 +1689,8 @@ These defaults keep the graph source of truth intact while avoiding silent corru
 | Quota tracking and auth refresh | `agent-runner` | Harness consumes provider state snapshots and denial reasons. |
 | Session-id generation/capture | `agent-runner` | Harness stores IDs as evidence/correlation keys. |
 | Cross-provider session porting | `agent-runner` | Harness treats chain/segment changes as observed execution substrate state. |
-| Per-CLI storage layout | `agent-runner` | Harness v1 adapter reads pinned state/locators; v2 asks `agents session locate`. |
-| Transcript override | Shared boundary | Harness supplies packed transcript; `SessionOverrideStore` applies it under pinned adapter rules. |
+| Per-CLI storage layout | `agent-runner` | Harness asks `agents session locate`; it does not depend on SQLite schema. |
+| Transcript override | Shared boundary | Harness supplies edited canonical JSONL; `SessionOverrideStore` applies it through `agents session import-replace`. |
 
 ### Per-Task Assignment Matrix
 
@@ -1714,46 +1713,45 @@ The round-4 operating policy remains unchanged. Model assignment constrains whic
 
 Render-time context shaping uses no model in the normal online path. Provider routing lanes choose configured model names and constraints, but concrete account/provider selection, quota-aware balancing, auth refresh, session porting, and resume composition remain delegated to `agent-runner`.
 
-### Agent-Runner Feature-Request Register
+### Consumed Agent-Runner Features
 
-The v1 adapter ships against known local `agent-runner` state and refuses outside its pinned range. These upstream features allow the same harness trait to move to v2:
+The harness consumes landed `agents session` surfaces and stays on `agents` binary versions where `agents session schema-probe` reports the expected feature flags. It refuses to call surfaces that `schema-probe` flags absent.
 
-| Feature request | Needed behavior | Harness impact when landed |
-|---|---|---|
-| `agents session locate <id>` | Return JSONL path, storage type, provider name, active chain/segment, and mutability state. | Replaces direct `state.db` and locator-script reads in `locate_session`. |
-| `agents session export <id>` | Emit canonical JSONL or normalized transcript to stdout with source metadata. | Replaces direct JSONL reads in `read_transcript`. |
-| `agents session import-replace <id>` | Atomically replace the transcript and update runner state. | Replaces v1 two-phase file/db write in `replace_transcript`. |
-| Pause-handshake / mid-session lock | Coordinate a transcript override with in-flight runner writes and return a lease token. | Removes v1 idle-only restriction and gives a first-class race boundary. |
-| Schema-version probe | Expose state schema and supported session-storage adapter versions. | Replaces v1 table/column/binary probing with an upstream compatibility check. |
-
-Until these land, `AgentRunnerDbAdapter` implements equivalents internally and pins to a known `agents` binary and schema range. If `agent-runner` ships frequent breaking state migrations, v1 becomes unacceptable and the harness must block session override work until v2 or another stable upstream API exists.
+| Feature | Landed CLI surface | Agent-runner commit / PR | Harness use |
+|---|---|---|---|
+| Locate | `agents session locate <id> [--json]` | `45324e4` / #14 | `locate_session` and `get_session_metadata`; refuses `unsupported-storage` instead of guessing from SQLite. |
+| Schema probe | `agents session schema-probe` | `32a1f2e` / #15 | `schema_version_probe`; verifies feature flags and `safe_for_import_replace`. |
+| Export | `agents session export <id>` | `8635dd1` / #16 | `read_transcript`; canonical JSONL with source byte ranges and SHA-256 preimages. |
+| Pause handshake | `agents session pause-handshake <id> [--ttl-ms]` and `resume-handshake` | `22fa942` / #17 | Advisory mid-session lease; paired with preimage gating for race safety. |
+| Import replace | `agents session import-replace <id> [--from-file] [--preimage-sha256]` | `941e6e8` / #18, reader unification `81b157e` / #19, lock/module fixes `5a1f204` / #21 | `replace_transcript`, `truncate_after`, and `append_turns` via edited canonical JSONL and atomic replacement. |
+| CLI docs | README session command documentation | `163fcbd` / #20 | Source of the stable command contract used by harness tests and compatibility checks. |
 
 ### Anti-Scope Clarifications
 
 - The harness does not reimplement provider routing, multi-account load balancing, quota tracking, auth refresh, `--resume` mechanics, cross-provider session porting, per-CLI session storage knowledge, or session-id generation/capture.
-- v1 direct DB/JSONL access is a temporary adapter, not a claim that `agent-runner` state belongs to the harness.
-- v1 writes only known transcript files and required consistency rows. It does not alter `agents` binary, `providers.toml`, `sessions.toml`, model TOMLs, quota scripts, auth stores, provider credentials, or local runtime registries.
-- v1 does not support concurrent override during an in-flight `agents` session write. It waits for session-idle or refuses with `session_busy`.
+- The harness does not touch `agent-runner` state.db directly. Stable session metadata comes from `agents session locate`; the SQLite schema is not the contract.
+- The harness does not bypass `pause-handshake` for mid-session writes. It uses the advisory lease plus `import-replace --preimage-sha256`, and treats exit `13` / `session-busy` as a closed race path.
+- The harness does not alter `agents` binary, `providers.toml`, `sessions.toml`, model TOMLs, quota scripts, auth stores, provider credentials, or local runtime registries.
 - Codex session-chain identity and same-provider resume can be observed through `agent-runner`; cross-account Codex transcript replacement remains unsupported unless upstream exposes a documented import/replace or state-aware migration surface.
 
 ### Assumption Register
 
 | ID | Assumption | Invalidator |
 |---|---|---|
-| SO-A1 | `agent-runner` state.db schema is stable enough that v1 pinning to a known binary/schema range is acceptable until v2 lands. | `agents` ships breaking schema migrations frequently or without detectable version/surface changes. |
-| SO-A2 | Per-CLI JSONL format for supported write targets is stable enough for v1 until v2 lands. | Claude or Codex changes JSONL format, compaction record shape, or resume loader behavior incompatibly. |
-| SO-A3 | In-flight session-write race is acceptably handled by flock-style/session-idle locking until pause-handshake lands. | `agents` or the wrapped CLI holds transactions longer than expected, writes without observable locks, or the harness sees stale state after probe. |
-| SO-A4 | Transcript locators and `session_storage` declarations can identify the correct raw transcript for supported providers. | Locator scripts return ambiguous, stale, non-absolute, missing, or wrong-session paths. |
-| SO-A5 | Packed transcript replacement can preserve enough provider-native shape to resume under the pinned range. | Upstream loader rejects harness-produced records even when hashes, session IDs, and order are preserved. |
+| SO-A1 | `agent-runner` CLI surfaces `session locate`, `session export`, `session import-replace`, `session pause-handshake`, `session resume-handshake`, and `session schema-probe` remain stable across `agents` binary minor versions. | `agents` makes breaking changes to those CLI signatures or output JSON shapes. |
+| SO-A2 | `schema-probe` feature flags and `safe_for_import_replace` are sufficient compatibility gates for session override. | A binary reports the expected flags but changes canonical JSONL semantics or import safety in an incompatible way. |
+| SO-A3 | `pause-handshake`'s advisory lease is sufficient race protection when paired with `import-replace --preimage-sha256`; no harness-side flock is needed. | External writers or non-`agents` tools routinely modify session JSONL files mid-session. |
+| SO-A4 | `session locate` can identify the correct canonical file-backed transcript for supported providers or fail with `unsupported-storage`. | Locate returns ambiguous, stale, wrong-session, or partially usable metadata. |
+| SO-A5 | Packed transcript replacement can preserve enough canonical turn shape to resume through `import-replace`. | `agents` rejects harness-produced canonical JSONL even when it was derived from `session export` and passes preimage gating. |
 
 ### Test-Intent Track
 
 | Contract operation | Change risk | Intended behavior | Level | Fixture source | Expected signal | Residual risk |
 |---|---|---|---|---|---|---|
-| `schema_version_probe` | Writes against a changed `agents` schema could corrupt sessions. | Accept only a pinned binary/schema surface; reject unknown table/column/index/storage shape before writes. | Per-adapter and per-implementation. | Temp `state.db` fixtures for current, missing-column, extra-incompatible, and unknown-binary cases. | `Ok(SchemaProbe)` for pinned shape; `unsupported_schema` before file mutation for all others. | Does not prove future migrations are semantically compatible when surface shape remains similar. |
-| `locate_session` | Wrong provider/path can overwrite another conversation. | Resolve provider, storage kind, active chain/segment, transcript path, mutability, and source hashes for exactly one session. | Per-trait and per-adapter. | `agent-runner` DB fixtures with single chain, duplicate session IDs, missing locator, Claude storage, Codex storage. | Correct `SessionLocation`; ambiguity or unsupported storage fails closed. | Real user stores can contain orphaned files not represented in DB. |
-| `read_transcript` | Parser drift can drop tool or compaction records. | Return canonical turns with provider-native source offsets, hashes, and unsupported-record markers rather than silently normalizing away data. | Per-implementation. | Claude JSONL and Codex JSONL samples from local transcript fixtures plus malformed-line fixtures. | Turn count, hashes, offsets, and unsupported markers match goldens. | Goldens may lag new CLI formats. |
-| `replace_transcript` | Cross-file/db write can leave half-applied state. | Two-phase write produces atomic JSONL replacement, state consistency, committed audit, and recoverable pending record. | Per-adapter integration. | Temp transcript dirs plus temp `state.db`; crash injection after temp write, after rename, and after DB transaction. | Final/preimage hashes and pending records resolve deterministically; no silent partial success. | Filesystem rename/fsync behavior differs across platforms. |
-| `truncate_after` | Truncation can remove needed tool protocol state. | Truncate only after a valid turn boundary and preserve audit preimage; reject truncation inside tool-call/result dependency. | Per-trait and policy integration. | Transcript fixtures with linear turns, pending tool calls, sidechains, and compaction boundary records. | Valid boundary truncates and audits; invalid boundary returns policy error with no file change. | Provider-specific hidden dependencies may not be visible in JSONL. |
-| `append_turns` | Appended turns may not match provider-native record order or IDs. | Append canonical turns only when adapter can render valid provider-native records; otherwise refuse and route through replace or recovery. | Per-implementation. | Provider JSONL fixtures with valid append, duplicate turn ID, stale mtime, and unsupported record kind. | Append succeeds with hash update or fails with `unsupported_append` before mutation. | Some CLIs may accept stricter or looser record shapes than fixtures show. |
-| `get_session_metadata` | Recovery and UI may show stale session state. | Return provider, chain, segment, capture method, resume acceptance, transcript state, compaction state, idle state, and last observed turn from one consistent snapshot. | Per-adapter. | DB fixtures covering resumed, migrated, accepted, rejected, compaction-boundary, and no-locator sessions. | Metadata fields match fixture rows and transcript existence. | Snapshot can become stale immediately after return without pause-handshake. |
+| `schema_version_probe` | Writes through an incompatible `agents` binary could corrupt sessions. | Accept only `schema-probe` output with expected feature flags and `safe_for_import_replace=true`; reject absent or malformed flags before writes. | `AgentRunnerCliAdapter` unit and integration. | Fake `agents` binary fixture, following the WU-0A-15 `fake_agents_fixture` pattern, with compatible, missing-flag, malformed-JSON, and unsafe-probe cases. | `Ok(SchemaProbe)` for compatible output; `unsupported_schema` before any import call for all others. | Does not prove future feature flags capture every semantic incompatibility. |
+| `locate_session` | Wrong provider/path can overwrite another conversation. | Shell out to `agents session locate <id> --json`; resolve exactly one supported file-backed session or fail closed on `unsupported-storage`. | `AgentRunnerCliAdapter` unit and integration. | Fake `agents` binary locate cases for success, duplicate/ambiguous, missing, unsupported storage, and stderr JSON error. | Correct `SessionLocation`; ambiguity or unsupported storage fails closed. | Real user stores can contain orphaned files that only `agent-runner` can diagnose. |
+| `read_transcript` | Export/parser drift can drop tool or compaction records. | Consume `agents session export <id>` canonical JSONL with source offsets and hashes; preserve unsupported-record evidence rather than silently normalizing away data. | `AgentRunnerCliAdapter` unit. | Fake export streams with valid canonical turns, malformed lines, missing source blocks, and unsupported records. | Turn count, hashes, offsets, and unsupported markers match goldens. | Goldens may lag new canonical JSONL fields. |
+| `replace_transcript` | Import can race or leave uncertain audit state. | Export, hash preimage, pause, import with `--preimage-sha256`, record receipt, and classify uncertain outcomes by re-exporting. | `AgentRunnerCliAdapter` integration. | Fake `agents` binary with success receipt, `session-busy` exit 13, `preimage-mismatch`, crash/no receipt, and unsupported storage paths. | Success records receipt; busy/mismatch fail before mutation; uncertain outcome enters recovery classification. | Fake binary cannot prove real filesystem atomicity inside `agent-runner`. |
+| `truncate_after` | Truncation can remove needed tool protocol state. | Edit canonical export only at valid turn boundaries, then call `import-replace` with preimage gating. | Trait policy and `AgentRunnerCliAdapter` unit. | Fake export streams with linear turns, pending tool calls, sidechains, and compaction boundary records. | Valid boundary imports and audits; invalid boundary returns policy error with no import call. | Provider-specific hidden dependencies may not be visible in canonical JSONL. |
+| `append_turns` | Appended turns may not match canonical record order or IDs. | Append canonical turns to an export stream only when the edited stream remains valid under `import-replace`; otherwise refuse. | Trait policy and `AgentRunnerCliAdapter` unit. | Fake export/import cases with valid append, duplicate turn ID, stale preimage, malformed canonical turn, and unsupported record kind. | Append succeeds with receipt or fails with no partial harness commit. | Some future canonical fields may require adapter updates. |
+| `get_session_metadata` | Recovery and UI may show stale session state. | Return provider, chain, segment, capture method, transcript state, mutability, and last observed turn from `session locate` and export-derived evidence. | `AgentRunnerCliAdapter` unit. | Fake locate/export cases covering resumed, migrated, accepted, rejected, compaction-boundary, and unsupported-storage sessions. | Metadata fields match CLI JSON and export evidence. | Snapshot can become stale immediately after return without an active pause lease. |
