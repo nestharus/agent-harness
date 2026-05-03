@@ -1,0 +1,16 @@
+# Force LF line endings on all text files. Critical for agent-runner's
+# frontmatter parser, which reads the literal first bytes of operator .md
+# files and rejects CRLF-prefixed YAML.
+* text=auto eol=lf
+*.md text eol=lf
+*.toml text eol=lf
+*.json text eol=lf
+*.yml text eol=lf
+*.yaml text eol=lf
+*.rs text eol=lf
+*.ts text eol=lf
+*.tsx text eol=lf
+*.js text eol=lf
+*.jsx text eol=lf
+*.css text eol=lf
+*.sh text eol=lf
