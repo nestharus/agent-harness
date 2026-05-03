@@ -10,6 +10,9 @@ dist/
 
 # Tauri / Rust
 target/
+src-tauri/gen/
+src-tauri/target/
+*.log
 
 # Editor / OS
 .DS_Store
