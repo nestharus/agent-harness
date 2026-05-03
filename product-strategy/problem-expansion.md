@@ -1,3 +1,9 @@
+---
+description: 'Stage 1b of the alignment cycle. Run only when problem-surfaces.md was produced by Stage 1. Read problem-surfaces.md + problem.md + problem-alignment.md and integrate the new surfaces into problem.md (and update the axis table in problem-alignment.md if new axes were added).'
+model: gpt-high
+output_format: ''
+---
+
 # Problem Expansion
 
 ## Purpose

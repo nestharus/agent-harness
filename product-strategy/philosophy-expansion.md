@@ -1,3 +1,9 @@
+---
+description: 'Stage 2b of the alignment cycle. Run only when philosophy-surfaces.md was produced by Stage 2. Read philosophy-surfaces.md + philosophy.md + philosophy-alignment.md, classify each concern (absorbable, tension, new axis, contradiction), update philosophy.md for absorbable cases, and write philosophy-decisions.md when concerns require user input.'
+model: gpt-high
+output_format: ''
+---
+
 # Philosophy Expansion
 
 ## Purpose

@@ -1,3 +1,9 @@
+---
+description: 'Stage 2 of the alignment cycle. Run only when problem-review.md has axes-aligned entries. Read philosophy.md + proposal.md + problem-review.md and determine whether the proposal embodies the philosophy for problems it correctly aims at. Write philosophy-review.md (always); write philosophy-surfaces.md only if new philosophical concerns were discovered.'
+model: claude-opus
+output_format: ''
+---
+
 # Philosophy Alignment Review
 
 ## Purpose

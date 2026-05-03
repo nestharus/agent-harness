@@ -1,3 +1,9 @@
+---
+description: 'Write or update proposal.md as a system-design document grounded in problem.md and philosophy.md. Brownfield revisions consume problem-review.md + philosophy-review.md as input. Stack/build-order content is roadmap-layer concern; defer to /DECISIONS.md and the roadmap layer rather than enumerating it here.'
+model: gpt-high
+output_format: ''
+---
+
 # Proposer Prompt
 
 ## Purpose
