@@ -1,84 +1,95 @@
 ---
-description: 'Stage 1b of the alignment cycle. Run only when problem-surfaces.md was produced by Stage 1. Read problem-surfaces.md + problem.md + problem-alignment.md and integrate the new surfaces into problem.md (and update the axis table in problem-alignment.md if new axes were added).'
+description: 'Stage 1b-integrate of the alignment cycle (synthesis). Run only when problem-classification.md was produced by Stage 1b-classify. Read problem-classification.md + problem-surfaces.md + problem.md + problem-alignment.md and synthesize the integrated text: draft expansions for new-axis and axis-expansion verdicts, update problem.md, and update the axis reference table in problem-alignment.md if new axes were added. Does NOT make classification judgments (that is Stage 1b-classify''s job).'
 model: gpt-high
 output_format: ''
 ---
 
-# Problem Expansion
+# Problem Expansion — Integrate
 
 ## Purpose
 
-Evaluate newly discovered problem surfaces and integrate them into the problem definition. The problem alignment review may uncover problems the proposal addresses that the problem definition doesn't describe, or reveal additional depth within existing axes. This agent determines whether those surfaces are genuine and updates the problem definition accordingly.
+Take the verdicts emitted by Stage 1b-classify (`problem-classification.md`) and synthesize the integrated text into the problem definition. This is the second half of expansion: pure synthesis, no judgment. The classification was already done.
+
+Per `~/ai/models/roles.md`, synthesis is `gpt-high`'s role: builder, not judge. The classifier already discarded covered/proposal-specific/out-of-scope surfaces; you only see what survived.
 
 ---
 
 ## Inputs
 
-- **Problem surfaces** (`problem-surfaces.md`) — new surfaces discovered by the problem alignment review
-- **Problem definition** (`problem.md`) — the current problem definition
-- **Problem alignment instructions** (`problem-alignment.md`) — the review agent instructions containing the axis reference table
+- **`problem-classification.md`** — per-surface verdicts from Stage 1b-classify (authoritative; do not re-judge).
+- **`problem-surfaces.md`** — original surface text (so you can quote it when drafting).
+- **`problem.md`** — current problem definition (target of integration).
+- **`problem-alignment.md`** — Stage 1 operator instructions, contains the axis reference table (target of integration).
 
 ## Outputs
 
-- **Updated problem definition** (`problem.md`) — with new sections or expanded existing sections
-- **Updated problem alignment instructions** (`problem-alignment.md`) — with new rows in the axis reference table (if new axes were added)
+- **`problem.md`** — updated with new sections (one per `new-axis` verdict) and expanded sections (one per `axis-expansion` verdict).
+- **`problem-alignment.md`** — axis reference table updated with new rows when `new-axis` verdicts were emitted.
+
+You do **not** modify `problem-classification.md`. You do **not** re-judge surfaces. If a verdict in `problem-classification.md` looks wrong, raise it as a NEEDS_INPUT to the orchestrator and stop — do not silently override.
 
 ---
 
-## Process
+## Procedure
 
-### Step 1: Validate each surface
+### Step 1: Read the classification
 
-For each surface in `problem-surfaces.md`, determine whether it is genuine:
+Open `problem-classification.md`. Build two work-lists:
 
-1. **Is it already covered?** Read the problem definition carefully. The surface may already be described — perhaps under a different name, as a sub-problem of an existing axis, or implicitly within a broader discussion. If it's covered, discard it.
+- **New axes** — every row whose verdict is `new-axis`. Each row already has a proposed section number and a one-sentence handoff.
+- **Axis expansions** — every row whose verdict is `axis-expansion`. Each row already has a target axis number and a one-sentence handoff.
 
-2. **Is it real?** Does this surface describe a genuine difficulty that the target communities face? Or is it an artifact of the proposal's design — a problem that only exists because the proposal chose a particular approach? If it's proposal-specific, discard it.
+Skip every row whose verdict starts with `discard` — you are not allowed to integrate a discarded surface.
 
-3. **Is it in scope?** Does this surface belong in the problem definition? Some real problems are outside the scope of what this problem definition covers. If it's out of scope, discard it.
+### Step 2: Draft new-axis sections
 
-### Step 2: Classify surviving surfaces
+For each `new-axis` verdict:
 
-For each surface that passes validation:
+1. Read the corresponding surface text in `problem-surfaces.md`.
+2. Write a new section for `problem.md` following the style and structure of existing sections.
+3. The section must describe the **core difficulty** — why this problem is hard and resists solution — not a feature wish list and not a solution sketch.
+4. Use the section number proposed by the classifier.
 
-- **New axis** — the surface describes a problem area the problem definition doesn't cover at all. It needs its own section.
-- **Axis expansion** — the surface adds depth to an existing axis. It describes a sub-problem, interaction, or difficulty the existing section doesn't articulate.
+### Step 3: Draft axis expansions
 
-### Step 3: Draft expansions
+For each `axis-expansion` verdict:
 
-For each new axis:
-1. Write a new section for the problem definition following the style and structure of existing sections.
-2. The section should describe the core difficulty — why this problem is hard and resists solution — not a feature wish list.
-3. Assign it a section number (continuing from the last existing section).
-
-For each axis expansion:
-1. Draft additional content for the existing section.
-2. The expansion should describe the newly revealed difficulty in the context of the existing section's treatment.
-3. Do not rewrite the existing section. Add to it.
+1. Read the corresponding surface text in `problem-surfaces.md`.
+2. Read the target axis section in the current `problem.md`.
+3. Draft additional content for that section, in the section's existing voice and structure.
+4. The expansion must describe the newly revealed difficulty in the context of the existing section's treatment.
+5. Do **not** rewrite the existing section. Add to it. Existing descriptions are not wrong; they are insufficient.
 
 ### Step 4: Update the axis reference table
 
-If new axes were added to the problem definition, add corresponding rows to the axis reference table at the bottom of `problem-alignment.md`. Assign axis numbers continuing from the last existing axis.
+For each `new-axis` verdict integrated in Step 2:
+
+1. Open `problem-alignment.md`.
+2. Add a row to the axis reference table at the bottom.
+3. Use the same axis number you assigned to the section.
+4. Mirror the column shape of existing rows.
 
 ---
 
-## What this agent does NOT do
+## Anti-scope (load-bearing)
 
-- **Does not modify the proposal.** The proposal may have prompted the discovery, but this agent only updates the problem definition.
-- **Does not modify the philosophy.** Philosophical implications of new problem surfaces are a separate concern.
-- **Does not evaluate alignment.** Whether the proposal is aligned with the new or expanded axes is for the next review cycle to determine.
-- **Does not invent problems.** Every surface must trace back to a finding in `problem-surfaces.md`. The agent validates, classifies, and integrates — it does not speculate about additional problems.
-- **Does not remove or rewrite existing content.** The problem definition grows; it does not shrink. Existing descriptions may be insufficient, but they are not wrong — add depth, don't replace.
+- **Do NOT re-judge surfaces.** The classifier already decided. If a verdict looks wrong, emit `NEEDS_INPUT:<scratch_dir>/questions/<question-id>.question.json` per `~/ai/conventions/agent-questions-and-session-graph.md` and stop.
+- **Do NOT integrate discarded surfaces.** Rows whose verdict starts with `discard` are off-limits.
+- **Do NOT modify the proposal.** The proposal may have prompted the discovery; you only update the problem definition.
+- **Do NOT modify the philosophy.** Philosophical implications are Stage 2b territory.
+- **Do NOT remove or rewrite existing problem.md content.** The problem definition grows; it does not shrink. Add depth, do not replace.
+- **Do NOT invent surfaces.** Every drafted section or expansion must trace back to a surface in `problem-surfaces.md` whose verdict in `problem-classification.md` authorizes integration.
 
 ---
 
 ## Quality checks
 
-Before writing updates:
+Before declaring the stage complete:
 
-- [ ] Every new section describes a core difficulty, not a feature or solution
-- [ ] Every expansion adds depth to an existing axis, not a tangent
-- [ ] New sections follow the style and structure of existing sections
-- [ ] The axis reference table is consistent with the problem definition's sections
-- [ ] No surface was added that is already covered elsewhere in the problem definition
-- [ ] No surface was added that is proposal-specific rather than domain-general
+- [ ] Every `new-axis` verdict has a corresponding new section in `problem.md` with the assigned section number.
+- [ ] Every `axis-expansion` verdict has corresponding additional content in the target axis section.
+- [ ] Every `new-axis` integration has a corresponding new row in the axis reference table in `problem-alignment.md`.
+- [ ] Every drafted section describes a core difficulty, not a feature or solution.
+- [ ] No `discard` verdicts were integrated.
+- [ ] No existing `problem.md` content was removed or rewritten.
+- [ ] The axis reference table in `problem-alignment.md` is consistent with `problem.md`'s sections.

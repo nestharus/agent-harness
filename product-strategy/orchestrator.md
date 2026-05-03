@@ -46,22 +46,43 @@ The agent writes:
 - `problem-review.md` (alignment findings — always written)
 - `problem-surfaces.md` (new problem surfaces — only written if surfaces are found)
 
-### Stage 1b: Problem Expansion
+### Stage 1b: Problem Expansion (split: classify → integrate)
 
 Check whether `problem-surfaces.md` was produced by Stage 1.
 
-If it was not produced, skip this stage — no new problem surfaces were discovered.
+If it was not produced, skip this stage entirely — no new problem surfaces were discovered.
 
-If it was produced, run a sub-agent with the instructions in `problem-expansion.md`.
+If it was produced, run two sub-agents in sequence: **Stage 1b-classify (judge)** then **Stage 1b-integrate (synthesis)**. The split enforces the `~/ai/models/roles.md` rule that opus never synthesizes; classification judgment runs on `claude-opus`, integrated text synthesis runs on `gpt-high`.
+
+#### Stage 1b-classify
+
+Run a sub-agent with the instructions in `problem-expansion-classify.md` (model: `claude-opus`).
 
 Provide the agent with:
 - `problem-surfaces.md` (the new surfaces)
 - `problem.md` (the current problem definition)
-- `problem-alignment.md` (the review instructions with axis table)
+- `problem-alignment.md` (the Stage 1 instructions with axis table)
+
+The agent writes:
+- `problem-classification.md` (per-surface verdict: `discard / already-covered`, `discard / proposal-specific`, `discard / out-of-scope`, `new-axis`, or `axis-expansion`)
+
+#### Stage 1b-integrate
+
+Check whether `problem-classification.md` contains at least one `new-axis` or `axis-expansion` verdict.
+
+If every verdict is `discard`, skip the integrate sub-stage — there is nothing to synthesize.
+
+Otherwise, run a sub-agent with the instructions in `problem-expansion.md` (model: `gpt-high`).
+
+Provide the agent with:
+- `problem-classification.md` (authoritative verdicts; the integrator must not re-judge)
+- `problem-surfaces.md` (original surface text for quoting)
+- `problem.md` (target of integration)
+- `problem-alignment.md` (target for axis-table updates)
 
 The agent updates:
-- `problem.md` (new sections or expanded existing sections)
-- `problem-alignment.md` (new rows in the axis reference table, if new axes were added)
+- `problem.md` (new sections for `new-axis` verdicts; expanded sections for `axis-expansion` verdicts)
+- `problem-alignment.md` (new rows in the axis reference table for `new-axis` verdicts)
 
 **Important:** The updated problem definition does not trigger a re-run of Stage 1 in this cycle. The new axes will be evaluated in the next full cycle after the proposer has had a chance to address them.
 
@@ -82,22 +103,47 @@ The agent writes:
 - `philosophy-review.md` (alignment findings — always written)
 - `philosophy-surfaces.md` (new philosophical concerns — only written if surfaces are found)
 
-### Stage 2b: Philosophy Expansion
+### Stage 2b: Philosophy Expansion (split: classify → integrate)
 
 Check whether `philosophy-surfaces.md` was produced by Stage 2.
 
-If it was not produced, skip this stage — no new philosophical concerns were discovered.
+If it was not produced, skip this stage entirely — no new philosophical concerns were discovered.
 
-If it was produced, run a sub-agent with the instructions in `philosophy-expansion.md`.
+If it was produced, run two sub-agents in sequence: **Stage 2b-classify (judge)** then **Stage 2b-integrate (synthesis)**. The split enforces the `~/ai/models/roles.md` rule that opus never synthesizes; classification judgment runs on `claude-opus`, integrated philosophy text synthesis runs on `gpt-high`. The user-input gate (`philosophy-decisions.md`) is owned by classify, not by integrate.
+
+#### Stage 2b-classify
+
+Run a sub-agent with the instructions in `philosophy-expansion-classify.md` (model: `claude-opus`).
 
 Provide the agent with:
 - `philosophy-surfaces.md` (the new concerns)
 - `philosophy.md` (the current philosophy)
-- `philosophy-alignment.md` (the review instructions)
+- `philosophy-alignment.md` (the Stage 2 instructions)
+
+The agent writes:
+- `philosophy-classification.md` (per-concern verdict: A — absorbable, B — compatible addition, C — tension, D — new-axis, E — contradiction)
+- `philosophy-decisions.md` (only if any concern is C, D, or E — these require user input and the orchestrator surfaces this artifact to the root as a NEEDS_INPUT new-value-question per `~/ai/conventions/agent-questions-and-session-graph.md`)
+
+If `philosophy-decisions.md` was written, halt the cycle after this sub-stage and surface the artifact to the root. Stage 2b-integrate runs on the next cycle after the user has answered.
+
+#### Stage 2b-integrate
+
+Skip if `philosophy-decisions.md` was written by Stage 2b-classify (the user-input gate takes precedence; the cycle resumes on the next round).
+
+Skip if `philosophy-classification.md` contains no A and no B verdicts (every concern requires user input or every concern was already absorbed elsewhere).
+
+Otherwise, run a sub-agent with the instructions in `philosophy-expansion.md` (model: `gpt-high`).
+
+Provide the agent with:
+- `philosophy-classification.md` (authoritative verdicts; the integrator must not re-judge)
+- `philosophy-surfaces.md` (original concern text for quoting)
+- `philosophy.md` (target of integration)
 
 The agent:
-- Updates `philosophy.md` (absorbable clarifications and compatible additions)
-- Writes `philosophy-decisions.md` if any concerns require user input (tensions, new axes, contradictions)
+- Applies absorbable clarifications/extensions for each A verdict (modifies the cited principle in `philosophy.md`).
+- Drafts new principles for each B verdict (adds to `philosophy.md`, marked provisional).
+- Does NOT integrate C, D, or E verdicts — those live in `philosophy-decisions.md` and are user-owned.
+- Does NOT modify `philosophy-decisions.md`.
 
 ---
 

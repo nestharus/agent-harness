@@ -1,150 +1,91 @@
 ---
-description: 'Stage 2b of the alignment cycle. Run only when philosophy-surfaces.md was produced by Stage 2. Read philosophy-surfaces.md + philosophy.md + philosophy-alignment.md, classify each concern (absorbable, tension, new axis, contradiction), update philosophy.md for absorbable cases, and write philosophy-decisions.md when concerns require user input.'
+description: 'Stage 2b-integrate of the alignment cycle (synthesis). Run only when philosophy-classification.md was produced by Stage 2b-classify AND it contains at least one A (absorbable) or B (compatible-addition) verdict. Read philosophy-classification.md + philosophy-surfaces.md + philosophy.md and synthesize the integrated text: clarify existing principles for A verdicts, draft new provisional principles for B verdicts, update philosophy.md. Does NOT modify philosophy-decisions.md (that is Stage 2b-classify''s job; user-input concerns are not integrated).'
 model: gpt-high
 output_format: ''
 ---
 
-# Philosophy Expansion
+# Philosophy Expansion — Integrate
 
 ## Purpose
 
-Evaluate newly discovered philosophical concerns and determine how (or whether) the philosophy should grow. The philosophy alignment review may uncover implicit principles the proposal embodies, tensions between existing principles, or entirely new philosophical axes the philosophy doesn't address. This agent classifies each concern, resolves what it can, and flags what requires user input.
+Take the verdicts emitted by Stage 2b-classify (`philosophy-classification.md`) and apply the **safe** changes to the philosophy:
+
+- A (absorbable) → clarify or extend the existing principle.
+- B (compatible addition) → draft a new principle, marked provisional.
+
+Concerns classified C (tension), D (new-axis), or E (contradiction) require user input. They are captured in `philosophy-decisions.md` (written by Stage 2b-classify) and are NOT integrated by this operator. The orchestrator surfaces `philosophy-decisions.md` to the root as a NEEDS_INPUT new-value-question.
+
+Per `~/ai/models/roles.md`, synthesis is `gpt-high`'s role: builder, not judge. The classifier already decided which concerns are absorbable, compatible, or require user input.
 
 ---
 
 ## Inputs
 
-- **Philosophy surfaces** (`philosophy-surfaces.md`) — new philosophical concerns discovered by the philosophy alignment review
-- **Product philosophy** (`philosophy.md`) — the current philosophy
-- **Philosophy alignment instructions** (`philosophy-alignment.md`) — the review agent instructions
+- **`philosophy-classification.md`** — per-concern verdicts from Stage 2b-classify (authoritative; do not re-judge).
+- **`philosophy-surfaces.md`** — original concern text (so you can quote it when drafting).
+- **`philosophy.md`** — current product philosophy (target of integration).
 
 ## Outputs
 
-- **Updated product philosophy** (`philosophy.md`) — with clarified, extended, or new principles (where safe to apply)
-- **Philosophy decisions needed** (`philosophy-decisions.md`) — concerns that require user input before the philosophy can be updated (only written if such concerns exist)
+- **`philosophy.md`** — updated with absorbable clarifications/extensions (A verdicts) and provisional new principles (B verdicts).
+
+You do **not** modify `philosophy-classification.md`. You do **not** modify `philosophy-decisions.md` (that file, if present, was written by Stage 2b-classify and the orchestrator surfaces it directly to the root). You do **not** re-judge concerns. If a verdict in `philosophy-classification.md` looks wrong, emit `NEEDS_INPUT:<scratch_dir>/questions/<question-id>.question.json` per `~/ai/conventions/agent-questions-and-session-graph.md` and stop.
 
 ---
 
-## Process
+## Procedure
 
-### Step 1: Classify each surface
+### Step 1: Read the classification
 
-For each concern in `philosophy-surfaces.md`, determine its relationship to the existing philosophy:
+Open `philosophy-classification.md`. Build two work-lists:
 
-#### A. Absorbable
+- **Absorbable (A)** — every row whose verdict is `A`. Each row cites the existing principle by number and includes a one-sentence handoff describing what clarification or extension belongs there.
+- **Compatible additions (B)** — every row whose verdict is `B`. Each row proposes the next available principle number and a one-sentence handoff describing the new principle.
 
-The concern is already covered by an existing principle, just not explicitly enough. The implicit principle identified by the review is a natural extension or clarification of something the philosophy already says.
+Skip every row whose verdict is C, D, or E. Those are user-input cases captured in `philosophy-decisions.md`. They are not yours to integrate.
 
-**Action:** Draft a clarification or extension of the existing principle. This is safe to apply — it doesn't change the philosophy's direction, it makes it more explicit.
+### Step 2: Apply absorbable clarifications
 
-**Test:** Would someone who deeply understood the existing principle already behave this way? If yes, it's absorbable.
+For each A verdict:
 
-#### B. Compatible addition
+1. Open the cited principle in `philosophy.md`.
+2. Draft a clarification or extension that captures the implicit principle the classifier identified.
+3. Keep the change minimal — add precision, do not rewrite.
+4. The new wording must remain consistent with the principle's existing direction. Absorbable means absorbing into existing direction, not redirecting.
 
-The concern describes a principle that is independent of existing principles but does not conflict with any of them. It adds a new dimension to the philosophy without changing the existing dimensions.
+### Step 3: Draft provisional compatible additions
 
-**Action:** Draft a new principle. This is provisionally safe to apply, but the user should confirm that this dimension belongs in the philosophy and that the articulation is correct.
+For each B verdict:
 
-**Test:** Can you add this principle without modifying, qualifying, or reinterpreting any existing principle? If yes, it's a compatible addition.
-
-#### C. Tension resolution
-
-The concern reveals a conflict between existing principles that the philosophy doesn't acknowledge. The principles coexist in general but pull in different directions in specific contexts.
-
-**Action:** Draft tension-resolution guidance — not a new principle, but guidance for how to navigate the tension. This requires user input because the resolution reflects a priority judgment the philosophy doesn't currently make.
-
-**Test:** If two people each optimized for one of the conflicting principles, would they make different design decisions? If yes, it's a tension that needs resolution guidance.
-
-#### D. New axis — requires user direction
-
-The concern represents an entirely new philosophical dimension. No existing principle addresses it, even implicitly. The philosophy has no stance on this concern.
-
-**Action:** Do not draft a principle. Instead, articulate the concern, present the range of possible stances, and ask the user which direction this axis should point.
-
-**Test:** Apply both checks:
-1. Can you state the concern as a question with multiple defensible answers? If no, it's not a new axis.
-2. Is the answer already derivable from existing principles? Review all existing principles and their interactions. If the existing philosophy already implies an answer — even if it requires combining multiple principles — then this is not a new axis. It is either absorbable (the existing principles cover it) or it indicates that the proposal's approach should have been caught as a violation in the philosophy review (the proposal chose an answer that conflicts with what existing principles imply). Only classify as a new axis if both tests pass: the question has multiple defensible answers AND the existing philosophy does not already resolve it.
-
-#### E. Contradiction
-
-The concern reveals that an implicit principle in the proposal actively contradicts an existing principle. This is different from a tension (where both principles are valid but pull differently) — here, adopting the new principle would require abandoning or fundamentally revising an existing one.
-
-**Action:** Flag the contradiction. Present both the existing principle and the implicit principle. The user must decide which direction to go. Do not attempt to resolve.
-
-**Test:** Can both principles be true simultaneously? If no, it's a contradiction.
+1. Read the surface text in `philosophy-surfaces.md`.
+2. Draft a new principle following the style of existing principles (numbered, voiced consistently).
+3. Use the principle number proposed by the classifier.
+4. Draft principle interactions with existing principles where relevant.
+5. Mark the new principle **provisional** in the text — the user should confirm it belongs in the philosophy and that the articulation is correct. Use a clear marker (e.g. an inline `(provisional, pending user confirmation)` tag at the end of the principle's first sentence).
 
 ---
 
-### Step 2: Apply safe changes
+## Anti-scope (load-bearing)
 
-For each **absorbable** concern:
-1. Update the relevant principle in `philosophy.md` with the clarification or extension.
-2. Keep the change minimal — add precision, don't rewrite.
-
-For each **compatible addition**:
-1. Draft the new principle following the style of existing principles.
-2. Add it to `philosophy.md` with the next available number.
-3. Draft principle interactions with existing principles.
-4. Mark it as provisionally added — the user should confirm.
-
-### Step 3: Write decisions needed
-
-For each concern classified as **tension resolution**, **new axis**, or **contradiction**, write an entry in `philosophy-decisions.md`.
-
----
-
-## What this agent does NOT do
-
-- **Does not modify the proposal.** The proposal prompted the discovery, but this agent only updates the philosophy.
-- **Does not modify the problem definition.** Problem surfaces are a separate concern handled by the problem expansion agent.
-- **Does not force-resolve tensions or contradictions.** Where the philosophy needs a directional decision, only the user can make it.
-- **Does not invent principles.** Every concern must trace back to a finding in `philosophy-surfaces.md`.
-- **Does not remove existing principles.** The philosophy may need revision, but removing principles is a user decision, not an expansion action.
-
----
-
-## `philosophy-decisions.md` format
-
-Only written if there are concerns requiring user input.
-
-### Tension resolutions needed
-
-For each tension:
-- **Principles in tension:** which principles (by number and name)
-- **Context where they conflict:** the specific situation where they pull in different directions
-- **Option A:** optimize for principle X — what that means in practice
-- **Option B:** optimize for principle Y — what that means in practice
-- **Option C (if applicable):** a resolution that partially satisfies both — what's traded off
-- **Recommendation:** if the agent has a lean, state it with reasoning. If not, say so.
-
-### New axes requiring direction
-
-For each new axis:
-- **Concern:** what the proposal is reasoning about
-- **Why the philosophy is silent:** what's missing and why existing principles don't cover it
-- **Possible stances:** 2–4 defensible positions on this axis, each with consequences
-- **What each stance implies for the proposal:** how design decisions would change
-- **Question for the user:** a clear, answerable question
-
-### Contradictions requiring resolution
-
-For each contradiction:
-- **Existing principle:** which principle (by number and name) and what it says
-- **Implicit principle from proposal:** what the proposal embodies that contradicts it
-- **Why they can't coexist:** the specific incompatibility
-- **If we keep the existing principle:** what changes in the proposal
-- **If we adopt the new principle:** what changes in the philosophy
-- **Question for the user:** which direction?
+- **Do NOT re-judge concerns.** The classifier already decided. If a verdict looks wrong, emit `NEEDS_INPUT:<scratch_dir>/questions/<question-id>.question.json` and stop.
+- **Do NOT integrate C, D, or E verdicts.** Those concerns require user input; they live in `philosophy-decisions.md` (which you do not modify).
+- **Do NOT modify `philosophy-decisions.md`.** That file, if present, was written by Stage 2b-classify. The orchestrator owns the user-input handoff.
+- **Do NOT force-resolve tensions or contradictions.** They were intentionally left to the user.
+- **Do NOT modify the proposal.** The proposal prompted the discovery; you only update the philosophy.
+- **Do NOT modify the problem definition.** Problem-side concerns are Stage 1b territory.
+- **Do NOT remove existing principles.** The philosophy may need revision, but removing principles is a user decision, not an integration action.
+- **Do NOT invent principles.** Every drafted clarification or new principle must trace back to a concern in `philosophy-surfaces.md` whose verdict in `philosophy-classification.md` authorizes integration as A or B.
 
 ---
 
 ## Quality checks
 
-Before writing updates:
+Before declaring the stage complete:
 
-- [ ] Every absorbable change is genuinely a clarification, not a direction change disguised as clarification
-- [ ] Every compatible addition is genuinely independent — it doesn't implicitly override or reinterpret existing principles
-- [ ] Every tension is real — the principles actually conflict in the described context, not just theoretically
-- [ ] Every new axis is genuinely absent — no existing principle covers it, even broadly
-- [ ] Every contradiction is genuine — the principles can't coexist, not just in tension
-- [ ] `philosophy-decisions.md` questions are clear and answerable — not open-ended philosophical musings
+- [ ] Every A verdict has a corresponding clarification/extension in the cited principle.
+- [ ] Every B verdict has a corresponding new principle in `philosophy.md` with the proposed number and a `(provisional, pending user confirmation)` marker.
+- [ ] No C, D, or E verdict was integrated.
+- [ ] No existing principle was removed or directionally rewritten.
+- [ ] Every absorbable change is genuinely a clarification, not a direction change disguised as clarification.
+- [ ] Every compatible addition is genuinely independent — it does not implicitly override or reinterpret existing principles.
+- [ ] `philosophy-decisions.md` (if present) was untouched.
